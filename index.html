@@ -1,0 +1,757 @@
+﻿<!doctype html>
+<html lang="ja-jp">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TOPPERS/ECNL for mruby Prototype Generator</title>
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" href="bootstrap/css/bootstrap-theme.css" />
+	<link rel="stylesheet" href="bootstrap/css/ie10-viewport-bug-workaround.css">
+	<link rel="stylesheet" href="xterm/src/xterm.css" />
+	<link rel="stylesheet" href="css/webmrbc.css" />
+	<script src="js/jquery-3.1.0.js"></script>
+	<script src="bootstrap/js/bootstrap.js"></script>
+	<script src="bootstrap/js/ie-emulation-modes-warning.js"></script>
+	<script src="xterm/src/xterm.js"></script>
+	<script src="xterm/addons/fit/fit.js"></script>
+	<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+	<script src="ace/mode-ruby.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/blockly.js" type="text/javascript"></script>
+	<script src="js/blocks.js" type="text/javascript"></script>
+	<script src="msg/ja.js" type="text/javascript"></script>
+	<script async src="mrbc.js" type="text/javascript"></script>
+	<script src="js/bridge.js" type="text/javascript"></script>
+	<script src="js/webmrbc.js" type="text/javascript"></script>
+</head>
+<body>
+	<div class="navbar navbar-inverse" id="main-menu">
+		<div class="container">
+			<ul class="nav navbar-nav" id="tabs">
+				<li class="active">
+					<a href="#block-tab" id="block-mode-button" onclick="WebMrbc.Views.MainMenuView.onBlockMode()">
+						<i class="glyphicon glyphicon-folder-close"></i>
+						ブロック
+					</a>
+				</li>
+				<li>
+					<a href="#ruby-tab" id="ruby-mode-button" onclick="WebMrbc.Views.MainMenuView.onRubyMode()">
+						<i class="glyphicon glyphicon-pencil"></i>
+						Ruby
+					</a>
+				</li>
+				<li>
+					<a href="#output-tab" id="output-mode-button" onclick="WebMrbc.Views.MainMenuView.onOutputMode()">
+						<i class="glyphicon glyphicon-list-alt"></i>
+						出力
+					</a>
+				</li>
+			</ul>
+			<form accept-charset="UTF-8" action="/source_codes/load?locale=ja" class="navbar-form pull-right" enctype="multipart/form-data" id="file-form" method="post">
+				<div class="btn-group">
+					<a class="dropdown-toggle btn btn-primary" data-toggle="dropdown" href="#menu" id="submenu-button">
+						<i class="glyphicon glyphicon-th-list"></i>
+						メニュー
+					</a>
+					<ul class="dropdown-menu pull-right" id="submenu">
+						<li>
+							<a id="load-local-button" onclick="WebMrbc.Views.MainMenuView.onLoadLocal()">
+								<h4>
+									<i class="glyphicon glyphicon-folder-open"></i>
+									ロード
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="save-button" onclick="WebMrbc.Views.MainMenuView.onSave()">
+								<h4>
+									<i class="glyphicon glyphicon-hdd"></i>
+									セーブ
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="check-button" onclick="WebMrbc.Views.MainMenuView.onCheck()">
+								<h4>
+									<i class="glyphicon glyphicon-check"></i>
+									チェック
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="reset-button" onclick="WebMrbc.Views.MainMenuView.onReset()">
+								<h4>
+									<i class="glyphicon glyphicon-off"></i>
+									リセット
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a class="signed-in-menu" id="preference-button" style="display: none" onclick="WebMrbc.Views.MainMenuView.onPreference()">
+								<h4>
+									<i class="glyphicon glyphicon-cog"></i>
+									設定
+								</h4>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="btn-group">
+					<a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#compile" id="compile-submenu-button">
+						<i class="glyphicon glyphicon-random"></i>
+						ビルド
+					</a>
+					<ul class="dropdown-menu pull-right" id="compile-submenu">
+						<li>
+							<a id="mrbc-help-button" onclick="WebMrbc.Views.MainMenuView.onHelp()">
+								<h4>
+									<i class="glyphicon glyphicon-question-sign"></i>
+									ヘルプ
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="mrbc-version-button" onclick="WebMrbc.Views.MainMenuView.onVersion()">
+								<h4>
+									<i class="glyphicon glyphicon-info-sign"></i>
+									バージョン
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="mrbc-compile-to-c-button" onclick="WebMrbc.Views.MainMenuView.onCompileToC()">
+								<h4>
+									<i class="glyphicon glyphicon-circle-arrow-down"></i>
+									ビルド（.c）
+								</h4>
+							</a>
+						</li>
+						<li>
+							<a id="mrbc-compile-to-bin-button" onclick="WebMrbc.Views.MainMenuView.onCompileToBin()">
+								<h4>
+									<i class="glyphicon glyphicon-download"></i>
+									ビルド（.bin）
+								</h4>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div id="messages"></div>
+	<div class="tab-content" id="modes-container">
+		<div class="tab-pane active modes-tab-pane" id="block-tab">
+			<div class="right-pane" id="block-tab-right-pane">
+				<div dir="LTR" id="blockly-div"></div>
+			</div>
+			<div class="left-pane" id="block-tab-left-pane">
+				<div id="selectors-container">
+					<ul class="nav nav-pills">
+						<li class="active">
+							<a data-toggle="tab" href="#class-selector-tab">クラス</a>
+						</li>
+					</ul>
+					<div class="tab-content" id="selectors-tab-content">
+						<div class="tab-pane active selector-tab" id="class-selector-tab">
+							<div id="class-selector-eobject-set"></div>
+							<div class="item" id="add-eobject-item">
+								<a class="eobject" id="add-eobject-button">
+									<i class="glyphicon glyphicon-plus"></i>
+									<br>
+									新しい機器オブジェクト
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-pane modes-tab-pane" id="ruby-tab">
+			<div class="ace_editor ace-clouds" id="text-editor"><textarea style="opacity: 0;" spellcheck="false" class="ace_text-input" nowrap></textarea><div class="ace_gutter"><div class="ace_layer ace_gutter-layer ace_folding-enabled"></div><div class="ace_gutter-active-line"></div></div><div class="ace_scroller"><div class="ace_content"><div class="ace_layer ace_print-margin-layer"><div style="left: 4px; visibility: visible;" class="ace_print-margin"></div></div><div class="ace_layer ace_marker-layer"></div><div style="padding: 0px 4px;" class="ace_layer ace_text-layer"></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_cursor-layer ace_hidden-cursors"><div class="ace_cursor"></div></div></div></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; overflow: visible; white-space: nowrap;">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div><div style="width: 22px; display: none; overflow-y: scroll;" class="ace_scrollbar"><div style="width: 22px;" class="ace_scrollbar-inner"></div></div><div style="height: 22px; display: none; overflow-x: scroll;" class="ace_scrollbar-h"><div style="height: 22px;" class="ace_scrollbar-inner"></div></div></div>
+		</div>
+
+		<div class="tab-pane modes-tab-pane" id="output-tab">
+			<a href="http://emscripten.org" id="emscripten_logo">
+				<img src="img/banner.svg" />
+			</a>
+			<div class="spinner" id='spinner'></div>
+			<div class="emscripten" id="status">Downloading...</div>
+			<div class="emscripten">
+				<progress value="0" max="100" id="progress" hidden></progress>
+			</div>
+			<div id="term"></div>
+			<textarea id="output"></textarea>
+			<div class="emscripten_border">
+				<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+			</div>
+		</div>
+	</div>
+
+	<div id="eobject-modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="right-pane" id="eobject-modal-right-pane">
+						<div id="eobject-modal-right-pane-inner">
+							<div class="btn-group-vertical" data-toggle="buttons" id="eobject_properties">
+								<label class="btn btn-default">
+									<input type="checkbox" autocomplete="off">動作状態
+								</label>
+								<label class="btn btn-default">
+									<input type="checkbox" autocomplete="off">設置場所
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="left-pane" id="eobject-modal-left-pane">
+						<div class="ui-droppable" id="eobject-modal-preview">
+							<div style="left: 0px; top: 0px; transform: rotate(0deg) scaleX(1);" class="ui-draggable" id="eobject-modal-eobject">
+								<img alt="car1.png" src="smalruby_files/car1.png">
+							</div>
+						</div>
+						<div id="eobject-modal-attributes">
+							<form class="form-horizontal" id="eobject-modal-form">
+								<div class="control-group" for="eobject[identifer]">
+									<label class="control-label" for="eobject_identifer">名前</label>
+									<div class="controls">
+										<input class="form-control" id="eobject_identifer" name="eobject[identifer]" placeholder="car1やball1など" type="text">
+									</div>
+								</div>
+								<div class="control-group" for="eobject[attribute]">
+									<label class="control-label" for="eobject_attribute">区分</label>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_attribute" data-toggle="dropdown" aria-expanded="false">
+											区分
+											<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu" role="menu" aria-labelledby="eobject_attribute">
+											<li role="presentation"><a role="menuitem" onclick="WebMrbc.Views.EObjectModalView.onSelectAttribute(this, 'local')">ローカルノード</a></li>
+											<li role="presentation"><a role="menuitem" onclick="WebMrbc.Views.EObjectModalView.onSelectAttribute(this, 'sync')">リモートノード（同期）</a></li>
+											<li role="presentation"><a role="menuitem" onclick="WebMrbc.Views.EObjectModalView.onSelectAttribute(this, 'async')">リモートノード（非同期）</a></li>
+											<li role="presentation"><a role="menuitem" onclick="WebMrbc.Views.EObjectModalView.onSelectAttribute(this, 'device')">機器オブジェクト</a></li>
+										</ul>
+									</div>
+								</div>
+								<div class="control-group" for="eobject[classGroupCode]">
+									<label class="control-label" for="eobject_classGroupCode">クラスグループ</label>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_classGroupCode" data-toggle="dropdown" aria-expanded="false">
+											クラスグループ
+											<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu" role="menu" aria-labelledby="eobject_classGroupCode" id="eobject_classGroups">
+											<li role="presentation"><a role="menuitem">センサー関連機器</a></li>
+											<li role="presentation"><a role="menuitem">空調関連機器</a></li>
+										</ul>
+									</div>
+								</div>
+								<div class="control-group" for="eobject[classCode]">
+									<label class="control-label" for="eobject_classCode">クラス</label>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_classCode" data-toggle="dropdown" aria-expanded="false">
+											クラス
+											<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu" role="menu" aria-labelledby="eobject_classCode" id="eobject_classs">
+											<li role="presentation"><a role="menuitem">ガス漏れセンサ</a></li>
+											<li role="presentation"><a role="menuitem">防犯センサ</a></li>
+											<li role="presentation"><a role="menuitem">非常ボタン</a></li>
+										</ul>
+									</div>
+								</div>
+								<div class="control-group" for="eobject[instanceCode]">
+									<label class="control-label" for="eobject_instanceCode">インスタンス</label>
+									<div class="controls">
+										<input class="form-control" id="eobject_instanceCode" name="eobject[instanceCode]" placeholder="1～127" type="text" onchange="WebMrbc.Views.EObjectModalView.onChangeInstanceCode(this)">
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button aria-hidden="true" class="btn btn-default" onclick="WebMrbc.Views.EObjectModalView.onCancel(this)"><i class="glyphicon glyphicon-remove"></i>やめる</button>
+					<button class="btn btn-primary" id="eobject-modal-ok-button" onclick="WebMrbc.Views.EObjectModalView.onOk(this)"><i class="glyphicon glyphicon-ok"></i>決めた！</button>
+				</div>
+			</div>
+		</div>
+
+		<script id="class-selector-template" type="text/template">
+			<div class='item' id="%identifer%">
+				<div class='item-info'>
+					<div class='name'>
+						%identifer%
+					</div>
+					<div class='attributes'>
+						%attribute%
+					</div>
+					<a class='modify-button'>
+						<i class='glyphicon glyphicon-cog'></i>
+					</a>
+					<span class="topright-buttons">
+						<a class='selected-mark'>
+							<i class='glyphicon glyphicon-chevron-right'></i>
+						</a>
+						<a class='remove-button'>
+							<i class='glyphicon glyphicon-remove'></i>
+						</a>
+					</span>
+				</div>
+				<a class='eobject'>
+					<img src='%img%'>
+				</a>
+			</div>
+		</script>
+	</div>
+
+	<div id="reset-modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>
+						本当にリセットしますか？
+					</h3>
+				</div>
+				<div class="modal-body">
+					<p>
+						作成中のプログラムが消えてしまうよ！
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button aria-hidden="true" class="btn" data-dismiss="modal" id="reset-modal-cancel-button"><i class="glyphicon glyphicon-remove"></i>やめる</button>
+					<button class="btn btn-primary" id="reset-modal-ok-button"><i class="glyphicon glyphicon-off"></i>リセット</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="preference-modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>
+						<i class="glyphicon glyphicon-cog"></i>
+						設定
+					</h3>
+				</div>
+				<div class="modal-body" id="preference-modal-content"></div>
+				<div class="modal-footer">
+					<button aria-hidden="true" class="btn" data-dismiss="modal"><i class="glyphicon glyphicon-remove"></i>やめる</button>
+					<button class="btn btn-primary" id="preference-modal-ok-button"><i class="glyphicon glyphicon-circle-blank"></i>決めた！</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<xml id="toolbox" style="display: none">
+		<category name="Logic" colour="210">
+			<block type="controls_if"></block>
+			<block type="switch_case_number"></block>
+			<block type="switch_case_text"></block>
+			<block type="logic_compare"></block>
+			<block type="logic_operation"></block>
+			<block type="logic_negate"></block>
+			<block type="logic_boolean"></block>
+			<block type="logic_null"></block>
+			<block type="logic_ternary"></block>
+		</category>
+		<category name="Loops" colour="120">
+			<block type="controls_repeat_ext">
+				<value name="TIMES">
+					<shadow type="math_number">
+						<field name="NUM">10</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="controls_whileUntil"></block>
+			<block type="controls_for">
+				<value name="FROM">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+				<value name="TO">
+					<shadow type="math_number">
+						<field name="NUM">10</field>
+					</shadow>
+				</value>
+				<value name="BY">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="controls_forEach"></block>
+			<block type="controls_flow_statements"></block>
+		</category>
+		<category name="Math" colour="230">
+			<block type="math_number"></block>
+			<block type="math_arithmetic">
+				<value name="A">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+				<value name="B">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_single">
+				<value name="NUM">
+					<shadow type="math_number">
+						<field name="NUM">9</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_trig">
+				<value name="NUM">
+					<shadow type="math_number">
+						<field name="NUM">45</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_constant"></block>
+			<block type="math_number_property">
+				<value name="NUMBER_TO_CHECK">
+					<shadow type="math_number">
+						<field name="NUM">0</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_change">
+				<value name="DELTA">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_round">
+				<value name="NUM">
+					<shadow type="math_number">
+						<field name="NUM">3.1</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_on_list"></block>
+			<block type="math_modulo">
+				<value name="DIVIDEND">
+					<shadow type="math_number">
+						<field name="NUM">64</field>
+					</shadow>
+				</value>
+				<value name="DIVISOR">
+					<shadow type="math_number">
+						<field name="NUM">10</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_constrain">
+				<value name="VALUE">
+					<shadow type="math_number">
+						<field name="NUM">50</field>
+					</shadow>
+				</value>
+				<value name="LOW">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+				<value name="HIGH">
+					<shadow type="math_number">
+						<field name="NUM">100</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_random_int">
+				<value name="FROM">
+					<shadow type="math_number">
+						<field name="NUM">1</field>
+					</shadow>
+				</value>
+				<value name="TO">
+					<shadow type="math_number">
+						<field name="NUM">100</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="math_random_float"></block>
+		</category>
+		<category name="Text" colour="160">
+			<block type="text"></block>
+			<block type="text_join"></block>
+			<block type="text_append">
+				<value name="TEXT">
+					<shadow type="text"></shadow>
+				</value>
+			</block>
+			<block type="text_length">
+				<value name="VALUE">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_isEmpty">
+				<value name="VALUE">
+					<shadow type="text">
+						<field name="TEXT"></field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_indexOf">
+				<value name="VALUE">
+					<block type="variables_get">
+						<field name="VAR">text</field>
+					</block>
+				</value>
+				<value name="FIND">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_charAt">
+				<value name="VALUE">
+					<block type="variables_get">
+						<field name="VAR">text</field>
+					</block>
+				</value>
+			</block>
+			<block type="text_getSubstring">
+				<value name="STRING">
+					<block type="variables_get">
+						<field name="VAR">text</field>
+					</block>
+				</value>
+			</block>
+			<block type="text_changeCase">
+				<value name="TEXT">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_trim">
+				<value name="TEXT">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_print">
+				<value name="TEXT">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="text_prompt_ext">
+				<value name="TEXT">
+					<shadow type="text">
+						<field name="TEXT">abc</field>
+					</shadow>
+				</value>
+			</block>
+		</category>
+		<category name="Lists" colour="260">
+			<block type="lists_create_with">
+				<mutation items="0"></mutation>
+			</block>
+			<block type="lists_create_with"></block>
+			<block type="lists_repeat">
+				<value name="NUM">
+					<shadow type="math_number">
+						<field name="NUM">5</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="lists_length"></block>
+			<block type="lists_isEmpty"></block>
+			<block type="lists_indexOf">
+				<value name="VALUE">
+					<block type="variables_get">
+						<field name="VAR">list</field>
+					</block>
+				</value>
+			</block>
+			<block type="lists_getIndex">
+				<value name="VALUE">
+					<block type="variables_get">
+						<field name="VAR">list</field>
+					</block>
+				</value>
+			</block>
+			<block type="lists_setIndex">
+				<value name="LIST">
+					<block type="variables_get">
+						<field name="VAR">list</field>
+					</block>
+				</value>
+			</block>
+			<block type="lists_getSublist">
+				<value name="LIST">
+					<block type="variables_get">
+						<field name="VAR">list</field>
+					</block>
+				</value>
+			</block>
+			<block type="lists_split">
+				<value name="DELIM">
+					<shadow type="text">
+						<field name="TEXT">,</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="lists_sort"></block>
+		</category>
+		<category name="Color" colour="20">
+			<block type="colour_picker"></block>
+			<block type="colour_random"></block>
+			<block type="colour_rgb">
+				<value name="RED">
+					<shadow type="math_number">
+						<field name="NUM">100</field>
+					</shadow>
+				</value>
+				<value name="GREEN">
+					<shadow type="math_number">
+						<field name="NUM">50</field>
+					</shadow>
+				</value>
+				<value name="BLUE">
+					<shadow type="math_number">
+						<field name="NUM">0</field>
+					</shadow>
+				</value>
+			</block>
+			<block type="colour_blend">
+				<value name="COLOUR1">
+					<shadow type="colour_picker">
+						<field name="COLOUR">#ff0000</field>
+					</shadow>
+				</value>
+				<value name="COLOUR2">
+					<shadow type="colour_picker">
+						<field name="COLOUR">#3333ff</field>
+					</shadow>
+				</value>
+				<value name="RATIO">
+					<shadow type="math_number">
+						<field name="NUM">0.5</field>
+					</shadow>
+				</value>
+			</block>
+		</category>
+		<sep></sep>
+		<category name="Variables" custom="VARIABLE" colour="330"></category>
+		<category name="Functions" custom="PROCEDURE" colour="290"></category>
+		<sep></sep>
+		<category name="Arduino" colour="160">
+			<category name="Kernel">
+				<block type="call"></block>
+				<block type="pin_mode"></block>
+				<block type="digital_write"></block>
+				<block type="digital_read"></block>
+				<block type="analog_read"></block>
+				<block type="pwm"></block>
+				<block type="analog_reference"></block>
+				<block type="init_dac"></block>
+				<block type="analog_dac"></block>
+				<block type="delay"></block>
+				<block type="millis"></block>
+				<block type="micros"></block>
+				<block type="led"></block>
+				<block type="tone"></block>
+				<block type="no_tone"></block>
+				<block type="random_seed"></block>
+				<block type="random"></block>
+			</category>
+			<category name="System">
+				<block type="system_exit"></block>
+				<block type="system_setrun"></block>
+				<block type="system_version"></block>
+				<block type="system_push"></block>
+				<block type="system_pop"></block>
+				<block type="system_fileload"></block>
+				<block type="system_reset"></block>
+				<block type="system_use_sd"></block>
+				<block type="system_use_wifi"></block>
+				<block type="system_get_mrb_path"></block>
+			</category>
+			<category name="MemFile">
+				<block type="memfile_open"></block>
+				<block type="memfile_close"></block>
+				<block type="memfile_read"></block>
+				<block type="memfile_write"></block>
+				<block type="memfile_seek"></block>
+				<block type="memfile_cp"></block>
+				<block type="memfile_rm"></block>
+			</category>
+			<category name="Serial">
+				<block type="serial_new"></block>
+				<block type="serial_bps"></block>
+				<block type="serial_print"></block>
+				<block type="serial_println"></block>
+				<block type="serial_available"></block>
+				<block type="serial_read"></block>
+				<block type="serial_write"></block>
+				<block type="serial_flash"></block>
+			</category>
+			<category name="I2C">
+				<block type="i2c_new"></block>
+				<block type="i2c_write"></block>
+				<block type="i2c_read"></block>
+				<block type="i2c_begin"></block>
+				<block type="i2c_lwrite"></block>
+				<block type="i2c_end"></block>
+				<block type="i2c_request"></block>
+				<block type="i2c_lread"></block>
+				<block type="i2c_available"></block>
+			</category>
+			<category name="Servo">
+				<block type="servo_attach"></block>
+				<block type="servo_write"></block>
+				<block type="servo_us"></block>
+				<block type="servo_read"></block>
+				<block type="servo_attached"></block>
+				<block type="servo_detach"></block>
+			</category>
+			<category name="RTC">
+				<block type="rtc_gettime"></block>
+				<block type="rtc_settime"></block>
+				<block type="rtc_deinit"></block>
+				<block type="rtc_init"></block>
+			</category>
+			<category name="SD">
+				<block type="sd_exists"></block>
+				<block type="sd_mkdir"></block>
+				<block type="sd_remove"></block>
+				<block type="sd_copy"></block>
+				<block type="sd_rmdir"></block>
+				<block type="sd_open"></block>
+				<block type="sd_close"></block>
+				<block type="sd_read"></block>
+				<block type="sd_seek"></block>
+				<block type="sd_write"></block>
+				<block type="sd_flush"></block>
+				<block type="sd_size"></block>
+				<block type="sd_position"></block>
+			</category>
+		</category>
+		<category name="ECHONET Lite" id="echonet_category" colour="230">
+			<block type="eproperty_new">
+				<field name="PROPERTY_CODE">80</field>
+			</block>
+			<block type="eproperty_new">
+				<field name="PROPERTY_CODE">82</field>
+			</block>
+		</category>
+	</xml>
+</body>
+</html>

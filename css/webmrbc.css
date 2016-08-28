@@ -1,0 +1,461 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+
+html {
+	-ms-touch-action: manipulation;
+}
+
+.dropdown-menu > li > a {
+	cursor: default;
+}
+
+#messages {
+	position: absolute;
+	right: 20px;
+	z-index: 999;
+	max-height: 80%;
+	overflow: auto;
+	bottom: 20px;
+	width: 25%;
+}
+
+.left-pane {
+	position: relative;
+	height: 100%;
+	float: left;
+	margin-left: -100%;
+}
+
+.right-pane {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	float: left;
+}
+
+#term {
+	width: 100%;
+}
+
+#output{
+	width: 100%;
+}
+
+#main-menu {
+	margin-bottom: 0px;
+}
+
+	#main-menu .container {
+		width: 100%;
+	}
+
+#modes-container {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 56px;
+	right: 0;
+	bottom: 0;
+}
+
+	#modes-container .modes-tab-pane {
+		position: relative;
+		height: 98%;
+	}
+
+		#modes-container .modes-tab-pane #block-tab-left-pane {
+			width: 200px;
+		}
+
+			#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container {
+				position: relative;
+				margin-left: 20px;
+				width: 160px;
+				height: 100%;
+				overflow: hidden;
+			}
+
+				#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container ul.nav-pills {
+					margin: 0 0 4px 0;
+					font-size: 0.8em;
+					line-height: 1em;
+				}
+
+					#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container ul.nav-pills li {
+						line-height: 12px;
+					}
+
+						#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container ul.nav-pills li a {
+							margin-right: 2px;
+							margin-top: 2px;
+							margin-bottom: 2px;
+							padding-top: 8px;
+							padding-bottom: 8px;
+							padding-right: 5px;
+							padding-left: 5px;
+							line-height: 12px;
+						}
+
+				#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content {
+					position: absolute;
+					width: 180px;
+					top: 32px;
+					left: 0;
+					right: 0;
+					bottom: -2px;
+					overflow-y: scroll;
+				}
+
+					#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item {
+						position: relative;
+						width: 160px;
+						height: 160px;
+					}
+
+						#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a {
+							text-decoration: none;
+							cursor: pointer;
+							font-size: 1.5em;
+							vertical-align: middle;
+							display: table-cell;
+						}
+
+						#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info {
+							position: absolute;
+							left: 0;
+							top: 0;
+							right: 0;
+							bottom: 0;
+							width: 160px;
+							height: 160px;
+							color: gray;
+						}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info .name {
+								position: absolute;
+								left: 10px;
+								top: 10px;
+								font-size: 1em;
+								z-index: 1;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info .attributes {
+								position: absolute;
+								left: 10px;
+								bottom: 10px;
+								font-size: 0.8em;
+								line-height: 1.1em;
+								text-align: left;
+								z-index: 1;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info a.modify-button {
+								position: absolute;
+								right: 10px;
+								bottom: 10px;
+								padding-left: 0.5em;
+								padding-top: 0.5em;
+								font-size: 1.5em;
+								z-index: 1;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info .topright-buttons {
+								position: absolute;
+								right: 10px;
+								top: 10px;
+								padding-left: 0.5em;
+								padding-bottom: 0.5em;
+								z-index: 1;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item .item-info .topright-buttons > a {
+								font-size: 1.5em;
+							}
+
+						#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a.eobject {
+							position: relative;
+							overflow: hidden;
+							display: table-cell;
+							text-align: center;
+							vertical-align: middle;
+							width: 160px;
+							height: 160px;
+							border: 5px solid white;
+						}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a.eobject img, #modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a.eobject div {
+								margin: -5px;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a.eobject img {
+								max-width: 160px;
+								max-height: 160px;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a.eobject:hover {
+								border: 5px solid #0088cc;
+							}
+
+						#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a#add-eobject-button.eobject {
+							text-align: center;
+							vertical-align: middle;
+							font-size: 1em;
+							border: 5px dashed lightgrey;
+						}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a#add-eobject-button.eobject i {
+								font-size: 2em;
+							}
+
+							#modes-container .modes-tab-pane #block-tab-left-pane #selectors-container #selectors-tab-content .selector-tab .item a#add-eobject-button.eobject:hover {
+								border: 5px dashed #0088cc;
+							}
+
+		#modes-container .modes-tab-pane #block-tab-right-pane #blockly-div {
+			margin-left: 200px;
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 20px;
+			bottom: 0;
+			-ms-touch-action: none;
+		}
+
+			#modes-container .modes-tab-pane #block-tab-right-pane #blockly-div svg.blocklySvg {
+				overflow: hidden;
+			}
+
+		#modes-container .modes-tab-pane #text-editor {
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			font-size: 10pt;
+		}
+
+#eobject-modal {
+	top: 5%;
+	left: 5%;
+	width: 90%;
+	height: 90%;
+	overflow-y: scroll;
+}
+
+	#eobject-modal .modal-dialog {
+		width: 100%;
+		height: 100%;
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
+
+	#eobject-modal .modal-body #eobject-modal-left-pane {
+		width: 45%;
+		margin-right: 8px;
+	}
+
+		#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-preview {
+			position: relative;
+			width: 160px;
+			height: 160px;
+			background-color: white;
+			border: 1px solid gray;
+			overflow: hidden;
+			margin-bottom: 8px;
+		}
+
+			#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-preview #eobject-modal-eobject {
+				position: absolute;
+				-ms-touch-action: none;
+			}
+
+				#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-preview #eobject-modal-eobject img {
+					width: 100%;
+					height: 100%;
+				}
+
+		#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-attributes #eobject-modal-form {
+			margin-bottom: 0;
+		}
+
+			#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-attributes #eobject-modal-form .control-group {
+				margin-bottom: 8px;
+			}
+
+				#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-attributes #eobject-modal-form .control-group .control-label {
+					width: 30%;
+				}
+
+				#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-attributes #eobject-modal-form .control-group .dropdown {
+					display: inline-block;
+				}
+
+				#eobject-modal .modal-body #eobject-modal-left-pane #eobject-modal-attributes #eobject-modal-form .control-group .controls {
+					display: inline-flex;
+				}
+
+	#eobject-modal .modal-body #eobject-modal-right-pane {
+		width: 50%;
+		height: 480px;
+		margin-left: 50%;
+		margin-bottom: 10px;
+	}
+
+		#eobject-modal .modal-body #eobject-modal-right-pane #eobject-modal-right-pane-inner {
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			overflow-y: scroll;
+		}
+
+			#eobject-modal .modal-body #eobject-modal-right-pane #eobject-modal-right-pane-inner #eobject_properties {
+				width: 100%;
+			}
+
+				#eobject-modal .modal-body #eobject-modal-right-pane #eobject-modal-right-pane-inner #eobject_properties label {
+					text-align: left;
+				}
+
+#preference-modal {
+	width: 700px;
+	margin-left: -350px;
+}
+
+	#preference-modal .modal-body form {
+		margin-bottom: 0;
+	}
+
+		#preference-modal .modal-body form .control-group {
+			margin-bottom: 8px;
+		}
+
+.emscripten {
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+div.emscripten {
+	text-align: center;
+}
+
+div.emscripten_border {
+	border: 1px solid black;
+}
+/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+canvas.emscripten {
+	border: 0px none;
+}
+
+#emscripten_logo {
+	display: inline-block;
+	margin: 4px;
+}
+
+.spinner {
+	height: 30px;
+	width: 30px;
+	margin: 0;
+	margin-top: 20px;
+	margin-left: 20px;
+	display: inline-block;
+	vertical-align: top;
+	-webkit-animation: rotation .8s linear infinite;
+	-moz-animation: rotation .8s linear infinite;
+	-o-animation: rotation .8s linear infinite;
+	animation: rotation 0.8s linear infinite;
+	border-left: 5px solid rgb(235, 235, 235);
+	border-right: 5px solid rgb(235, 235, 235);
+	border-bottom: 5px solid rgb(235, 235, 235);
+	border-top: 5px solid rgb(120, 120, 120);
+	border-radius: 100%;
+	background-color: rgb(189, 215, 46);
+}
+
+@-webkit-keyframes rotation {
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+
+	to {
+		-webkit-transform: rotate(360deg);
+	}
+}
+
+@-moz-keyframes rotation {
+	from {
+		-moz-transform: rotate(0deg);
+	}
+
+	to {
+		-moz-transform: rotate(360deg);
+	}
+}
+
+@-o-keyframes rotation {
+	from {
+		-o-transform: rotate(0deg);
+	}
+
+	to {
+		-o-transform: rotate(360deg);
+	}
+}
+
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#status {
+	display: inline-block;
+	vertical-align: top;
+	margin-top: 30px;
+	margin-left: 20px;
+	font-weight: bold;
+	color: rgb(120, 120, 120);
+}
+
+#progress {
+	height: 20px;
+	width: 30px;
+}
+
+#controls {
+	display: inline-block;
+	float: right;
+	vertical-align: top;
+	margin-top: 30px;
+	margin-right: 20px;
+}
+
+#output {
+	width: 100%;
+	height: 200px;
+	margin: 0 auto;
+	margin-top: 10px;
+	display: block;
+	background-color: black;
+	color: white;
+	font-family: courier-new, courier, monospace;
+	font-size: 12px;
+	outline: none;
+}
