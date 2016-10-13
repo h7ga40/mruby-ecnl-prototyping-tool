@@ -59,6 +59,18 @@
                 WebMrbc.Views.ClassSelectorView = new WebMrbc.ClassSelectorView(WebMrbc.Collections.ClassWorkspaces);
                 WebMrbc.Views.EObjectModalView = new WebMrbc.EObjectModalView();
                 Blockly.Blocks["eproperty_new"] = new WebMrbc.EPropertyBlock("eproperty_new");
+                Blockly.Blocks["property_attribute"] = new WebMrbc.EcnlPropertyAttributeBlock("property_attribute");
+                Blockly.Blocks["service_code"] = new WebMrbc.EcnlServiceCodeBlock("service_code");
+                Blockly.Blocks["node_id"] = new WebMrbc.EcnlNodeIDBlock("node_id");
+                Blockly.Blocks["save_received_property"] = new WebMrbc.EcnlSaveReceivedPropertyBlock("save_received_property");
+                Blockly.Blocks["get_saved_property"] = new WebMrbc.EcnlGetSavedPropertyBlock("get_saved_property");
+                Blockly.Blocks["get_property_info"] = new WebMrbc.EcnlGetPropertyInfoBlock("get_property_info");
+                Blockly.Blocks["set_announce_request"] = new WebMrbc.EcnlSetAnnounceRequestBlock("set_announce_request");
+                Blockly.Blocks["data_to_number"] = new WebMrbc.EcnlDataToNumberBlock("data_to_number");
+                Blockly.Blocks["number_to_data"] = new WebMrbc.EcnlNumberToDataBlock("number_to_data");
+                Blockly.Blocks["no_op"] = new WebMrbc.EcnlNoOpBlock("no_op");
+                Blockly.Blocks["received_data"] = new WebMrbc.EcnlReceivedDataBlock("received_data");
+                Blockly.Blocks["received_data_size"] = new WebMrbc.EcnlReceivedDataSizeBlock("received_data_size");
                 Blockly.Blocks["switch_case_number"] = new WebMrbc.SwitchCaseNumberBlock("switch_case_number");
                 Blockly.Blocks["switch_case_number_first_case"] = new WebMrbc.SwitchCaseNumberFirstCaseBlock("switch_case_number_first_case");
                 Blockly.Blocks["switch_case_number_case"] = new WebMrbc.SwitchCaseNumberCaseBlock("switch_case_number_case");
@@ -73,14 +85,18 @@
                 Blockly.Blocks["digital_read"] = new WebMrbc.DigitalReadBlock("digital_read");
                 Blockly.Blocks["analog_read"] = new WebMrbc.AnalogReadBlock("analog_read");
                 Blockly.Blocks["pwm"] = new WebMrbc.PwmBlock("pwm");
+                Blockly.Blocks["pwm_value"] = new WebMrbc.PwmValueBlock("pwm_value");
                 Blockly.Blocks["analog_reference"] = new WebMrbc.AnalogReferenceBlock("analog_reference");
                 Blockly.Blocks["init_dac"] = new WebMrbc.InitDacBlock("init_dac");
                 Blockly.Blocks["analog_dac"] = new WebMrbc.AnalogDacBlock("analog_dac");
+                Blockly.Blocks["dac_value"] = new WebMrbc.DacValueBlock("dac_value");
                 Blockly.Blocks["delay"] = new WebMrbc.DelayBlock("delay");
                 Blockly.Blocks["millis"] = new WebMrbc.MillisBlock("millis");
                 Blockly.Blocks["micros"] = new WebMrbc.MicrosBlock("micros");
                 Blockly.Blocks["led"] = new WebMrbc.LedBlock("led");
+                Blockly.Blocks["bit"] = new WebMrbc.BitBlock("bit");
                 Blockly.Blocks["tone"] = new WebMrbc.ToneBlock("tone");
+                Blockly.Blocks["tone_value"] = new WebMrbc.ToneValueBlock("tone_value");
                 Blockly.Blocks["no_tone"] = new WebMrbc.NoToneBlock("no_tone");
                 Blockly.Blocks["random_seed"] = new WebMrbc.RandomSeedBlock("random_seed");
                 Blockly.Blocks["random"] = new WebMrbc.RandomBlock("random");
@@ -101,6 +117,15 @@
                 Blockly.Blocks["memfile_seek"] = new WebMrbc.MemFileSeekBlock("memfile_seek");
                 Blockly.Blocks["memfile_cp"] = new WebMrbc.MemFileCpBlock("memfile_cp");
                 Blockly.Blocks["memfile_rm"] = new WebMrbc.MemFileRmBlock("memfile_rm");
+                Blockly.Blocks["rtc_year"] = new WebMrbc.RtcYearBlock("rtc_year");
+                Blockly.Blocks["rtc_month"] = new WebMrbc.RtcMonthBlock("rtc_month");
+                Blockly.Blocks["rtc_day"] = new WebMrbc.RtcDayBlock("rtc_day");
+                Blockly.Blocks["rtc_hour"] = new WebMrbc.RtcHourBlock("rtc_hour");
+                Blockly.Blocks["rtc_minute"] = new WebMrbc.RtcMinuteBlock("rtc_minute");
+                Blockly.Blocks["rtc_second"] = new WebMrbc.RtcSecondBlock("rtc_second");
+                Blockly.Blocks["rtc_weekday"] = new WebMrbc.RtcWeekDayBlock("rtc_weekday");
+                Blockly.Blocks["rtc_datetime"] = new WebMrbc.RtcDateTimeBlock("rtc_datetime");
+                Blockly.Blocks["rtc_datetime_item"] = new WebMrbc.RtcDateTimeItemBlock("rtc_datetime_item");
                 Blockly.Blocks["rtc_gettime"] = new WebMrbc.RtcGetTimeBlock("rtc_gettime");
                 Blockly.Blocks["rtc_settime"] = new WebMrbc.RtcSettimeBlock("rtc_settime");
                 Blockly.Blocks["rtc_deinit"] = new WebMrbc.RtcDeinitBlock("rtc_deinit");
@@ -118,6 +143,7 @@
                 Blockly.Blocks["sd_flush"] = new WebMrbc.SdFlushBlock("sd_flush");
                 Blockly.Blocks["sd_size"] = new WebMrbc.SdSizeBlock("sd_size");
                 Blockly.Blocks["sd_position"] = new WebMrbc.SdPositionBlock("sd_position");
+                Blockly.Blocks["bps_value"] = new WebMrbc.BpsValueBlock("bps_value");
                 Blockly.Blocks["serial_new"] = new WebMrbc.SerialNewBlock("serial_new");
                 Blockly.Blocks["serial_bps"] = new WebMrbc.SerialBpsBlock("serial_bps");
                 Blockly.Blocks["serial_print"] = new WebMrbc.SerialPrintBlock("serial_print");
@@ -128,7 +154,9 @@
                 Blockly.Blocks["serial_flash"] = new WebMrbc.SerialFlashBlock("serial_flash");
                 Blockly.Blocks["servo_attach"] = new WebMrbc.ServoAttachBlock("servo_attach");
                 Blockly.Blocks["servo_write"] = new WebMrbc.ServoWriteBlock("servo_write");
+                Blockly.Blocks["servo_angle"] = new WebMrbc.ServoAngleBlock("servo_angle");
                 Blockly.Blocks["servo_us"] = new WebMrbc.ServoUsBlock("servo_us");
+                Blockly.Blocks["servo_us_value"] = new WebMrbc.ServoUsValueBlock("servo_us_value");
                 Blockly.Blocks["servo_read"] = new WebMrbc.ServoReadBlock("servo_read");
                 Blockly.Blocks["servo_attached"] = new WebMrbc.ServoAttachedBlock("servo_attached");
                 Blockly.Blocks["servo_detach"] = new WebMrbc.ServoDetachBlock("servo_detach");
@@ -142,6 +170,7 @@
                 Blockly.Blocks["system_use_sd"] = new WebMrbc.SystemUseSdBlock("system_use_sd");
                 Blockly.Blocks["system_use_wifi"] = new WebMrbc.SystemUseWifiBlock("system_use_wifi");
                 Blockly.Blocks["system_get_mrb_path"] = new WebMrbc.SystemGetMrbPathBlock("system_get_mrb_path");
+                Blockly.Blocks["hexadecimal"] = new WebMrbc.HexadecimalBlock("hexadecimal");
                 Blockly.Ruby = new WebMrbc.Ruby();
     
                 var termElement = document.getElementById("term");
@@ -793,7 +822,7 @@
                         var blocks = System.Array.init(0, null);
                         var pos = 0;
                         do  {
-                            var len = (ms.lastIndex - pos) | 0;
+                            var len = (m.index - pos) | 0;
                             blocks.push(result.substr(pos, len).toLowerCase());
                             pos = (pos + len) | 0;
                         } while (((m = ms.exec(result))) != null);
@@ -824,7 +853,7 @@
                         var blocks = System.Array.init(0, null);
                         var pos = 0;
                         do  {
-                            var len = (ms.lastIndex - pos) | 0;
+                            var len = (m.index - pos) | 0;
                             blocks.push(result.substr(pos, len).toLowerCase());
                             pos = (pos + len) | 0;
                         } while (((m = ms.exec(result))) != null);
@@ -852,7 +881,7 @@
                         var blocks = System.Array.init(0, null);
                         var pos = 0;
                         do  {
-                            var len = (ms.lastIndex - pos) | 0;
+                            var len = (m.index - pos) | 0;
                             blocks.push(result.substr(pos, len).toLowerCase());
                             pos = (pos + len) | 0;
                         } while (((m = ms.exec(result))) != null);
@@ -988,164 +1017,6 @@
                         return "ecn_data_prop_set";
                 }
             },
-            getSetterBody: function (indent_, epi) {
-                var $t, $t1;
-                var body = new System.Text.StringBuilder();
-    
-                switch (epi.propertyCode) {
-                    case 128: 
-                        body.appendLine(indent_ + "# 動作状態ON/OFF設定関数（0x30, 0x31のみ受け付け）");
-                        body.appendLine(indent_ + "def onoff_prop_set(prop, src)");
-                        body.appendLine(indent_ + "\t# サイズが1以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (src.bytesize != 1) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\tif (prop.anno) then");
-                        body.appendLine(indent_ + "\t\tprop.set_anno(prop.exinf != src)");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\tcase (src.getbyte(0))");
-                        body.appendLine(indent_ + "\t# ONの場合");
-                        body.appendLine(indent_ + "\twhen 0x30 then");
-                        body.appendLine(indent_ + "\t\tprop.set_exinf(src)");
-                        body.appendLine(indent_ + "\t\t# TODO: ONの場合の処理");
-                        body.appendLine(indent_ + "\t# OFFの場合");
-                        body.appendLine(indent_ + "\twhen 0x31 then");
-                        body.appendLine(indent_ + "\t\tprop.set_exinf(src)");
-                        body.appendLine(indent_ + "\t\t# TODO: OFFの場合の処理");
-                        body.appendLine(indent_ + "\t# 0x30か0x31以外は受け付けない");
-                        body.appendLine(indent_ + "\telse");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn 1");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    case 136: 
-                        body.appendLine(indent_ + "# 異常発生状態設定関数（0x41, 0x42のみ受け付け）");
-                        body.appendLine(indent_ + "def alarm_prop_set(prop, src)");
-                        body.appendLine(indent_ + "\t# サイズが1以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (src.bytesize != 1) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\tif (prop.anno) then");
-                        body.appendLine(indent_ + "\t\tprop.set_anno(prop.exinf != src)");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\tcase (src.getbyte(0))");
-                        body.appendLine(indent_ + "\t# 異常発生あり/なしの場合");
-                        body.appendLine(indent_ + "\twhen 0x41,0x42 then");
-                        body.appendLine(indent_ + "\t\tprop.set_exinf(src)");
-                        body.appendLine(indent_ + "\t# 0x41か0x42以外は受け付けない");
-                        body.appendLine(indent_ + "\telse");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn 1");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    case 151: 
-                        body.appendLine(indent_ + "# 現在時刻設定関数");
-                        body.appendLine(indent_ + "def date_prop_get(prop, size)");
-                        body.appendLine(indent_ + "\t# サイズが2以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (src.bytesize != 2) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\ttime = Rtc.getTime");
-                        body.appendLine(indent_ + "\ttime[3] = src.getbyte(0)");
-                        body.appendLine(indent_ + "\ttime[4] = src.getbyte(1)");
-                        body.appendLine(indent_ + "\tRtc.setTime time");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn 2");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    case 152: 
-                        body.appendLine(indent_ + "# 現在年月日設定関数");
-                        body.appendLine(indent_ + "def date_prop_get(prop, size)");
-                        body.appendLine(indent_ + "\t# サイズが4以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (src.bytesize != 4) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\ttime = Rtc.getTime");
-                        body.appendLine(indent_ + "\ttime[0] = (src.getbyte(0) << 8) | src.getbyte(1)");
-                        body.appendLine(indent_ + "\ttime[1] = src.getbyte(2)");
-                        body.appendLine(indent_ + "\ttime[2] = src.getbyte(3)");
-                        body.appendLine(indent_ + "\tRtc.setTime time");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn 4");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    default: 
-                        var valueRange = { };
-                        if (WebMrbc.CodeGenerator.hasPropSetter(epi, valueRange)) {
-                            var Xn = "X" + (((2 * epi.size) | 0)).toString();
-                            var indent = indent_ + "\t";
-    
-                            body.appendLine(indent_ + System.String.format("# {0}設定関数", epi.description));
-                            body.appendLine(indent_ + System.String.format("def {0}(prop, src)", WebMrbc.CodeGenerator.getSetter(epi)));
-                            body.appendLine(indent_ + System.String.format("\t# サイズが{0}以外は受け付けない", epi.size));
-                            body.appendLine(indent_ + System.String.format("\tif (src.bytesize != {0}) then", epi.size));
-                            body.appendLine(indent_ + "\t\treturn 0");
-                            body.appendLine(indent_ + "\tend");
-                            body.appendLine();
-                            if (valueRange.v.getValues().length > 0) {
-                                indent += "\t";
-                                body.appendLine(indent_ + "\tcase (src.getbyte(0))");
-                                $t = Bridge.getEnumerator(valueRange.v.getValues());
-                                while ($t.moveNext()) {
-                                    var i = $t.getCurrent();
-                                    body.appendLine(indent_ + System.String.format("\t# {0}の場合", i.getDisp()));
-                                    body.appendLine(indent_ + System.String.format("\twhen 0x{0} then", i.getVal().toString(16)));
-                                    body.appendLine(indent_ + "\t\tprop.set_exinf(src)");
-                                    body.appendLine(indent_ + System.String.format("\t\t# TODO: {0}の場合の処理", i.getDisp()));
-                                }
-                                body.appendLine(indent_ + "\telse");
-                            }
-                            var first = true;
-                            $t1 = Bridge.getEnumerator(valueRange.v.getRanges());
-                            while ($t1.moveNext()) {
-                                var i1 = $t1.getCurrent();
-                                if (!System.String.isNullOrEmpty(i1.getDisp())) {
-                                    body.appendLine(indent + System.String.format("# {0}の場合", i1.getDisp()));
-                                }
-                                if (first) {
-                                    first = false;
-                                    body.append(indent);
-                                }
-                                else  {
-                                    body.append(indent + "else ");
-                                }
-                                body.appendLine(indent + System.String.format("if((*({0} *)src >= 0x{1}) && (*({0} *)src <= 0x{2})){{", epi.type, i1.getMin().toString(16), i1.getMax().toString(16)));
-                                body.appendLine(indent + System.String.format("\t*(({0} *)item->exinf) = *(({0} *)src);", epi.type));
-                                body.appendLine(indent + System.String.format("\t# TODO: {0}の場合の処理", System.String.isNullOrEmpty(i1.getDisp()) ? "この" : i1.getDisp()));
-                                body.appendLine(indent + "end");
-                            }
-                            if (valueRange.v.getValues().length > 0) {
-                                body.appendLine(indent_ + "\t\t# 上記以外は受け付けない");
-                                body.appendLine(indent_ + "\t\treturn 0");
-                                body.appendLine(indent_ + "\tend");
-                            }
-                            else  {
-                                body.appendLine(indent_ + "\t# 上記以外は受け付けない");
-                                body.appendLine(indent_ + "\telse");
-                                body.appendLine(indent_ + "\t\treturn 0");
-                                body.appendLine(indent_ + "\tend");
-                            }
-                            body.appendLine();
-                            body.appendLine(indent_ + System.String.format("\treturn {0}", epi.size));
-                            body.appendLine(indent_ + "end");
-                            break;
-                        }
-                        break;
-                }
-    
-                body.appendLine();
-    
-                return body.toString();
-            },
             getGetter: function (epi) {
                 switch (epi.propertyCode) {
                     case 151: 
@@ -1155,44 +1026,6 @@
                     default: 
                         return "ecn_data_prop_get";
                 }
-            },
-            getGetterBody: function (indent_, epi) {
-                var body = new System.Text.StringBuilder();
-    
-                switch (epi.propertyCode) {
-                    case 151: 
-                        body.appendLine(indent_ + "# 現在時刻設定関数");
-                        body.appendLine(indent_ + "def date_prop_get(prop, size)");
-                        body.appendLine(indent_ + "\t# サイズが2以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (size != 2) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\ttime = Rtc.getTime");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn time[3].chr + time[4].chr");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    case 152: 
-                        body.appendLine(indent_ + "# 現在年月日設定関数");
-                        body.appendLine(indent_ + "def date_prop_get(prop, size)");
-                        body.appendLine(indent_ + "\t# サイズが4以外は受け付けない");
-                        body.appendLine(indent_ + "\tif (size != 4) then");
-                        body.appendLine(indent_ + "\t\treturn 0");
-                        body.appendLine(indent_ + "\tend");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\ttime = Rtc.getTime");
-                        body.appendLine();
-                        body.appendLine(indent_ + "\treturn ((time[0] & 0xFF00) >> 8).chr + (time[0] & 0xFF).chr + time[1].chr + time[2].chr");
-                        body.appendLine(indent_ + "end");
-                        break;
-                    default: 
-                        break;
-                }
-    
-                body.appendLine();
-    
-                return body.toString();
             },
             getInitialValue$1: function (body, emi, description, valRng, indent, recursive) {
                 var $t;
@@ -1309,32 +1142,6 @@
             }
     
             WebMrbc.CodeGenerator.getInitialValue$1(body, pi, pi.description, pi.valueDescription, indent, false);
-        }
-    
-        return body.toString();
-    },
-    defineEchonetAccesser: function (indent, wa) {
-        var $t;
-        var body = new System.Text.StringBuilder();
-    
-        $t = Bridge.getEnumerator(this._PropertyInfos);
-        while ($t.moveNext()) {
-            var pi = $t.getCurrent();
-            if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
-                continue;
-            }
-    
-            var func = WebMrbc.CodeGenerator.getSetter(pi);
-            if (!System.Linq.Enumerable.from(wa.setterDefs).contains(func)) {
-                wa.setterDefs.push(func);
-                body.append(WebMrbc.CodeGenerator.getSetterBody(indent, pi));
-            }
-    
-            func = WebMrbc.CodeGenerator.getGetter(pi);
-            if (!System.Linq.Enumerable.from(wa.getterDefs).contains(func)) {
-                wa.getterDefs.push(func);
-                body.append(WebMrbc.CodeGenerator.getGetterBody(indent, pi));
-            }
         }
     
         return body.toString();
@@ -1848,6 +1655,340 @@
         }
     });
     
+    Bridge.define('WebMrbc.GrSakura', {
+        statics: {
+            pins: function () {
+                return new Blockly.FieldDropdown([["IO0", "PIN_IO0"], ["IO1", "PIN_IO1"], ["IO2", "PIN_IO2"], ["IO3", "PIN_IO3"], ["IO4", "PIN_IO4"], ["IO5", "PIN_IO5"], ["IO6", "PIN_IO6"], ["IO7", "PIN_IO7"], ["IO8", "PIN_IO8"], ["IO9", "PIN_IO9"], ["IO10", "PIN_IO10"], ["IO11", "PIN_IO11"], ["IO12", "PIN_IO12"], ["IO13", "PIN_IO13"], ["IO14", "PIN_IO14"], ["IO15", "PIN_IO15"], ["IO16", "PIN_IO16"], ["IO17", "PIN_IO17"], ["IO18", "PIN_IO18"], ["IO19", "PIN_IO19"], ["IO20", "PIN_IO20"], ["IO21", "PIN_IO21"], ["IO22", "PIN_IO22"], ["IO23", "PIN_IO23"], ["IO24", "PIN_IO24"], ["IO25", "PIN_IO25"], ["IO26", "PIN_IO26"], ["IO27", "PIN_IO27"], ["IO28", "PIN_IO28"], ["IO29", "PIN_IO29"], ["IO30", "PIN_IO30"], ["IO31", "PIN_IO31"], ["IO32", "PIN_IO32"], ["IO33", "PIN_IO33"], ["IO34", "PIN_IO34"], ["IO35", "PIN_IO35"], ["IO36", "PIN_IO36"], ["IO37", "PIN_IO37"], ["IO38", "PIN_IO38"], ["IO39", "PIN_IO39"], ["IO40", "PIN_IO40"], ["IO41", "PIN_IO41"], ["IO42", "PIN_IO42"], ["IO43", "PIN_IO43"], ["IO44", "PIN_IO44"], ["IO45", "PIN_IO45"], ["IO46", "PIN_IO46"], ["IO47", "PIN_IO47"], ["IO48", "PIN_IO48"], ["IO49", "PIN_IO49"], ["IO50", "PIN_IO50"], ["IO51", "PIN_IO51"], ["IO52", "PIN_IO52"], ["IO53", "PIN_IO53"], ["IO54", "PIN_IO54"], ["IO55", "PIN_IO55"], ["IO56", "PIN_IO56"], ["IO57", "PIN_IO57"], ["IO58", "PIN_IO58"], ["IO59", "PIN_IO59"], ["IO60", "PIN_IO60"], ["LED0", "PIN_LED0"], ["LED1", "PIN_LED1"], ["LED2", "PIN_LED2"], ["LED3", "PIN_LED3"], ["SW", "PIN_SW"]]);
+            },
+            analogPins: function () {
+                return new Blockly.FieldDropdown([["AN000", "PIN_AN000"], ["AN001", "PIN_AN001"], ["AN002", "PIN_AN002"], ["AN003", "PIN_AN003"], ["AN004", "PIN_AN004"], ["AN005", "PIN_AN005"], ["AN006", "PIN_AN006"], ["AN007", "PIN_AN007"], ["AN008", "PIN_AN008"], ["AN009", "PIN_AN009"], ["AN010", "PIN_AN010"], ["AN011", "PIN_AN011"], ["AN012", "PIN_AN012"], ["AN013", "PIN_AN013"], ["ANINT", "PIN_ANINT"], ["ANTMP", "PIN_ANTMP"]]);
+            },
+            pwmPins: function () {
+                return new Blockly.FieldDropdown([["IO0", "PIN_IO0"], ["IO1", "PIN_IO1"], ["IO2", "PIN_IO2"], ["IO3", "PIN_IO3"], ["IO4", "PIN_IO4"], ["IO5", "PIN_IO5"], ["IO6", "PIN_IO6"], ["IO7", "PIN_IO7"], ["IO9", "PIN_IO9"], ["IO10", "PIN_IO10"]]);
+            },
+            pinNameToNum: function (name) {
+                switch (name) {
+                    case "PIN_IO0": 
+                        return 0;
+                    case "PIN_IO1": 
+                        return 1;
+                    case "PIN_IO2": 
+                        return 2;
+                    case "PIN_IO3": 
+                        return 3;
+                    case "PIN_IO4": 
+                        return 4;
+                    case "PIN_IO5": 
+                        return 5;
+                    case "PIN_IO6": 
+                        return 6;
+                    case "PIN_IO7": 
+                        return 7;
+                    case "PIN_IO8": 
+                        return 8;
+                    case "PIN_IO9": 
+                        return 9;
+                    case "PIN_IO10": 
+                        return 10;
+                    case "PIN_IO11": 
+                        return 11;
+                    case "PIN_IO12": 
+                        return 12;
+                    case "PIN_IO13": 
+                        return 13;
+                    case "PIN_IO14": 
+                        return 14;
+                    case "PIN_IO15": 
+                        return 15;
+                    case "PIN_IO16": 
+                        return 16;
+                    case "PIN_IO17": 
+                        return 17;
+                    case "PIN_IO18": 
+                        return 18;
+                    case "PIN_IO19": 
+                        return 19;
+                    case "PIN_IO20": 
+                        return 20;
+                    case "PIN_IO21": 
+                        return 21;
+                    case "PIN_IO22": 
+                        return 22;
+                    case "PIN_IO23": 
+                        return 23;
+                    case "PIN_IO24": 
+                        return 24;
+                    case "PIN_IO25": 
+                        return 25;
+                    case "PIN_IO26": 
+                        return 26;
+                    case "PIN_IO27": 
+                        return 27;
+                    case "PIN_IO28": 
+                        return 28;
+                    case "PIN_IO29": 
+                        return 29;
+                    case "PIN_IO30": 
+                        return 30;
+                    case "PIN_IO31": 
+                        return 31;
+                    case "PIN_IO32": 
+                        return 32;
+                    case "PIN_IO33": 
+                        return 33;
+                    case "PIN_IO34": 
+                        return 34;
+                    case "PIN_IO35": 
+                        return 35;
+                    case "PIN_IO36": 
+                        return 36;
+                    case "PIN_IO37": 
+                        return 37;
+                    case "PIN_IO38": 
+                        return 38;
+                    case "PIN_IO39": 
+                        return 39;
+                    case "PIN_IO40": 
+                        return 40;
+                    case "PIN_IO41": 
+                        return 41;
+                    case "PIN_IO42": 
+                        return 42;
+                    case "PIN_IO43": 
+                        return 43;
+                    case "PIN_IO44": 
+                        return 44;
+                    case "PIN_IO45": 
+                        return 45;
+                    case "PIN_IO46": 
+                        return 46;
+                    case "PIN_IO47": 
+                        return 47;
+                    case "PIN_IO48": 
+                        return 48;
+                    case "PIN_IO49": 
+                        return 49;
+                    case "PIN_IO50": 
+                        return 50;
+                    case "PIN_IO51": 
+                        return 51;
+                    case "PIN_IO52": 
+                        return 52;
+                    case "PIN_IO53": 
+                        return 53;
+                    case "PIN_IO54": 
+                        return 54;
+                    case "PIN_IO55": 
+                        return 55;
+                    case "PIN_IO56": 
+                        return 56;
+                    case "PIN_IO57": 
+                        return 57;
+                    case "PIN_IO58": 
+                        return 58;
+                    case "PIN_IO59": 
+                        return 59;
+                    case "PIN_IO60": 
+                        return 60;
+                    case "PIN_LED0": 
+                        return 61;
+                    case "PIN_LED1": 
+                        return 62;
+                    case "PIN_LED2": 
+                        return 63;
+                    case "PIN_LED3": 
+                        return 64;
+                    case "PIN_SW": 
+                        return 65;
+                    case "PIN_AN000": 
+                        return 14;
+                    case "PIN_AN001": 
+                        return 15;
+                    case "PIN_AN002": 
+                        return 16;
+                    case "PIN_AN003": 
+                        return 17;
+                    case "PIN_AN004": 
+                        return 18;
+                    case "PIN_AN005": 
+                        return 19;
+                    case "PIN_AN006": 
+                        return 20;
+                    case "PIN_AN007": 
+                        return 21;
+                    case "PIN_AN008": 
+                        return 22;
+                    case "PIN_AN009": 
+                        return 23;
+                    case "PIN_AN010": 
+                        return 24;
+                    case "PIN_AN011": 
+                        return 25;
+                    case "PIN_AN012": 
+                        return 26;
+                    case "PIN_AN013": 
+                        return 27;
+                    case "PIN_ANINT": 
+                        return 28;
+                    case "PIN_ANTMP": 
+                        return 29;
+                    default: 
+                        return -1;
+                }
+            },
+            pinModeNameToNum: function (name) {
+                switch (name) {
+                    case "INPUT": 
+                        return 0;
+                    case "OUTPUT": 
+                        return 1;
+                    default: 
+                        return -1;
+                }
+            },
+            pinValueNameToNum: function (name) {
+                switch (name) {
+                    case "LOW": 
+                        return 0;
+                    case "HIGH": 
+                        return 1;
+                    default: 
+                        return -1;
+                }
+            },
+            analogRefModeNameToNum: function (name) {
+                switch (name) {
+                    case "DEFAULT": 
+                        return 0;
+                    case "INTERNAL": 
+                        return 1;
+                    case "EXTERNAL": 
+                        return 2;
+                    case "RAW12BIT": 
+                        return 3;
+                    default: 
+                        return -1;
+                }
+            },
+            i2CPorts: function () {
+                return new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]);
+            },
+            i2CPortNameToVariable: function (name) {
+                switch (name) {
+                    case "I2C0": 
+                        return "$i2c0";
+                    case "I2C1": 
+                        return "$i2c1";
+                    case "I2C2": 
+                        return "$i2c2";
+                    case "I2C3": 
+                        return "$i2c3";
+                    default: 
+                        return name;
+                }
+            },
+            memFileHandles: function () {
+                return new Blockly.FieldDropdown([["MemFile0", "MEM_FILE0"], ["MemFile1", "MEM_FILE1"]]);
+            },
+            memFileHandlerNameToNum: function (name) {
+                switch (name) {
+                    case "MEM_FILE0": 
+                        return 0;
+                    case "MEM_FILE1": 
+                        return 1;
+                    default: 
+                        return -1;
+                }
+            },
+            memOpenModeNameToNum: function (name) {
+                switch (name) {
+                    case "EEP_READ": 
+                        return 0;
+                    case "EEP_APPEND": 
+                        return 1;
+                    case "EEP_WRITE": 
+                        return 2;
+                    default: 
+                        return -1;
+                }
+            },
+            memCpModeNameToNum: function (name) {
+                switch (name) {
+                    case "NO_OVERWRITE": 
+                        return 0;
+                    case "OVERWRITE": 
+                        return 1;
+                    default: 
+                        return -1;
+                }
+            },
+            sdFileHandles: function () {
+                return new Blockly.FieldDropdown([["SdFile0", "SD_FILE0"], ["SdFile1", "SD_FILE1"]]);
+            },
+            sdFileHandlerNameToNum: function (name) {
+                switch (name) {
+                    case "SD_FILE0": 
+                        return 0;
+                    case "SD_FILE1": 
+                        return 1;
+                    default: 
+                        return -1;
+                }
+            },
+            sdOpenModeNameToNum: function (name) {
+                switch (name) {
+                    case "READ": 
+                        return 0;
+                    case "APPEND": 
+                        return 1;
+                    case "NEW_CREATE": 
+                        return 2;
+                    default: 
+                        return -1;
+                }
+            },
+            serialPorts: function () {
+                return new Blockly.FieldDropdown([["USB", "SERIAL0"], ["TX-0/RX-1", "SERIAL1"], ["TX-5/RX-6", "SERIAL2"], ["TX-7/RX-8", "SERIAL3"], ["TX-12/RX-11", "SERIAL4"], ["TX-9(26)/RX-3", "SERIAL5"]]);
+            },
+            serialPortNameToNum: function (name) {
+                switch (name) {
+                    case "SERIAL0": 
+                        return 0;
+                    case "SERIAL1": 
+                        return 1;
+                    case "SERIAL2": 
+                        return 2;
+                    case "SERIAL3": 
+                        return 3;
+                    case "SERIAL4": 
+                        return 4;
+                    case "SERIAL5": 
+                        return 5;
+                    default: 
+                        return -1;
+                }
+            },
+            serialPortNameToVariable: function (name) {
+                switch (name) {
+                    case "SERIAL0": 
+                        return "$Serial";
+                    case "SERIAL1": 
+                        return "$Serial1";
+                    case "SERIAL2": 
+                        return "$Serial2";
+                    case "SERIAL3": 
+                        return "$Serial3";
+                    case "SERIAL4": 
+                        return "$Serial4";
+                    case "SERIAL5": 
+                        return "$Serial5";
+                    default: 
+                        return name;
+                }
+            }
+        }
+    });
+    
     Bridge.define('WebMrbc.HexDump', {
         text: null,
         constructor: function (bytes, width) {
@@ -2092,7 +2233,27 @@
         },
         onLoadLocal: function () {
         },
+        /**
+         * 
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.MainMenuView
+         * @memberof WebMrbc.MainMenuView
+         * @return  {void}
+         */
         onSave: function () {
+            WebMrbc.Views.ClassSelectorView.getCurrent().loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
+    
+            var zip = new JSZip();
+            var i = 1;
+            WebMrbc.Collections.ClassWorkspaces.each(function (e) {
+                var xml = Blockly.Xml.workspaceToDom(e.getWorkspace());
+                zip.file("ClassWorkspace" + i + ".xml", xml.outerHTML);
+                i = (i + 1) | 0;
+            });
+            var blob = zip.generate({ type: "blob" });
+            saveAs(blob, "Workspace.zip");
         },
         onCheck: function () {
         },
@@ -2329,7 +2490,7 @@
                                 tokens.push(new WebMrbc.TokenInfo(input.substr(pos), WebMrbc.TokenType.String));
                                 break;
                             }
-                            var index = (pos + ms.lastIndex) | 0;
+                            var index = (pos + m.index) | 0;
                             if (index === pos) {
                                 tokens.push(new WebMrbc.TokenInfo(m[0], WebMrbc.TokenType.Separetor));
                                 pos = (pos + 1) | 0;
@@ -2698,8 +2859,8 @@
                             WebMrbc.ValueRange._ParsedText.add(line, new WebMrbc.ValueSet(values, ranges, bitField.v, initialValue.v));
                         }
     
-                        valueRange._Values.concat.apply(valueRange._Values, values);
-                        valueRange._Ranges.concat.apply(valueRange._Ranges, ranges);
+                        valueRange._Values = Bridge.cast(valueRange._Values.concat.apply(valueRange._Values, values), Array);
+                        valueRange._Ranges = Bridge.cast(valueRange._Ranges.concat.apply(valueRange._Ranges, ranges), Array);
                         if (bitField.v != null) {
                             valueRange._BitFields.push(bitField.v);
                         }
@@ -2844,7 +3005,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("アナログリード").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
+            this.appendDummyInput().appendField("アナログリード").appendField(WebMrbc.GrSakura.analogPins(), "PIN_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -2860,10 +3021,25 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("アナログ入力基準電圧").appendField(new Blockly.FieldDropdown([["5.0V Arduino互換", "AR_DEFAULT"], ["1.1V 内蔵電圧", "AR_INTERNAL"], ["AVREFピン供給電圧", "AR_EXTERNAL"], ["3.3V 12ビットA/D変換を行う", "AR_RAW12BIT"]]), "ANALOG_REFERENCE_MODE");
+            this.appendDummyInput().appendField("アナログ入力基準電圧").appendField(new Blockly.FieldDropdown([["5.0V Arduino互換", "DEFAULT"], ["1.1V 内蔵電圧", "INTERNAL"], ["AVREFピン供給電圧", "EXTERNAL"], ["3.3V 12ビットA/D変換を行う", "RAW12BIT"]]), "ANALOG_REFERENCE_MODE");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.BitBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("Bit 7").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT7").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT6").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT5").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT4").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT3").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT2").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT1").appendField(new Blockly.FieldCheckbox("FALSE"), "BIT0").appendField("0");
+            this.setOutput(true, "Number");
             this.setColour(160);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
@@ -2997,6 +3173,22 @@
         }
     });
     
+    Bridge.define('WebMrbc.BpsValueBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldDropdown([["115.2kbps", "115200"], ["57.6kbps", "57600"], ["38.4kbps", "38400"], ["31.25kbps", "31250"], ["28.8kbps", "28800"], ["19.2kbps", "19200"], ["14.4kbps", "14400"], ["9.6kbps", "9600"], ["4.8kbps", "4800"], ["2.4kbps", "2400"], ["1.2kbps", "1200"], ["600bps", "600"], ["300bps", "300"]]), "VALUE");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
     Bridge.define('WebMrbc.CallBlock', {
         inherits: [WebMrbc.Block],
         constructor: function (type) {
@@ -3063,7 +3255,7 @@
         },
         reset$1: function (n) {
             this.list.splice(0, this.list.length);
-            this.list.concat(n);
+            this.list = Bridge.cast(this.list.concat(n), Array);
     
             if (!Bridge.staticEquals(this.onReset, null)) {
                 this.onReset(this, Object.empty);
@@ -3109,6 +3301,21 @@
         }
     }; });
     
+    Bridge.define('WebMrbc.DacValueBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 4095, 1), "DAC_VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("DAC 0～4095");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
     Bridge.define('WebMrbc.DelayBlock', {
         inherits: [WebMrbc.Block],
         constructor: function (type) {
@@ -3134,9 +3341,9 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("デジタルリード").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
+            this.appendDummyInput().appendField("デジタルリード").appendField(WebMrbc.GrSakura.pins(), "PIN_NO");
             this.setInputsInline(true);
-            this.setOutput(true, "PIN_VALUE");
+            this.setOutput(true, "Boolean");
             this.setColour(160);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
@@ -3150,12 +3357,102 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("デジタルライト").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
-            this.appendDummyInput().appendField("値").appendField(new Blockly.FieldDropdown([["LOW", "PIN_VALUE_LOW"], ["HIGH", "PIN_VALUE_HIGH"]]), "PIN_VALUE");
+            this.appendDummyInput().appendField("デジタルライト").appendField(WebMrbc.GrSakura.pins(), "PIN_NO");
+            this.appendDummyInput().appendField("値").appendField(new Blockly.FieldDropdown([["LOW", "LOW"], ["HIGH", "HIGH"]]), "PIN_VALUE");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlPropertyLocalBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        getInputName: function () {
+            var match = false;
+            var prev, block = this;
+            for (; ; ) {
+                prev = block;
+                block = prev.getParent();
+                if (block == null) {
+                    break;
+                }
+    
+                if (Bridge.referenceEquals(block.type, "eproperty_new")) {
+                    match = true;
+                    break;
+                }
+            }
+    
+            if (!match) {
+                return "";
+            }
+    
+            for (var i = 0; i < block.inputList.length; i = (i + 1) | 0) {
+                var input = block.inputList[i];
+                if (input.connection == null) {
+                    continue;
+                }
+    
+                var childBlock = input.connection.targetBlock();
+                if (Bridge.referenceEquals(childBlock.id, prev.id)) {
+                    return input.name;
+                }
+            }
+    
+            return "";
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlNodeIDBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("ノードID").appendField(new Blockly.FieldDropdown([["アドレスID登録なし", "ENOD_NOT_MATCH_ID"], ["マルチキャストアドレスID", "ENOD_MULTICAST_ID"], ["自ノードアドレスID", "ENOD_LOCAL_ID"], ["APIアドレスID", "ENOD_API_ID"], ["他ノードID", "ENOD_REMOTE_ID"]]), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlPropertyAttributeBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("プロパティ属性").appendField(new Blockly.FieldDropdown([["未設定", "EPC_NONE"], ["設定可", "EPC_RULE_SET"], ["取得可", "EPC_RULE_GET"], ["通知有り", "EPC_RULE_ANNO"], ["状態変化時通知", "EPC_ANNOUNCE"], ["可変長データ", "EPC_VARIABLE"]]), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlServiceCodeBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("サービスコード").appendField(new Blockly.FieldDropdown([["プロパティ値書き込み要求（応答不要）", "ESV_SET_I"], ["プロパティ値書き込み要求（応答要）", "ESV_SET_C"], ["プロパティ値読み出し要求", "ESV_GET"], ["プロパティ値通知要求", "ESV_INF_REQ"], ["プロパティ値書き込み・読み出し要求", "ESV_SET_GET"], ["プロパティ値書き込み応答", "ESV_SET_RES"], ["プロパティ値読み出し応答", "ESV_GET_RES"], ["プロパティ値通知", "ESV_INF"], ["プロパティ値通知（応答要）", "ESV_INFC"], ["プロパティ値通知応答", "ESV_INFC_RES"], ["プロパティ値書き込み・読み出し応答", "ESV_SET_GET_RES"], ["プロパティ値書き込み要求不可応答", "ESV_SET_I_SNA"], ["プロパティ値書き込み要求不可応答", "ESV_SET_C_SNA"], ["プロパティ値読み出し不可応答", "ESV_GET_SNA"], ["プロパティ値通知不可応答", "ESV_INF_SNA"], ["プロパティ値書き込み・読み出し不可応答", "ESV_SET_GET_SNA"]]), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(230);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
         }
@@ -3175,9 +3472,9 @@
         },
         init: function () {
             this.appendDummyInput("PROPERTY").appendField(new Blockly.FieldTextInput("onoff_prop"), "IDENTIFER").appendField("動作状態", "DESCRIPTION").appendField("EPC:").appendField("80", "PROPERTY_CODE").appendField("Size:").appendField("1", "PROPERTY_SIZE").appendField("byte");
-            this.appendStatementInput("SET").setCheck("ESetHandler").appendField("設定(prop, src)");
+            this.appendStatementInput("SET").setCheck("EPropertySetHandler").appendField("設定(prop, src)");
             this.appendValueInput("SET_RET").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField("設定に使用したバイト数");
-            this.appendStatementInput("GET").setCheck("EGetHandler").appendField("取得(prop, size)");
+            this.appendStatementInput("GET").setCheck("EPropertyGetHandler").appendField("取得(prop, size)");
             this.appendValueInput("GET_RET").setCheck("String").setAlign(Blockly.ALIGN_RIGHT).appendField("返すデータ");
             this.setColour(230);
             this.setTooltip("");
@@ -3233,6 +3530,29 @@
         }
     });
     
+    Bridge.define('WebMrbc.HexadecimalBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            var input = new Blockly.FieldTextInput("00000000");
+            input.setValidator(Bridge.fn.bind(this, this.validator));
+    
+            this.appendDummyInput().appendField("HEX").appendField(input, "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+    
+        },
+        validator: function (text) {
+            text = text.replace(new RegExp("[^0-9a-fA-F]+", "g"), "");
+            return text;
+        }
+    });
+    
     Bridge.define('WebMrbc.I2cAvailableBlock', {
         inherits: [WebMrbc.Block],
         constructor: function (type) {
@@ -3240,7 +3560,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの受信バッファ内にあるデータ数を調べる").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの受信バッファ内にあるデータ数を調べる").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -3256,7 +3576,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの送信開始準備").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの送信開始準備").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3273,7 +3593,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの送信シーケンスを発行する").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの送信シーケンスを発行する").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendDummyInput().appendField("ストップコンディション発生").appendField(new Blockly.FieldCheckbox("TRUE"), "STOP");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
@@ -3290,7 +3610,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの周波数を変更する").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの周波数を変更する").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendValueInput("FREQUENCY").setCheck("Number").appendField("周波数");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
@@ -3308,7 +3628,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cへ受信シーケンスを発行しデータを読み出す").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cへ受信シーケンスを発行しデータを読み出す").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -3324,7 +3644,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの送信バッファの末尾に数値を追加する").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの送信バッファの末尾に数値を追加する").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendValueInput("DATA").setCheck("Number").appendField("データ");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
@@ -3341,7 +3661,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cの初期化").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cの初期化").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3358,7 +3678,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cからの読み込み").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cからの読み込み").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendValueInput("ADDRESS_L").setCheck("Number").appendField("下位アドレス");
             this.appendValueInput("ADDRESS_H").setCheck("Number").appendField("上位アドレス");
             this.setInputsInline(true);
@@ -3376,7 +3696,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cへ受信シーケンスを発行する").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cへ受信シーケンスを発行する").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendValueInput("ADDRESS").setCheck("Number").appendField("開始アドレス");
             this.appendValueInput("COUNT").setCheck("Number").appendField("データ数");
             this.setInputsInline(true);
@@ -3394,7 +3714,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("I2Cへの書き込み").appendField(new Blockly.FieldDropdown([["SDA-0/SCL-1", "I2C0"], ["SDA-5/SCL-6", "I2C1"], ["SDA-7/SCL-8", "I2C2"], ["SDA-9(26)/SCL-3", "I2C3"]]), "PORT_NO");
+            this.appendDummyInput().appendField("I2Cへの書き込み").appendField(WebMrbc.GrSakura.i2CPorts(), "I2C_PORT_NO");
             this.appendValueInput("ADDRESS").setCheck("Number").appendField("アドレス");
             this.appendValueInput("DATA").setCheck("Number").appendField("データ");
             this.setInputsInline(true);
@@ -3496,7 +3816,8 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("LED").appendField(new Blockly.FieldDropdown([["ON", "LED_ON"], ["OFF", "LED_OFF"]]), "SW");
+            this.appendDummyInput().appendField("LED");
+            this.appendValueInput("SW").setCheck("Number");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3513,7 +3834,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルをクローズします").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルをクローズします").appendField(WebMrbc.GrSakura.memFileHandles(), "MEM_FILE_NO");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3533,7 +3854,7 @@
             this.appendDummyInput().appendField("ファイルをコピーします");
             this.appendValueInput("SRC_FILENAME").setCheck("String").appendField("コピー元ファイル名");
             this.appendValueInput("DST_FILENAME").setCheck("String").appendField("コピー先ファイル名");
-            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["上書きしない", "NO_OVERWRITE"], ["上書きする", "OVERWRITE"]]), "MODE");
+            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["上書きしない", "NO_OVERWRITE"], ["上書きする", "OVERWRITE"]]), "EEP_CP_MODE");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -3549,9 +3870,9 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルをオープンします").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルをオープンします").appendField(WebMrbc.GrSakura.memFileHandles(), "MEM_FILE_NO");
             this.appendValueInput("FILENAME").setCheck("String").appendField("ファイル名(8.3形式)");
-            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["Read", "READ"], ["Append", "APPEND"], ["New Create", "NEW_CREATE"]]), "MODE");
+            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["Read", "EEP_READ"], ["Append", "EEP_APPEND"], ["New Create", "EEP_WRITE"]]), "EEP_OPEN_MODE");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3568,7 +3889,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルから1バイト読み込みます").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルから1バイト読み込みます").appendField(WebMrbc.GrSakura.memFileHandles(), "MEM_FILE_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -3601,7 +3922,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルの読み出し位置を移動する").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルの読み出し位置を移動する").appendField(WebMrbc.GrSakura.memFileHandles(), "MEM_FILE_NO");
             this.appendValueInput("POSITION").setCheck("Number").appendField("seekするバイト数");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
@@ -3618,7 +3939,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルにバイナリデータを書き込みます").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルにバイナリデータを書き込みます").appendField(WebMrbc.GrSakura.memFileHandles(), "MEM_FILE_NO");
             this.appendValueInput("DATA").setCheck("String").appendField("データ");
             this.appendValueInput("LENGTH").setCheck("Number").appendField("データサイズ");
             this.setInputsInline(true);
@@ -3668,7 +3989,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("トーン出力停止").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
+            this.appendDummyInput().appendField("トーン出力停止").appendField(WebMrbc.GrSakura.pwmPins(), "PIN_NO");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3706,8 +4027,8 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("PINのモード設定").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
-            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["INPUT", "PIN_MODE_INPUT"], ["OUTPUT", "PIN_MODE_OUTPUT"]]), "PIN_MODE");
+            this.appendDummyInput().appendField("PINのモード設定").appendField(WebMrbc.GrSakura.pins(), "PIN_NO");
+            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["INPUTモード", "INPUT"], ["OUTPUTモード", "OUTPUT"]]), "PIN_MODE");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -3724,13 +4045,28 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("PWM出力").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
+            this.appendDummyInput().appendField("PWM出力").appendField(WebMrbc.GrSakura.pwmPins(), "PIN_NO");
             this.appendValueInput("PWM_OUT").setCheck("Number").appendField("出力PWM比率");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(160);
             this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.PwmValueBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 255, 1), "PWM_VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("PWM 0～255");
             this.setHelpUrl("http://www.example.com/");
         }
     });
@@ -3744,7 +4080,7 @@
         init: function () {
             this.appendDummyInput().appendField("乱数を取得");
             this.appendValueInput("MIN").setCheck("Number").appendField("最小値");
-            this.appendValueInput("MIN").setCheck("Number").appendField("最大値");
+            this.appendValueInput("MAX").setCheck("Number").appendField("最大値");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -3834,6 +4170,58 @@
         }
     });
     
+    Bridge.define('WebMrbc.RtcDateTimeBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendValueInput("YEAR").setCheck("Number").appendField("年");
+            this.appendValueInput("MONTH").setCheck("Number").appendField("月");
+            this.appendValueInput("DAY").setCheck("Number").appendField("日");
+            this.appendValueInput("HOUR").setCheck("Number").appendField("時");
+            this.appendValueInput("MINUTE").setCheck("Number").appendField("分");
+            this.appendValueInput("SECOND").setCheck("Number").appendField("秒");
+            this.setInputsInline(true);
+            this.setOutput(true, "Array");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcDateTimeItemBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldVariable("item"), "ARRAY").appendField(new Blockly.FieldDropdown([["年", "0"], ["月", "1"], ["日", "2"], ["時", "3"], ["分", "4"], ["秒", "5"], ["週", "6"]]), "ITEM");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcDayBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("1", 1, 31, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("日(1-31)");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
     Bridge.define('WebMrbc.RtcDeinitBlock', {
         inherits: [WebMrbc.Block],
         constructor: function (type) {
@@ -3866,6 +4254,21 @@
         }
     });
     
+    Bridge.define('WebMrbc.RtcHourBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 23, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("時(0-23)");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
     Bridge.define('WebMrbc.RtcInitBlock', {
         inherits: [WebMrbc.Block],
         constructor: function (type) {
@@ -3878,6 +4281,51 @@
             this.setOutput(true, "Number");
             this.setColour(160);
             this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcMinuteBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 59, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("分(0-59)");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcMonthBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("1", 1, 12, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("月(1-12)");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcSecondBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 59, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("秒(0-59)");
             this.setHelpUrl("http://www.example.com/");
         }
     });
@@ -3899,8 +4347,40 @@
         }
     });
     
+    Bridge.define('WebMrbc.RtcWeekDayBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldDropdown([["日曜", "0"], ["月曜", "1"], ["火曜", "2"], ["水曜", "3"], ["木曜", "4"], ["金曜", "5"], ["土曜", "6"]]), "VALUE");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.RtcYearBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("2017", 2000, 2099, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("年(2000-2099)");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
     Bridge.define('WebMrbc.Ruby', {
         inherits: [WebMrbc.Generator],
+        value_sw: null,
         ORDER_ATOMIC: 0,
         ORDER_MEMBER: 2,
         ORDER_FUNCTION_CALL: 2,
@@ -3937,68 +4417,68 @@
             this.escapeChars_.add("\"", "\\\"");
         },
         i2c_new: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$i2c" + dropdown_port_no + " = I2c.new(" + dropdown_port_no + ")\n";
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + " = I2c.new(" + dropdown_i2c_port_no + ")\n";
             return code;
         },
         i2c_write: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$i2c" + dropdown_port_no + ".write(" + value_address + ",\"" + value_data + "\")\n";
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".write(" + value_address + ",\"" + value_data + "\")\n";
             return code;
         },
         i2c_read: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_address_l = Blockly.Ruby.valueToCode(block, "ADDRESS_L", Blockly.Ruby.ORDER_ATOMIC);
             var value_address_h = Blockly.Ruby.valueToCode(block, "ADDRESS_H", Blockly.Ruby.ORDER_ATOMIC);
             var code;
             if (value_address_h == null) {
-                code = "$i2c" + dropdown_port_no + ".read(" + value_address_l + ")";
+                code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".read(" + value_address_l + ")";
             }
             else  {
-                code = "$i2c" + dropdown_port_no + ".read(" + value_address_l + "," + value_address_h + ")";
+                code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".read(" + value_address_l + "," + value_address_h + ")";
             }
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_begin: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$i2c" + dropdown_port_no + ".begin()\n";
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".begin()\n";
             return code;
         },
         i2c_lwrite: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$i2c" + dropdown_port_no + ".lwrite(" + value_data + ")";
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".lwrite(" + value_data + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_end: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var checkbox_stop = Bridge.referenceEquals(block.getFieldValue("STOP"), "TRUE");
-            var code = "$i2c" + dropdown_port_no + ".lwrite(" + checkbox_stop + ")";
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".lwrite(" + checkbox_stop + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_request: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_count = Blockly.Ruby.valueToCode(block, "COUNT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$i2c" + dropdown_port_no + ".request(" + value_address + "," + value_count + ")";
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".request(" + value_address + "," + value_count + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_lread: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$i2c" + dropdown_port_no + ".lread()";
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".lread()";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_available: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$i2c" + dropdown_port_no + ".available()";
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".available()";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_frequency: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_frequency = Blockly.Ruby.valueToCode(block, "FREQUENCY", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$i2c" + dropdown_port_no + ".frequency(" + value_frequency + ")\n";
+            var code = WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no) + ".frequency(" + value_frequency + ")\n";
             return code;
         },
         call: function (block) {
@@ -4009,34 +4489,39 @@
         pin_mode: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var dropdown_pin_mode = block.getFieldValue("PIN_MODE");
-            var code = "pinMode(" + dropdown_pin_no + "," + dropdown_pin_mode + ")\n";
+            var code = "pinMode(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + WebMrbc.GrSakura.pinModeNameToNum(dropdown_pin_mode) + ")\n";
             return code;
         },
         digital_write: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var dropdown_pin_value = block.getFieldValue("PIN_VALUE");
-            var code = "digitalWrite(" + dropdown_pin_no + "," + dropdown_pin_value + ")\n";
+            var code = "digitalWrite(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + WebMrbc.GrSakura.pinValueNameToNum(dropdown_pin_value) + ")\n";
             return code;
         },
         digital_read: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = "digitalRead(" + dropdown_pin_no + ")";
+            var code = "digitalRead(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         analog_read: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = "analogRead(" + dropdown_pin_no + ")";
+            var code = "analogRead(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         pwm: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var value_pwm_out = Blockly.Ruby.valueToCode(block, "PWM_OUT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "pwm(" + dropdown_pin_no + "," + value_pwm_out + ")\n";
+            var code = "pwm(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + value_pwm_out + ")\n";
             return code;
+        },
+        pwm_value: function (block) {
+            var number_pwm_value = block.getFieldValue("PWM_VALUE");
+            var code = number_pwm_value;
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         analog_reference: function (block) {
             var dropdown_analog_reference_mode = block.getFieldValue("ANALOG_REFERENCE_MODE");
-            var code = "analogReference(" + dropdown_analog_reference_mode + ")\n";
+            var code = "analogReference(" + WebMrbc.GrSakura.analogRefModeNameToNum(dropdown_analog_reference_mode) + ")\n";
             return code;
         },
         init_dac: function (block) {
@@ -4047,6 +4532,11 @@
             var value_value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
             var code = "analogDac(" + value_value + ")\n";
             return code;
+        },
+        dac_value: function (block) {
+            var number_dac_value = block.getFieldValue("ADC_VALUE");
+            var code = number_dac_value;
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         delay: function (block) {
             var value_value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
@@ -4062,20 +4552,41 @@
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         led: function (block) {
-            var dropdown_sw = block.getFieldValue("SW");
-            var code = "led(" + dropdown_sw + ")\n";
+            var value_sw = Blockly.Ruby.valueToCode(block, "SW", Blockly.Ruby.ORDER_ATOMIC);
+            var code = "led(" + value_sw + ")\n";
             return code;
+        },
+        bit: function (block) {
+            var code = "0b";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT7"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT6"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT5"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT4"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT3"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT2"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT1"), "TRUE")) ? "1" : "0";
+            code += (Bridge.referenceEquals(block.getFieldValue("BIT0"), "TRUE")) ? "1" : "0";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        hexadecimal: function (block) {
+            var code = "0x" + block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         tone: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var value_frequency = Blockly.Ruby.valueToCode(block, "FREQUENCY", Blockly.Ruby.ORDER_ATOMIC);
             var value_duration = Blockly.Ruby.valueToCode(block, "DURATION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "tone(" + dropdown_pin_no + "," + value_frequency + "," + value_duration + ")\n";
+            var code = "tone(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + value_frequency + "," + value_duration + ")\n";
             return code;
+        },
+        tone_value: function (block) {
+            var number_tone_value = block.getFieldValue("TONE_VALUE");
+            var code = number_tone_value;
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         no_tone: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = "noTone(" + dropdown_pin_no + ")\n";
+            var code = "noTone(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")\n";
             return code;
         },
         random_seed: function (block) {
@@ -4086,49 +4597,91 @@
         random: function (block) {
             var value_min = Blockly.Ruby.valueToCode(block, "MIN", Blockly.Ruby.ORDER_ATOMIC);
             var value_max = Blockly.Ruby.valueToCode(block, "MAX", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "random(" + value_min + "," + value_max + ")";
+            var code;
+            if (System.String.isNullOrEmpty(value_min)) {
+                code = "random(" + value_max + ")";
+            }
+            else  {
+                code = "random(" + value_min + "," + value_max + ")";
+            }
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_open: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var dropdown_mode = block.getFieldValue("MODE");
-            var code = "MemFile.open(" + dropdown_file_no + "," + value_filename + "," + dropdown_mode + ")\n";
+            var dropdown_eep_open_mode = block.getFieldValue("EEP_OPEN_MODE");
+            var code = "MemFile.open(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + "," + value_filename + "," + WebMrbc.GrSakura.memOpenModeNameToNum(dropdown_eep_open_mode) + ")\n";
             return code;
         },
         memfile_close: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "MemFile.close(" + dropdown_file_no + ")\n";
+            var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
+            var code = "MemFile.close(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ")\n";
             return code;
         },
         memfile_read: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "MemFile.read(" + dropdown_file_no + ")";
+            var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
+            var code = "MemFile.read(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_write: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "MemFile.write(" + dropdown_file_no + "," + value_data + "," + value_length + ")";
+            var code = "MemFile.write(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + "," + value_data + "," + value_length + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_seek: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "MemFile.seek(" + dropdown_file_no + "," + value_position + ")";
+            var code = "MemFile.seek(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + "," + value_position + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_cp: function (block) {
             var value_src_filename = Blockly.Ruby.valueToCode(block, "SRC_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var value_dst_filename = Blockly.Ruby.valueToCode(block, "DST_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var dropdown_mode = block.getFieldValue("MODE");
-            var code = "MemFile.cp(" + value_dst_filename + "," + value_dst_filename + ")";
+            var dropdown_eep_cp_mode = block.getFieldValue("EEP_CP_MODE");
+            var code = "MemFile.cp(" + value_dst_filename + "," + value_dst_filename + "," + WebMrbc.GrSakura.memCpModeNameToNum(dropdown_eep_cp_mode) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_rm: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var code = "MemFile.rm(" + value_filename + ")";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_year: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_month: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_day: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_hour: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_minute: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_second: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_weekday: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_datetime: function (block) {
+            var code = "[" + Blockly.Ruby.valueToCode(block, "YEAR", Blockly.Ruby.ORDER_ATOMIC) + ", " + Blockly.Ruby.valueToCode(block, "MONTH", Blockly.Ruby.ORDER_ATOMIC) + ", " + Blockly.Ruby.valueToCode(block, "DAY", Blockly.Ruby.ORDER_ATOMIC) + ", " + Blockly.Ruby.valueToCode(block, "HOUR", Blockly.Ruby.ORDER_ATOMIC) + ", " + Blockly.Ruby.valueToCode(block, "MINUTE", Blockly.Ruby.ORDER_ATOMIC) + ", " + Blockly.Ruby.valueToCode(block, "SECOND", Blockly.Ruby.ORDER_ATOMIC) + "]";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        rtc_datetime_item: function (block) {
+            var code = Blockly.Ruby.variableDB_.getName(block.getFieldValue("ARRAY"), Blockly.Variables.NAME_TYPE) + "[" + block.getFieldValue("ITEM") + "]";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_gettime: function (block) {
@@ -4154,7 +4707,7 @@
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_mkdir: function (block) {
-            var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
+            var value_filename = Blockly.Ruby.valueToCode(block, "DIRNAME", Blockly.Ruby.ORDER_ATOMIC);
             var code = "SD.mkdir(" + value_filename + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
@@ -4170,107 +4723,119 @@
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_rmdir: function (block) {
-            var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
+            var value_filename = Blockly.Ruby.valueToCode(block, "DIRNAME", Blockly.Ruby.ORDER_ATOMIC);
             var code = "SD.rmdir(" + value_filename + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_open: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var dropdown_mode = block.getFieldValue("MODE");
-            var code = "SD.open(" + dropdown_file_no + "," + value_filename + "," + dropdown_mode + ")";
+            var dropdown_sd_open_mode = block.getFieldValue("SD_OPEN_MODE");
+            var code = "SD.open(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + "," + value_filename + "," + WebMrbc.GrSakura.sdOpenModeNameToNum(dropdown_sd_open_mode) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_close: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "SD.close(" + dropdown_file_no + ")";
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
+            var code = "SD.close(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_read: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "SD.read(" + dropdown_file_no + ")";
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
+            var code = "SD.read(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_seek: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "SD.seek(" + dropdown_file_no + "," + value_position + ")";
+            var code = "SD.seek(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + "," + value_position + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_write: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "SD.write(" + dropdown_file_no + "," + value_data + "," + value_length + ")";
+            var code = "SD.write(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + "," + value_data + "," + value_length + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_flush: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "SD.flush(" + dropdown_file_no + ")\n";
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
+            var code = "SD.flush(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")\n";
             return code;
         },
         sd_size: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "SD.size(" + dropdown_file_no + ")";
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
+            var code = "SD.size(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_position: function (block) {
-            var dropdown_file_no = block.getFieldValue("FILE_NO");
-            var code = "SD.position(" + dropdown_file_no + ")";
+            var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
+            var code = "SD.position(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        bps_value: function (block) {
+            var code = block.getFieldValue("VALUE");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_new: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_bps = Blockly.Ruby.valueToCode(block, "BPS", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$Serial" + dropdown_port_no + " = Serial.new(" + dropdown_port_no + "," + value_bps + ")";
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + " = Serial.new(" + WebMrbc.GrSakura.serialPortNameToNum(dropdown_serial_port_no) + "," + value_bps + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_bps: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_bps = Blockly.Ruby.valueToCode(block, "BPS", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$Serial" + dropdown_port_no + ".bps(" + value_bps + ")\n";
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".bps(" + value_bps + ")\n";
             return code;
         },
         serial_print: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_str = Blockly.Ruby.valueToCode(block, "STR", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$Serial" + dropdown_port_no + ".print(" + value_str + ")\n";
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".print(" + value_str + ")\n";
             return code;
         },
         serial_println: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_str = Blockly.Ruby.valueToCode(block, "STR", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$Serial" + dropdown_port_no + ".println(" + value_str + ")\n";
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".println(" + value_str + ")\n";
             return code;
         },
         serial_available: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$Serial" + dropdown_port_no + ".available()";
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".available()";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_read: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$Serial" + dropdown_port_no + ".read()";
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".read()";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_write: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = "$Serial" + dropdown_port_no + ".bps(" + value_data + "," + value_length + ")";
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".bps(" + value_data + "," + value_length + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_flash: function (block) {
-            var dropdown_port_no = block.getFieldValue("PORT_NO");
-            var code = "$Serial" + dropdown_port_no + ".flash()\n";
+            var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
+            var code = WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no) + ".flash()\n";
             return code;
+        },
+        servo_angle: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        servo_us_value: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         servo_attach: function (block) {
             var number_ch = block.getFieldValue("CH");
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var text_min = block.getFieldValue("MIN");
             var text_max = block.getFieldValue("MAX");
-            var code = "Servo.attach(" + number_ch + "," + dropdown_pin_no + "," + text_min + "," + text_max + ")\n";
+            var code = "Servo.attach(" + number_ch + "," + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + text_min + "," + text_max + ")\n";
             return code;
         },
         servo_write: function (block) {
@@ -4344,6 +4909,108 @@
         },
         system_get_mrb_path: function (block) {
             var code = "System.getMrbPath()";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        property_attribute: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        service_code: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        node_id: function (block) {
+            var code = block.getFieldValue("VALUE");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        get_property_info: function (block) {
+            var code = "prop." + block.getFieldValue("MEMBER");
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        save_received_property: function (block) {
+            var code = "prop.set_exinf(src)\n";
+            return code.toString();
+        },
+        get_saved_property: function (block) {
+            var code = "prop.exinf";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        set_announce_request: function (block) {
+            var data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
+            var code = new System.Text.StringBuilder();
+            code.append("if (prop.anno)\n");
+            code.append("\tprop.set_anno(" + data + " != src)\n");
+            code.append("end\n");
+            return code.toString();
+        },
+        data_to_number: function (block) {
+            var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
+            var dropdown_width = block.getFieldValue("WIDTH");
+            var code = "";
+            var functionName;
+    
+            switch (dropdown_width) {
+                case "BYTE": 
+                    code = "src.getbyte(" + value_position + ")";
+                    break;
+                case "SHORT": 
+                    functionName = Blockly.Ruby.provideFunction_("getshort", ["def " + Blockly.Ruby.functionNamePlaceholder() + "(str, pos)", "\t(src.getbyte(pos) << 8) + src.getbyte(pos + 1)", "end"]);
+                    code = functionName + "(src, " + value_position + ")";
+                    break;
+                case "INT": 
+                    functionName = Blockly.Ruby.provideFunction_("getint", ["def " + Blockly.Ruby.functionNamePlaceholder() + "(str, pos)", "\t(src.getbyte(pos) << 24) + (src.getbyte(pos + 1) << 16) + (src.getbyte(pos + 2) << 8) + src.getbyte(pos + 3)", "end"]);
+                    code = functionName + "(src, " + value_position + ")";
+                    break;
+            }
+    
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        number_to_data: function (block) {
+            var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
+            var dropdown_width = block.getFieldValue("WIDTH");
+            var value_value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
+            var code = "";
+            var functionName;
+    
+            switch (dropdown_width) {
+                case "BYTE": 
+                    code = "src.setbyte(" + value_position + ", " + value_value + ")\n";
+                    break;
+                case "SHORT": 
+                    functionName = Blockly.Ruby.provideFunction_("setshort", ["def " + Blockly.Ruby.functionNamePlaceholder() + "(str, pos, value)", "\tsrc.setbyte(pos, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 1, value & 0xFF)", "end"]);
+                    code = functionName + "(src, " + value_position + ", " + value_value + ")\n";
+                    break;
+                case "INT": 
+                    functionName = Blockly.Ruby.provideFunction_("setint", ["def " + Blockly.Ruby.functionNamePlaceholder() + "(str, pos, value)", "\tsrc.setbyte(pos, (value >> 24) & 0xFF)", "\tsrc.setbyte(pos + 1, (value >> 16) & 0xFF)", "\tsrc.setbyte(pos + 2, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 3, value & 0xFF)", "end"]);
+                    code = functionName + "(src, " + value_position + ", " + value_value + ")\n";
+                    break;
+            }
+            return code;
+        },
+        no_op: function (block) {
+            switch (block.getInputName()) {
+                case "SET": 
+                    return "return 0\n";
+                case "GET": 
+                    return "return " + Blockly.Ruby.quote_("") + "\n";
+            }
+            return "return\n";
+        },
+        received_data: function (block) {
+            var code = "src";
+            return [code, Blockly.Ruby.ORDER_ATOMIC];
+        },
+        received_data_size: function (block) {
+            var code = "0";
+            switch (block.getInputName()) {
+                case "SET": 
+                case "SET_RET": 
+                    code = "src.bytesize";
+                    break;
+                case "GET": 
+                    code = "size";
+                    break;
+            }
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         defineSvcTask: function (workspace, localNode) {
@@ -4582,15 +5249,15 @@
             return sb.toString();
         },
         init_smalruby: function (workspace) {
-            this.definitions_.set("receiver_stack", ["main"]);
-            this.definitions_.set("eobject_stack", System.Array.init(0, null));
+            this.definitions_.receiver_stack = ["main"];
+            this.definitions_.eobject_stack = System.Array.init(0, null);
         },
         defineENode: function (enode, workspace) {
             var code = Blockly.Ruby.workspaceToCode(workspace);
             var identifer = enode.identifer;
             var blockName = "enode_" + identifer;
     
-            if (!Blockly.Ruby.definitions_.containsKey(blockName)) {
+            if (Blockly.Ruby.definitions_[blockName] == null) {
                 var wa = new WebMrbc.CodeGenWorkArea();
                 var cg = new WebMrbc.CodeGenerator(enode);
                 var sb = new System.Text.StringBuilder();
@@ -4608,7 +5275,7 @@
                 sb.appendLine("end");
     
                 code = sb.toString();
-                Blockly.Ruby.definitions_.set(blockName, code);
+                Blockly.Ruby.definitions_[blockName] = code;
             }
             return code;
         },
@@ -4634,7 +5301,7 @@
             return sb.toString();
         },
         eobjectStack: function () {
-            return Bridge.cast(this.definitions_.get("eobject_stack"), Array);
+            return Bridge.cast(this.definitions_.eobject_stack, Array);
         },
         eobject: function () {
             var t = this.eobjectStack();
@@ -4644,7 +5311,7 @@
             return t[((t.length - 1) | 0)];
         },
         receiverStack: function () {
-            return Bridge.cast(this.definitions_.get("receiver_stack"), Array);
+            return Bridge.cast(this.definitions_.receiver_stack, Array);
         },
         receiver: function () {
             var t = this.receiverStack();
@@ -4830,7 +5497,7 @@
         },
         init: function (workspace) {
             // Create a dictionary of definitions to be printed before the code.
-            Blockly.Ruby.definitions_ = new System.Collections.Generic.Dictionary$2(String,Object)();
+            Blockly.Ruby.definitions_ = {};
             // Create a dictionary mapping desired function names in definitions_
             // to actual function names (to avoid collisions with user functions).
             Blockly.Ruby.functionNames_ = new System.Collections.Generic.Dictionary$2(String,String)();
@@ -4861,7 +5528,7 @@
                     defvars.push("@" + Blockly.Ruby.variableDB_.getName(variables[x], Blockly.Variables.NAME_TYPE) + " = nil");
                 }
                 var code = defvars.join("\n");
-                this.definitions_.set("variables", code);
+                this.definitions_.variables = code;
             }
     
             this.init_smalruby(workspace);
@@ -4874,11 +5541,11 @@
             var requires = System.Array.init(0, null);
             var prepares = System.Array.init(0, null);
             var definitions = System.Array.init(0, null);
-            $t = Bridge.getEnumerator(this.definitions_.getKeys());
+            $t = Bridge.getEnumerator(Object.keys(this.definitions_));
             while ($t.moveNext()) {
                 var name = $t.getCurrent();
-                var def = this.definitions_.get(name);
-                if (!Bridge.referenceEquals(Bridge.getType(def), String)) {
+                var def = Bridge.as(this.definitions_[name], String);
+                if (def == null) {
                     continue;
                 }
     
@@ -4910,15 +5577,17 @@
             }
     
             if (definitions.length > 0) {
-                allDefs += definitions.join("\n").replace(new RegExp("\n\n+", "g"), "\n\n").replace(new RegExp("\n*$"), "\n");
+                allDefs += definitions.join("\n") + "\n\n";
             }
             return allDefs;
         },
         finish: function (code) {
             // need some helper functions to conform to Blockly's behavior
             var helpers = System.Array.init(0, null);
+            var indent = "\t";
             var allDefs = this.generateDefinitions(helpers);
-            return allDefs.replace(new RegExp("\n\n+", "g"), "\n\n").replace(new RegExp("\n*$"), "\n\n\n") + code;
+            allDefs = indent + allDefs.split("\n").join("\n" + indent);
+            return allDefs.replace(new RegExp("\n\n+", "g"), "\n\n") + "\n" + code;
         },
         scrubNakedValue: function (line) {
             return line + "\n";
@@ -5955,7 +6624,7 @@
             }
             var code = "def " + funcName + "(" + args.join(", ") + ")\n" + branch + returnValue + "end";
             code = Blockly.Ruby.scrub_(block, code);
-            Blockly.Ruby.definitions_.set(funcName, code);
+            Blockly.Ruby.definitions_[funcName] = code;
     
             Blockly.Ruby.variableDB_.popScope();
     
@@ -6301,7 +6970,7 @@
             }
             var code = "case " + argument + "\n";
             var n = 0;
-            argument = Blockly.Ruby.valueToCode(block, "CASE" + n, Blockly.Ruby.ORDER_NONE);
+            argument = block.getFieldValue("CASE_VALUE" + n);
             if (System.String.isNullOrEmpty(argument)) {
                 argument = n.toString();
             }
@@ -6311,7 +6980,7 @@
             }
             code += "when " + argument + "\n" + branch;
             for (n = 1; n <= block.caseCount_; n = (n + 1) | 0) {
-                argument = Blockly.Ruby.valueToCode(block, "CASE" + n, Blockly.Ruby.ORDER_NONE);
+                argument = block.getFieldValue("CASE_VALUE" + n);
                 if (System.String.isNullOrEmpty(argument)) {
                     argument = n.toString();
                 }
@@ -6339,7 +7008,7 @@
             }
             var code = "case " + argument + "\n";
             var n = 0;
-            argument = Blockly.Ruby.valueToCode(block, "CASE" + n, Blockly.Ruby.ORDER_NONE);
+            argument = block.getFieldValue("CASE_VALUE" + n);
             if (System.String.isNullOrEmpty(argument)) {
                 argument = n.toString();
             }
@@ -6349,7 +7018,7 @@
             }
             code += "when " + argument + "\n" + branch;
             for (n = 1; n <= block.caseCount_; n = (n + 1) | 0) {
-                argument = Blockly.Ruby.valueToCode(block, "CASE" + n, Blockly.Ruby.ORDER_NONE);
+                argument = block.getFieldValue("CASE_VALUE" + n);
                 if (System.String.isNullOrEmpty(argument)) {
                     argument = n.toString();
                 }
@@ -6504,7 +7173,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルをクローズします").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルをクローズします").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
             this.setColour(160);
@@ -6555,7 +7224,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルの書き込みをフラッシュします").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルの書き込みをフラッシュします").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(160);
@@ -6572,7 +7241,7 @@
         },
         init: function () {
             this.appendDummyInput().appendField("ディレクトリを作成する");
-            this.appendValueInput("FILENAME").setCheck("String");
+            this.appendValueInput("DIRNAME").setCheck("String");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
             this.setColour(160);
@@ -6588,9 +7257,9 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルをオープンします").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルをオープンします").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.appendValueInput("FILENAME").setCheck("String").appendField("ファイル名");
-            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["Read", "READ"], ["Append", "APPEND"], ["New Create", "NEW_CREATE"]]), "MODE");
+            this.appendDummyInput().appendField("モード").appendField(new Blockly.FieldDropdown([["Read", "READ"], ["Append", "APPEND"], ["New Create", "NEW_CREATE"]]), "SD_OPEN_MODE");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
             this.setColour(160);
@@ -6606,7 +7275,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルのseek位置を取得します").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルのseek位置を取得します").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.setOutput(true, "Number");
             this.setColour(160);
             this.setTooltip("");
@@ -6621,7 +7290,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルから1バイト読み込みます").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルから1バイト読み込みます").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -6655,7 +7324,7 @@
         },
         init: function () {
             this.appendDummyInput().appendField("ディレクトリを削除する");
-            this.appendValueInput("FILENAME").setCheck("String");
+            this.appendValueInput("DIRNAME").setCheck("String");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
             this.setColour(160);
@@ -6671,7 +7340,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルの読み出し位置を移動する").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルの読み出し位置を移動する").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.appendValueInput("POSITION").setCheck("Number").appendField("バイト数");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
@@ -6688,7 +7357,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルのサイズを取得します").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルのサイズを取得します").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.setOutput(true, "Number");
             this.setColour(160);
             this.setTooltip("");
@@ -6703,7 +7372,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ファイルにバイナリデータを書き込む").appendField(new Blockly.FieldDropdown([["File0", "FILE0"], ["File1", "FILE1"]]), "FILE_NO");
+            this.appendDummyInput().appendField("ファイルにバイナリデータを書き込む").appendField(WebMrbc.GrSakura.sdFileHandles(), "SD_FILE_NO");
             this.appendValueInput("DATA").setCheck("String").appendField("データ");
             this.appendValueInput("LENGTH").setCheck("Number").appendField("データサイズ");
             this.setInputsInline(true);
@@ -6721,7 +7390,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルデータがあるかどうか調べます").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルデータがあるかどうか調べます").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
             this.setColour(160);
@@ -6737,7 +7406,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("ボーレートを設定します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("ボーレートを設定します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.appendValueInput("BPS").setCheck("Number").appendField("ボーレート");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
@@ -6755,7 +7424,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルデータをフラッシュします").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルデータをフラッシュします").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -6772,7 +7441,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアル通信を初期化します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアル通信を初期化します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.appendValueInput("BPS").setCheck("Number").appendField("ボーレート");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
@@ -6789,7 +7458,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルに出力します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルに出力します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.appendValueInput("STR").setCheck("String").appendField("文字列");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
@@ -6807,7 +7476,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルに\\r\\n付きで出力します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルに\\r\\n付きで出力します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.appendValueInput("STR").setCheck("String").appendField("文字列");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
@@ -6825,7 +7494,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルからデータを取得します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルからデータを取得します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.setInputsInline(true);
             this.setOutput(true, "Array");
             this.setColour(160);
@@ -6841,7 +7510,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("シリアルにデータを出力します").appendField(new Blockly.FieldDropdown([["USB", "PORT0"], ["TX-0/RX-1", "PORT1"], ["TX-5/RX-6", "PORT2"], ["TX-7/RX-8", "PORT3"], ["TX-12/RX-11", "PORT4"], ["TX-9(26)/RX-3", "PORT5"]]), "PORT_NO");
+            this.appendDummyInput().appendField("シリアルにデータを出力します").appendField(WebMrbc.GrSakura.serialPorts(), "SERIAL_PORT_NO");
             this.appendValueInput("DATA").setCheck("String").appendField("データ");
             this.appendValueInput("LENGTH").setCheck("Number").appendField("データサイズ");
             this.setInputsInline(true);
@@ -6849,6 +7518,36 @@
             this.setColour(160);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.ServoAngleBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldAngle("180", Bridge.fn.bind(this, this.validator)), "VALUE");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        validator: function (text) {
+            if (text == null) {
+                return null;
+            }
+            var a = parseFloat(text);
+            if (isNaN(a)) {
+                return null;
+            }
+            a %= 180;
+            if (a < 0) {
+                a += 180;
+            }
+            return System.Double.format(a, 'G');
         }
     });
     
@@ -6860,7 +7559,7 @@
         },
         init: function () {
             this.appendDummyInput().appendField("サーボ出力を任意のピンに割り当てます").appendField(new Blockly.FieldNumber("0", 0, 11, 1), "CH");
-            this.appendDummyInput().appendField("割り当てるピン番号").appendField(new Blockly.FieldDropdown([["Pin0", "PIN0"], ["Pin1", "PIN1"], ["Pin2", "PIN2"]]), "PIN_NO").appendField("Min").appendField(new Blockly.FieldTextInput("default"), "MIN").appendField("Max").appendField(new Blockly.FieldTextInput("default"), "MAX");
+            this.appendDummyInput().appendField("割り当てるピン番号").appendField(WebMrbc.GrSakura.pwmPins(), "PIN_NO").appendField("Min").appendField(new Blockly.FieldTextInput("default"), "MIN").appendField("Max").appendField(new Blockly.FieldTextInput("default"), "MAX");
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(160);
@@ -6928,6 +7627,21 @@
             this.setNextStatement(true, null);
             this.setColour(160);
             this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.ServoUsValueBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", 0, 19999, 1), "VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("パルスの幅 1～19999, 0で出力 OFF");
             this.setHelpUrl("http://www.example.com/");
         }
     });
@@ -7515,6 +8229,7 @@
         init: function () {
             this.appendDummyInput().appendField("次に実行するスクリプトファイルをセットします");
             this.appendValueInput("FILENAME").setCheck("String");
+            this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(160);
@@ -7577,7 +8292,7 @@
     
         },
         init: function () {
-            this.appendDummyInput().appendField("トーン出力").appendField(new Blockly.FieldDropdown([["Pin1", "PIN1"], ["Pin2", "PIN2"], ["Pin3", "PIN3"]]), "PIN_NO");
+            this.appendDummyInput().appendField("トーン出力").appendField(WebMrbc.GrSakura.pwmPins(), "PIN_NO");
             this.appendValueInput("FREQUENCY").setCheck("Number").appendField("周波数");
             this.appendValueInput("DURATION").setCheck("Number").appendField("出力を維持する時間[ms]");
             this.setInputsInline(true);
@@ -7586,6 +8301,239 @@
             this.setColour(160);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.ToneValueBlock', {
+        inherits: [WebMrbc.Block],
+        constructor: function (type) {
+            WebMrbc.Block.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("1000", 2, 62500, 1), "TONE_VALUE");
+            this.setOutput(true, "Number");
+            this.setColour(160);
+            this.setTooltip("Tone 2～62500");
+            this.setHelpUrl("http://www.example.com/");
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlDataToNumberBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendValueInput("POSITION").setCheck("Number").appendField("受信データの");
+            this.appendDummyInput().appendField("Byte目から").appendField(new Blockly.FieldDropdown([["1", "BYTE"], ["2", "SHORT"], ["4", "INT"]]), "WIDTH").appendField("Byte分の数値");
+            this.setInputsInline(true);
+            this.setOutput(true, "Number");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (Bridge.referenceEquals(this.getInputName(), "SET")) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティ設定ブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlGetPropertyInfoBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("プロパティ").appendField(new Blockly.FieldDropdown([["コード", "pcd"], ["属性", "atr"], ["サイズ", "sz"]]), "MEMBER");
+            this.setOutput(true, "Number");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (!System.String.isNullOrEmpty(this.getInputName())) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティアクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlGetSavedPropertyBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("保存してあるプロパティ値").appendField("", "ITEM");
+            this.setOutput(true, "String");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (!System.String.isNullOrEmpty(this.getInputName())) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティアクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlNoOpBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("処理無し");
+            this.setPreviousStatement(true, null);
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (!System.String.isNullOrEmpty(this.getInputName())) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティアクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlNumberToDataBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendValueInput("POSITION").setCheck("Number").appendField("送信データの");
+            this.appendDummyInput().appendField("Byte目から").appendField(new Blockly.FieldDropdown([["1", "BYTE"], ["2", "SHORT"], ["4", "INT"]]), "WIDTH").appendField("Byte分に");
+            this.appendValueInput("VALUE").setCheck("Number");
+            this.appendDummyInput().appendField("を書き込み");
+            this.setInputsInline(true);
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (Bridge.referenceEquals(this.getInputName(), "GET")) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティ取得アクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlReceivedDataBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("受信データ");
+            this.setOutput(true, "String");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (Bridge.referenceEquals(this.getInputName(), "SET")) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティ設定ブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlReceivedDataSizeBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("受信データサイズ");
+            this.setOutput(true, "Number");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (!System.String.isNullOrEmpty(this.getInputName())) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティアクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlSaveReceivedPropertyBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendDummyInput().appendField("受信プロパティを保存").appendField("", "ITEM");
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (!System.String.isNullOrEmpty(this.getInputName())) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティアクセスブロックのみで使用します");
+            }
+        }
+    });
+    
+    Bridge.define('WebMrbc.EcnlSetAnnounceRequestBlock', {
+        inherits: [WebMrbc.EcnlPropertyLocalBlock],
+        constructor: function (type) {
+            WebMrbc.EcnlPropertyLocalBlock.prototype.$constructor.call(this, type);
+    
+        },
+        init: function () {
+            this.appendValueInput("DATA").setCheck("String").appendField("受信データと");
+            this.appendDummyInput().appendField("を比較し変化がある場合は通知要求");
+            this.setInputsInline(true);
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+        },
+        onchange: function (ev) {
+            if (Bridge.referenceEquals(this.getInputName(), "SET")) {
+                this.setWarningText(null);
+            }
+            else  {
+                this.setWarningText("プロパティ設定ブロックのみで使用します");
+            }
         }
     });
     
@@ -7599,6 +8547,9 @@
         },
         getIdentifer: function () {
             return this.identifer;
+        },
+        getWorkspace: function () {
+            return this.workspace;
         },
         getImageUrl: function () {
             return "img/no_image.png";
@@ -7663,6 +8614,81 @@
     
     Bridge.define('WebMrbc.EObjectWorkspace', {
         inherits: [WebMrbc.IClassWorkspace],
+        statics: {
+            createSizeCheckBlocks: function () {
+                var field;
+                var ifBlock = $("<block>");
+                ifBlock.attr("type", "controls_if");
+    
+                var value = $("<value>");
+                value.attr("name", "IF0");
+                ifBlock.append(value);
+    
+                var compBlock = $("<block>");
+                compBlock.attr("type", "logic_compare");
+                value.append(compBlock);
+    
+                field = $("<field>");
+                field.attr("name", "OP");
+                field.text("NEQ");
+                compBlock.append(field);
+    
+                value = $("<value>");
+                value.attr("name", "A");
+                compBlock.append(value);
+    
+                var subblock = $("<block>");
+                subblock.attr("type", "received_data_size");
+                value.append(subblock);
+    
+                value = $("<value>");
+                value.attr("name", "B");
+                compBlock.append(value);
+    
+                subblock = $("<block>");
+                subblock.attr("type", "get_property_info");
+                value.append(subblock);
+    
+                field = $("<field>");
+                field.attr("name", "MEMBER");
+                field.text("sz");
+                subblock.append(field);
+    
+                var doStatement = $("<statement>");
+                doStatement.attr("name", "DO0");
+                ifBlock.append(doStatement);
+    
+                subblock = $("<block>");
+                subblock.attr("type", "no_op");
+                doStatement.append(subblock);
+    
+                return ifBlock;
+            },
+            createReceivedData: function (width, pos) {
+                var block = $("<block>");
+                block.attr("type", "data_to_number");
+    
+                var field = $("<field>");
+                field.attr("name", "WIDTH");
+                field.text(width);
+                block.append(field);
+    
+                var value = $("<value>");
+                value.attr("name", "POSITION");
+                block.append(value);
+    
+                var subBlock = $("<shadow>");
+                subBlock.attr("type", "math_number");
+                value.append(subBlock);
+    
+                field = $("<field>");
+                field.attr("name", "NUM");
+                field.text(pos.toString());
+                subBlock.append(field);
+    
+                return block;
+            }
+        },
         eobject: null,
         workspace: null,
         callback: null,
@@ -7672,6 +8698,9 @@
         },
         getIdentifer: function () {
             return this.eobject.identifer;
+        },
+        getWorkspace: function () {
+            return this.workspace;
         },
         getImageUrl: function () {
             return "img/no_image.png";
@@ -7726,7 +8755,250 @@
                 block.append(field);
     
                 echonet_category.append(block);
+    
+                {
+                    var statement = $("<statement>");
+                    statement.attr("name", "SET");
+                    block.append(statement);
+    
+                    var ifBlock = WebMrbc.EObjectWorkspace.createSizeCheckBlocks();
+                    statement.append(ifBlock);
+    
+                    var next = $("<next>");
+                    ifBlock.append(next);
+    
+                    var annoBlock = $("<block>");
+                    annoBlock.attr("type", "set_announce_request");
+                    next.append(annoBlock);
+    
+                    var value = $("<value>");
+                    value.attr("name", "DATA");
+                    annoBlock.append(value);
+    
+                    var subblock = $("<block>");
+                    subblock.attr("type", "get_saved_property");
+                    value.append(subblock);
+    
+                    next = $("<next>");
+                    annoBlock.append(next);
+    
+                    var setBlock = null;
+                    var valueRange = { };
+                    if (WebMrbc.CodeGenerator.hasPropSetter(pi, valueRange)) {
+                        setBlock = this.createSetStatement(valueRange.v);
+                    }
+                    else  {
+                        setBlock = $("<block>");
+                        setBlock.attr("type", "save_received_property");
+                    }
+    
+                    if (setBlock != null) {
+                        next.append(setBlock);
+                    }
+                }
+    
+                {
+                    var value1 = $("<value>");
+                    value1.attr("name", "SET_RET");
+                    block.append(value1);
+    
+                    var subblock1 = $("<block>");
+                    subblock1.attr("type", "get_property_info");
+                    value1.append(subblock1);
+    
+                    field = $("<field>");
+                    field.attr("name", "MEMBER");
+                    field.text("sz");
+                    subblock1.append(field);
+                }
+    
+                {
+                    var statement1 = $("<statement>");
+                    statement1.attr("name", "GET");
+                    block.append(statement1);
+    
+                    var ifBlock1 = WebMrbc.EObjectWorkspace.createSizeCheckBlocks();
+                    statement1.append(ifBlock1);
+                }
+    
+                {
+                    var value2 = $("<value>");
+                    value2.attr("name", "GET_RET");
+                    block.append(value2);
+    
+                    var subblock2 = $("<block>");
+                    subblock2.attr("type", "get_saved_property");
+                    value2.append(subblock2);
+                }
             }
+        },
+        createSetStatement: function (valueRange) {
+            var $t, $t1;
+            var switchBlock = null;
+            var ifBlock = null;
+            var field;
+    
+            if (valueRange.getValues().length > 0) {
+                switchBlock = $("<block>");
+                switchBlock.attr("type", "switch_case_number");
+    
+                var mutation = $("<mutation>");
+                mutation.attr("case", ((valueRange.getValues().length - 1) | 0));
+                mutation.attr("default", 1);
+                switchBlock.append(mutation);
+    
+                var i = 0;
+                $t = Bridge.getEnumerator(valueRange.getValues());
+                while ($t.moveNext()) {
+                    var v = $t.getCurrent();
+                    field = $("<field>");
+                    field.attr("name", "CASE_VALUE" + i);
+                    field.text(v.getVal().toString());
+                    switchBlock.append(field);
+                    i = (i + 1) | 0;
+                }
+    
+                var value = $("<value>");
+                value.attr("name", "SWITCH");
+                switchBlock.append(value);
+    
+                var block0 = WebMrbc.EObjectWorkspace.createReceivedData("BYTE", 0);
+                value.append(block0);
+    
+                for (i = 0; i < valueRange.getValues().length; i = (i + 1) | 0) {
+                    var doStatement = $("<statement>");
+                    doStatement.attr("name", "DO" + i);
+                    switchBlock.append(doStatement);
+    
+                    var subblock = $("<block>");
+                    subblock.attr("type", "save_received_property");
+                    doStatement.append(subblock);
+                }
+            }
+    
+            if (valueRange.getRanges().length > 0) {
+                ifBlock = $("<block>");
+                ifBlock.attr("type", "controls_if");
+    
+                var mutation1 = $("<mutation>");
+                mutation1.attr("elseif", ((valueRange.getRanges().length - 1) | 0));
+                mutation1.attr("else", 1);
+                ifBlock.append(mutation1);
+    
+                var i1 = 0;
+                $t1 = Bridge.getEnumerator(valueRange.getRanges());
+                while ($t1.moveNext()) {
+                    var r = $t1.getCurrent();
+                    var value1 = $("<value>");
+                    value1.attr("name", "IF" + i1);
+                    ifBlock.append(value1);
+    
+                    var block2 = this.rengeCheack("BYTE", 0, r.getMin(), r.getMax());
+                    value1.append(block2);
+    
+                    i1 = (i1 + 1) | 0;
+                }
+    
+                for (i1 = 0; i1 < valueRange.getRanges().length; i1 = (i1 + 1) | 0) {
+                    var doStatement1 = $("<statement>");
+                    doStatement1.attr("name", "DO" + i1);
+                    ifBlock.append(doStatement1);
+    
+                    var subblock1 = $("<block>");
+                    subblock1.attr("type", "save_received_property");
+                    doStatement1.append(subblock1);
+                }
+    
+                {
+                    var elseBlock = $("<statement>");
+                    elseBlock.attr("name", "ELSE");
+                    ifBlock.append(elseBlock);
+    
+                    var subblock2 = $("<block>");
+                    subblock2.attr("type", "no_op");
+                    elseBlock.append(subblock2);
+                }
+            }
+    
+            if (switchBlock != null) {
+                var defaultBlock = $("<statement>");
+                defaultBlock.attr("name", "DEFAULT");
+                switchBlock.append(defaultBlock);
+    
+                if (ifBlock != null) {
+                    defaultBlock.append(ifBlock);
+                }
+                else  {
+                    var subblock3 = $("<block>");
+                    subblock3.attr("type", "no_op");
+                    defaultBlock.append(subblock3);
+                }
+    
+                return switchBlock;
+            }
+            else  {
+                if (ifBlock != null) {
+                    return ifBlock;
+                }
+            }
+    
+            return null;
+        },
+        rengeCheack: function (width, pos, min, max) {
+            var block2 = $("<block>");
+            block2.attr("type", "logic_operation");
+    
+            var field = $("<field>");
+            field.attr("name", "OP");
+            field.text("AND");
+            block2.append(field);
+    
+            var value = $("<value>");
+            value.attr("name", "A");
+            block2.append(value);
+    
+            var a = this.compareNum(width, pos, "GTE", min);
+            value.append(a);
+    
+            value = $("<value>");
+            value.attr("name", "B");
+            block2.append(value);
+    
+            var b = this.compareNum(width, pos, "LTE", max);
+            value.append(b);
+    
+            return block2;
+        },
+        compareNum: function (width, pos, OP, num) {
+            var block3 = $("<block>");
+            block3.attr("type", "logic_compare");
+    
+            var field = $("<field>");
+            field.attr("name", "OP");
+            field.text(OP);
+            block3.append(field);
+    
+            var value = $("<value>");
+            value.attr("name", "A");
+            block3.append(value);
+    
+            var block4 = WebMrbc.EObjectWorkspace.createReceivedData(width, pos);
+            value.append(block4);
+    
+            value = $("<value>");
+            value.attr("name", "B");
+            block3.append(value);
+    
+            block4 = $("<block>");
+            block4.attr("type", "math_number");
+            value.append(block4);
+    
+            field = $("<field>");
+            field.attr("name", "NUM");
+            field.text(num.toString());
+            block4.append(field);
+    
+            return block3;
         },
         openModifyView: function (callback) {
             if (!Bridge.staticEquals(this.callback, null)) {
@@ -7765,6 +9037,9 @@
         },
         getIdentifer: function () {
             return this.identifer;
+        },
+        getWorkspace: function () {
+            return this.workspace;
         },
         getImageUrl: function () {
             return "img/no_image.png";
@@ -7965,7 +9240,7 @@
             return true;
         },
         toCode: function () {
-            return Blockly.Ruby.defineENode(Bridge.cast(this.eobject, WebMrbc.JsonNodeInfo), this.workspace);
+            return Blockly.Ruby.defineENode(Bridge.cast(this.eobject, WebMrbc.JsonNodeInfo), this.getWorkspace());
         }
     });
     
