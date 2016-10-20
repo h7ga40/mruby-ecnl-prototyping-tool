@@ -10,7 +10,7 @@
 		"fields":[
 			
 		],
-		"identifer":"OperationStatus",
+		"identifier":"OperationStatus",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -34,7 +34,7 @@
 		"fields":[
 			
 		],
-		"identifer":"OperationModeSetting",
+		"identifier":"OperationModeSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -59,7 +59,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSetting1",
+		"identifier":"TemperatureSetting1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -83,7 +83,7 @@
 		"fields":[
 			
 		],
-		"identifer":"RelativeHumiditySettingForDehumidificationMode1",
+		"identifier":"RelativeHumiditySettingForDehumidificationMode1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -107,7 +107,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForCoolingMode1",
+		"identifier":"TemperatureSettingForCoolingMode1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -130,7 +130,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForHeatingMode1",
+		"identifier":"TemperatureSettingForHeatingMode1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -153,7 +153,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForDehumidificationMode1",
+		"identifier":"TemperatureSettingForDehumidificationMode1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -175,7 +175,7 @@
 		"fields":[
 			
 		],
-		"identifer":"RatedPowerConsumptionOfIndoorUnit",
+		"identifier":"RatedPowerConsumptionOfIndoorUnit",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -197,7 +197,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredElectricCurrentConsumptionOfIndoorUnit",
+		"identifier":"MeasuredElectricCurrentConsumptionOfIndoorUnit",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -219,7 +219,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredIndoorRelativeHumidity1",
+		"identifier":"MeasuredIndoorRelativeHumidity1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -241,7 +241,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredIndoorTemperature1",
+		"identifier":"MeasuredIndoorTemperature1",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -264,7 +264,7 @@
 		"fields":[
 			
 		],
-		"identifer":"RelativeTemperatureSetting",
+		"identifier":"RelativeTemperatureSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -287,7 +287,7 @@
 		"fields":[
 			
 		],
-		"identifer":"AirFlowRateSetting",
+		"identifier":"AirFlowRateSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -310,7 +310,7 @@
 		"fields":[
 			
 		],
-		"identifer":"AirFlowDirectionVerticalSetting",
+		"identifier":"AirFlowDirectionVerticalSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -333,7 +333,7 @@
 		"fields":[
 			
 		],
-		"identifer":"AirFlowDirectionHorizontalSetting",
+		"identifier":"AirFlowDirectionHorizontalSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -355,7 +355,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SpecialState",
+		"identifier":"SpecialState",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -377,7 +377,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ThermostatState",
+		"identifier":"ThermostatState",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -399,7 +399,7 @@
 		"fields":[
 			
 		],
-		"identifer":"CurrentFunctionAutomaticOperationMode",
+		"identifier":"CurrentFunctionAutomaticOperationMode",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -422,7 +422,7 @@
 		"fields":[
 			
 		],
-		"identifer":"VentilationModeSetting",
+		"identifier":"VentilationModeSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -445,7 +445,7 @@
 		"fields":[
 			
 		],
-		"identifer":"CombinedOperationOfIndoorUnitAndTotalHeatExchanger",
+		"identifier":"CombinedOperationOfIndoorUnitAndTotalHeatExchanger",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -468,7 +468,7 @@
 		"fields":[
 			
 		],
-		"identifer":"VentilationAirFlowRateSetting",
+		"identifier":"VentilationAirFlowRateSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -491,7 +491,7 @@
 		"fields":[
 			
 		],
-		"identifer":"DisablingOfAirConditionerSetting",
+		"identifier":"DisablingOfAirConditionerSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -514,7 +514,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ThermostatSettingOverrideFunction",
+		"identifier":"ThermostatSettingOverrideFunction",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -537,7 +537,7 @@
 		"fields":[
 			
 		],
-		"identifer":"FilterCleaningReminderLampSetting",
+		"identifier":"FilterCleaningReminderLampSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -560,7 +560,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredPowerConsumptionOfIndoorUnit",
+		"identifier":"MeasuredPowerConsumptionOfIndoorUnit",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -582,7 +582,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ApertureOfExpansionValve",
+		"identifier":"ApertureOfExpansionValve",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -606,7 +606,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSetting2",
+		"identifier":"TemperatureSetting2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -630,7 +630,7 @@
 		"fields":[
 			
 		],
-		"identifer":"RelativeHumiditySettingForDehumidificationMode2",
+		"identifier":"RelativeHumiditySettingForDehumidificationMode2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -654,7 +654,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForCoolingMode2",
+		"identifier":"TemperatureSettingForCoolingMode2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -677,7 +677,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForHeatingMode2",
+		"identifier":"TemperatureSettingForHeatingMode2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -700,7 +700,7 @@
 		"fields":[
 			
 		],
-		"identifer":"TemperatureSettingForDehumidificationMode2",
+		"identifier":"TemperatureSettingForDehumidificationMode2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -722,7 +722,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredIndoorRelativeHumidity2",
+		"identifier":"MeasuredIndoorRelativeHumidity2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -744,7 +744,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredIndoorTemperature2",
+		"identifier":"MeasuredIndoorTemperature2",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -767,7 +767,7 @@
 		"fields":[
 			
 		],
-		"identifer":"OnTimerBasedReservationSetting",
+		"identifier":"OnTimerBasedReservationSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -794,7 +794,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Hour",
+				"identifier":"Hour",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -809,7 +809,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Minute",
+				"identifier":"Minute",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -819,7 +819,7 @@
 				"valueDescription":"0x00～0x3B(0～59)"
 			}
 		],
-		"identifer":"OnTimerSettingTime",
+		"identifier":"OnTimerSettingTime",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -846,7 +846,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Hour",
+				"identifier":"Hour",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -861,7 +861,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Minute",
+				"identifier":"Minute",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -871,7 +871,7 @@
 				"valueDescription":"0x00～0x3B(0～59)"
 			}
 		],
-		"identifer":"OnTimerSettingRelativeTime",
+		"identifier":"OnTimerSettingRelativeTime",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -894,7 +894,7 @@
 		"fields":[
 			
 		],
-		"identifer":"OffTimerBasedReservationSetting",
+		"identifier":"OffTimerBasedReservationSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -921,7 +921,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Hour",
+				"identifier":"Hour",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -936,7 +936,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Minute",
+				"identifier":"Minute",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -946,7 +946,7 @@
 				"valueDescription":"0x00～0x3B(0～59)"
 			}
 		],
-		"identifer":"OffTimerSettingTime",
+		"identifier":"OffTimerSettingTime",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -973,7 +973,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Hour",
+				"identifier":"Hour",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -988,7 +988,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Minute",
+				"identifier":"Minute",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -998,7 +998,7 @@
 				"valueDescription":"0x00～0x3B(0～59)"
 			}
 		],
-		"identifer":"OffTimerSettingRelativeTime",
+		"identifier":"OffTimerSettingRelativeTime",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1022,7 +1022,7 @@
 		"fields":[
 			
 		],
-		"identifer":"InstallationLocation",
+		"identifier":"InstallationLocation",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1049,7 +1049,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Reserved1",
+				"identifier":"Reserved1",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1064,7 +1064,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Reserved2",
+				"identifier":"Reserved2",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1079,7 +1079,7 @@
 				"fields":[
 					
 				],
-				"identifer":"OrderOfRelease",
+				"identifier":"OrderOfRelease",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1094,7 +1094,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Reserved4",
+				"identifier":"Reserved4",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1104,7 +1104,7 @@
 				"valueDescription":"0x00"
 			}
 		],
-		"identifer":"StandardVersionInformation",
+		"identifier":"StandardVersionInformation",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1130,7 +1130,7 @@
 				"fields":[
 					
 				],
-				"identifer":"LowerLayerCommunicationIdField",
+				"identifier":"LowerLayerCommunicationIdField",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1145,7 +1145,7 @@
 				"fields":[
 					
 				],
-				"identifer":"UniqueNumberField",
+				"identifier":"UniqueNumberField",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -1155,7 +1155,7 @@
 				"valueDescription":""
 			}
 		],
-		"identifer":"IdentificationNumber",
+		"identifier":"IdentificationNumber",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1177,7 +1177,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredInstantaneousPowerConsumption",
+		"identifier":"MeasuredInstantaneousPowerConsumption",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1199,7 +1199,7 @@
 		"fields":[
 			
 		],
-		"identifer":"MeasuredCumulativePowerConsumption",
+		"identifier":"MeasuredCumulativePowerConsumption",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1226,7 +1226,7 @@
 				"fields":[
 					
 				],
-				"identifer":"DataSizeOfTheFaultCodeField",
+				"identifier":"DataSizeOfTheFaultCodeField",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1245,7 +1245,7 @@
 						"fields":[
 							
 						],
-						"identifer":"ManufacturerCode",
+						"identifier":"ManufacturerCode",
 						"initialValue":null,
 						"isArray":true,
 						"primitive":true,
@@ -1255,7 +1255,7 @@
 						"valueDescription":"ECHONETコンソーシアムで規定。"
 					}
 				],
-				"identifer":"ManufacturerCode",
+				"identifier":"ManufacturerCode",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":false,
@@ -1270,7 +1270,7 @@
 				"fields":[
 					
 				],
-				"identifer":"FieldForManufacturerDefinedFaultCode",
+				"identifier":"FieldForManufacturerDefinedFaultCode",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -1280,7 +1280,7 @@
 				"valueDescription":""
 			}
 		],
-		"identifer":"ManufacturersFaultCode",
+		"identifier":"ManufacturersFaultCode",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1303,7 +1303,7 @@
 		"fields":[
 			
 		],
-		"identifer":"CurrentLimitSetting",
+		"identifier":"CurrentLimitSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1326,7 +1326,7 @@
 		"fields":[
 			
 		],
-		"identifer":"FaultStatus",
+		"identifier":"FaultStatus",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1348,7 +1348,7 @@
 		"fields":[
 			
 		],
-		"identifer":"FaultDescription",
+		"identifier":"FaultDescription",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1374,7 +1374,7 @@
 				"fields":[
 					
 				],
-				"identifer":"ManufacturerCode",
+				"identifier":"ManufacturerCode",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -1384,7 +1384,7 @@
 				"valueDescription":"ECHONETコンソーシアムで規定。"
 			}
 		],
-		"identifer":"ManufacturerCode",
+		"identifier":"ManufacturerCode",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1406,7 +1406,7 @@
 		"fields":[
 			
 		],
-		"identifer":"BusinessFacilityCode",
+		"identifier":"BusinessFacilityCode",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1428,7 +1428,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ProductCode",
+		"identifier":"ProductCode",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1450,7 +1450,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ProductionNumber",
+		"identifier":"ProductionNumber",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1476,7 +1476,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Year",
+				"identifier":"Year",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1491,7 +1491,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Mounth",
+				"identifier":"Mounth",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1506,7 +1506,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Day",
+				"identifier":"Day",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1516,7 +1516,7 @@
 				"valueDescription":"0x01～0x1F(1～31)"
 			}
 		],
-		"identifer":"ProductionDate",
+		"identifier":"ProductionDate",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1539,7 +1539,7 @@
 		"fields":[
 			
 		],
-		"identifer":"PowerSavingOperationSetting",
+		"identifier":"PowerSavingOperationSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1562,7 +1562,7 @@
 		"fields":[
 			
 		],
-		"identifer":"PositionInformation",
+		"identifier":"PositionInformation",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1589,7 +1589,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Hour",
+				"identifier":"Hour",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1604,7 +1604,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Minute",
+				"identifier":"Minute",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1614,7 +1614,7 @@
 				"valueDescription":"0x00～0x3B(0～59)"
 			}
 		],
-		"identifer":"CurrentTimeSetting",
+		"identifier":"CurrentTimeSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1641,7 +1641,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Year",
+				"identifier":"Year",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1656,7 +1656,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Mounth",
+				"identifier":"Mounth",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1671,7 +1671,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Day",
+				"identifier":"Day",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1681,7 +1681,7 @@
 				"valueDescription":"0x01～0x1F(1～31)"
 			}
 		],
-		"identifer":"CurrentDateSetting",
+		"identifier":"CurrentDateSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1704,7 +1704,7 @@
 		"fields":[
 			
 		],
-		"identifer":"PowerLimitSetting",
+		"identifier":"PowerLimitSetting",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -1730,7 +1730,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Unit",
+				"identifier":"Unit",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1745,7 +1745,7 @@
 				"fields":[
 					
 				],
-				"identifer":"ElapsedTime",
+				"identifier":"ElapsedTime",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -1755,7 +1755,7 @@
 				"valueDescription":"0x00000000～0xFFFFFFFF(0～4294967295)"
 			}
 		],
-		"identifer":"CumulativeOperatingTime",
+		"identifier":"CumulativeOperatingTime",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -1778,7 +1778,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SetMPropertyMap",
+		"identifier":"SetMPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1801,7 +1801,7 @@
 		"fields":[
 			
 		],
-		"identifer":"GetMPropertyMap",
+		"identifier":"GetMPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1824,7 +1824,7 @@
 		"fields":[
 			
 		],
-		"identifer":"StatusChangeAnnouncementPropertyMap",
+		"identifier":"StatusChangeAnnouncementPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1847,7 +1847,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SetPropertyMap",
+		"identifier":"SetPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -1870,7 +1870,7 @@
 		"fields":[
 			
 		],
-		"identifer":"GetPropertyMap",
+		"identifier":"GetPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,

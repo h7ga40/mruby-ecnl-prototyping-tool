@@ -217,10 +217,10 @@
 						</div>
 						<div id="eobject-modal-attributes">
 							<form class="form-horizontal" id="eobject-modal-form">
-								<div class="control-group" for="eobject[identifer]">
-									<label class="control-label" for="eobject_identifer">名前</label>
+								<div class="control-group" for="eobject[identifier]">
+									<label class="control-label" for="eobject_identifier">名前</label>
 									<div class="controls">
-										<input class="form-control" id="eobject_identifer" name="eobject[identifer]" placeholder="car1やball1など" type="text">
+										<input class="form-control" id="eobject_identifier" name="eobject[identifier]" placeholder="car1やball1など" type="text">
 									</div>
 								</div>
 								<div class="control-group" for="eobject[attribute]">
@@ -283,10 +283,10 @@
 		</div>
 
 		<script id="class-selector-template" type="text/template">
-			<div class='item' id="%identifer%">
+			<div class='item' id="%identifier%">
 				<div class='item-info'>
 					<div class='name'>
-						%identifer%
+						%identifier%
 					</div>
 					<div class='attributes'>
 						%attribute%
@@ -423,13 +423,6 @@
 				<value name="NUMBER_TO_CHECK">
 					<shadow type="math_number">
 						<field name="NUM">0</field>
-					</shadow>
-				</value>
-			</block>
-			<block type="math_change">
-				<value name="DELTA">
-					<shadow type="math_number">
-						<field name="NUM">1</field>
 					</shadow>
 				</value>
 			</block>
@@ -960,7 +953,8 @@
 						<shadow type="rtc_second"></shadow>
 					</value>
 				</block>
-				<block type="rtc_datetime_item"></block>
+				<block type="rtc_get_datetime_item"></block>
+				<block type="rtc_set_datetime_item"></block>
 				<block type="rtc_year"></block>
 				<block type="rtc_month"></block>
 				<block type="rtc_day"></block>
@@ -1061,6 +1055,23 @@
 				<block type="no_op"></block>
 				<block type="received_data"></block>
 				<block type="received_data_size"></block>
+				<block type="data_join"></block>
+				<block type="create_esv_get"></block>
+				<block type="create_esv_set"></block>
+				<block type="esv_add_edt"></block>
+				<block type="esv_add_epc"></block>
+				<block type="send_esv"></block>
+				<block type="release_esv"></block>
+				<block type="notify_initial_esv"></block>
+				<block type="esv_get_esv"></block>
+				<block type="esv_iterate"></block>
+				<block type="esv_iterator"></block>
+				<block type="svctask_set_timer"></block>
+				<block type="svctask_timer"></block>
+				<block type="svctask_progress"></block>
+				<block type="svctask_recv_msg"></block>
+				<block type="svctask_call_timeout"></block>
+				<block type="svctask_is_match"></block>
 			</category>
 			<category name="Property" id="echonet_category">
 				<block type="eproperty_new">

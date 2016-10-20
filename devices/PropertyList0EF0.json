@@ -9,7 +9,7 @@
 		"fields":[
 			
 		],
-		"identifer":"OperationStatus",
+		"identifier":"OperationStatus",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -35,7 +35,7 @@
 				"fields":[
 					
 				],
-				"identifer":"MajorVersionNumber",
+				"identifier":"MajorVersionNumber",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -50,7 +50,7 @@
 				"fields":[
 					
 				],
-				"identifer":"MinorVersionNumber",
+				"identifier":"MinorVersionNumber",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -65,7 +65,7 @@
 				"fields":[
 					
 				],
-				"identifer":"MessageType",
+				"identifier":"MessageType",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -75,7 +75,7 @@
 				"valueDescription":"Bitmap"
 			}
 		],
-		"identifer":"VersionInformation",
+		"identifier":"VersionInformation",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -101,7 +101,7 @@
 				"fields":[
 					
 				],
-				"identifer":"LowerCommunicationIdField",
+				"identifier":"LowerCommunicationIdField",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -120,7 +120,7 @@
 						"fields":[
 							
 						],
-						"identifer":"ManufacturerCode",
+						"identifier":"ManufacturerCode",
 						"initialValue":null,
 						"isArray":true,
 						"primitive":true,
@@ -130,7 +130,7 @@
 						"valueDescription":"ECHONETコンソーシアムで規定。"
 					}
 				],
-				"identifer":"ManufacturerCode",
+				"identifier":"ManufacturerCode",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":false,
@@ -145,7 +145,7 @@
 				"fields":[
 					
 				],
-				"identifer":"UniqueIdSection",
+				"identifier":"UniqueIdSection",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -155,7 +155,7 @@
 				"valueDescription":""
 			}
 		],
-		"identifer":"IdentificationNumber",
+		"identifier":"IdentificationNumber",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -177,7 +177,7 @@
 		"fields":[
 			
 		],
-		"identifer":"FaultContent",
+		"identifier":"FaultContent",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -200,7 +200,7 @@
 		"fields":[
 			
 		],
-		"identifer":"UniqueIdentifierData",
+		"identifier":"UniqueIdentifierData",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -222,7 +222,7 @@
 		"fields":[
 			
 		],
-		"identifer":"NumberOfSelfNodeInstances",
+		"identifier":"NumberOfSelfNodeInstances",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -244,7 +244,7 @@
 		"fields":[
 			
 		],
-		"identifer":"NumberOfSelfNodeClasses",
+		"identifier":"NumberOfSelfNodeClasses",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -267,7 +267,7 @@
 		"fields":[
 			
 		],
-		"identifer":"InstanceListNotification",
+		"identifier":"InstanceListNotification",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -290,7 +290,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SelfNodeInstanceListS",
+		"identifier":"SelfNodeInstanceListS",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -313,7 +313,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SelfNodeClassListS",
+		"identifier":"SelfNodeClassListS",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -335,7 +335,7 @@
 		"fields":[
 			
 		],
-		"identifer":"FaultStatus",
+		"identifier":"FaultStatus",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":true,
@@ -361,7 +361,7 @@
 				"fields":[
 					
 				],
-				"identifer":"ManufacturerCode",
+				"identifier":"ManufacturerCode",
 				"initialValue":null,
 				"isArray":true,
 				"primitive":true,
@@ -371,7 +371,7 @@
 				"valueDescription":"ECHONETコンソーシアムで規定。"
 			}
 		],
-		"identifer":"ManufacturerCode",
+		"identifier":"ManufacturerCode",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -393,7 +393,7 @@
 		"fields":[
 			
 		],
-		"identifer":"PlaceOfBusinessCode",
+		"identifier":"PlaceOfBusinessCode",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -415,7 +415,7 @@
 		"fields":[
 			
 		],
-		"identifer":"ProductCode",
+		"identifier":"ProductCode",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -437,7 +437,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SerialNumber",
+		"identifier":"SerialNumber",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -463,7 +463,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Year",
+				"identifier":"Year",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -478,7 +478,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Mounth",
+				"identifier":"Mounth",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -493,7 +493,7 @@
 				"fields":[
 					
 				],
-				"identifer":"Day",
+				"identifier":"Day",
 				"initialValue":null,
 				"isArray":false,
 				"primitive":true,
@@ -503,7 +503,7 @@
 				"valueDescription":"0x01～0x1F(1～31)"
 			}
 		],
-		"identifer":"DateOfManufacture",
+		"identifier":"DateOfManufacture",
 		"initialValue":null,
 		"isArray":false,
 		"primitive":false,
@@ -526,7 +526,7 @@
 		"fields":[
 			
 		],
-		"identifer":"StatusChangeAnnouncementPropertyMap",
+		"identifier":"StatusChangeAnnouncementPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -549,7 +549,7 @@
 		"fields":[
 			
 		],
-		"identifer":"SetPropertyMap",
+		"identifier":"SetPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,
@@ -572,7 +572,7 @@
 		"fields":[
 			
 		],
-		"identifer":"GetPropertyMap",
+		"identifier":"GetPropertyMap",
 		"initialValue":null,
 		"isArray":true,
 		"primitive":true,

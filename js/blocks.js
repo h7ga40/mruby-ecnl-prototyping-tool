@@ -215,9 +215,10 @@ Blockly.Blocks.lists_indexOf = {
 		this.appendValueInput("VALUE").setCheck("Array").appendField(Blockly.Msg.LISTS_INDEX_OF_INPUT_IN_LIST);
 		this.appendValueInput("FIND").appendField(new Blockly.FieldDropdown(a), "END");
 		this.setInputsInline(!0);
-		a = Blockly.Msg.LISTS_INDEX_OF_TOOLTIP.replace("%1",
-            Blockly.Blocks.ONE_BASED_INDEXING ? "0" : "-1");
-		this.setTooltip(a)
+		this.setTooltip(function () {
+			return Blockly.Msg.LISTS_INDEX_OF_TOOLTIP.replace("%1",
+                this.workspace.options.oneBasedIndex ? "0" : "-1")
+		})
 	}
 };
 Blockly.Blocks.lists_getIndex = {
@@ -291,7 +292,7 @@ Blockly.Blocks.lists_getIndex = {
 				case "REMOVE RANDOM":
 					d = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM
 			}
-			if ("FROM_START" == e || "FROM_END" == e) d += "  " + Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP.replace("%1", Blockly.Blocks.ONE_BASED_INDEXING ? "#1" : "#0");
+			if ("FROM_START" == e || "FROM_END" == e) d += "  " + ("FROM_START" == e ? Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP : Blockly.Msg.LISTS_INDEX_FROM_END_TOOLTIP).replace("%1", b.workspace.options.oneBasedIndex ? "#1" : "#0");
 			return d
 		})
 	},
@@ -303,7 +304,8 @@ Blockly.Blocks.lists_getIndex = {
 		return a
 	},
 	domToMutation: function (a) {
-		var b = "true" == a.getAttribute("statement");
+		var b =
+            "true" == a.getAttribute("statement");
 		this.updateStatement_(b);
 		a = "false" != a.getAttribute("at");
 		this.updateAt_(a)
@@ -314,8 +316,8 @@ Blockly.Blocks.lists_getIndex = {
 	updateAt_: function (a) {
 		this.removeInput("AT");
 		this.removeInput("ORDINAL", !0);
-		a ? (this.appendValueInput("AT").setCheck("Number"), Blockly.Msg.ORDINAL_NUMBER_SUFFIX && this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) :
-            this.appendDummyInput("AT");
+		a ? (this.appendValueInput("AT").setCheck("Number"), Blockly.Msg.ORDINAL_NUMBER_SUFFIX &&
+            this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) : this.appendDummyInput("AT");
 		var b = new Blockly.FieldDropdown(this.WHERE_OPTIONS, function (b) {
 			var e = "FROM_START" == b || "FROM_END" == b;
 			if (e != a) {
@@ -386,7 +388,7 @@ Blockly.Blocks.lists_setIndex = {
 				case "INSERT RANDOM":
 					d = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM
 			}
-			if ("FROM_START" == e || "FROM_END" == e) d += "  " + Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP.replace("%1", Blockly.Blocks.ONE_BASED_INDEXING ? "#1" : "#0");
+			if ("FROM_START" == e || "FROM_END" == e) d += "  " + Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP.replace("%1", b.workspace.options.oneBasedIndex ? "#1" : "#0");
 			return d
 		})
 	},
@@ -677,10 +679,10 @@ Blockly.Blocks.logic_compare = {
 		var a = [
                 ["=", "EQ"],
                 ["\u2260", "NEQ"],
-                [">", "LT"],
-                ["\u2265", "LTE"],
-                ["<", "GT"],
-                ["\u2264", "GTE"]
+                ["\u200f<\u200f", "LT"],
+                ["\u200f\u2264\u200f", "LTE"],
+                ["\u200f>\u200f", "GT"],
+                ["\u200f\u2265\u200f", "GTE"]
 		],
             b = [
                 ["=", "EQ"],
@@ -695,12 +697,12 @@ Blockly.Blocks.logic_compare = {
 		this.setColour(Blockly.Blocks.logic.HUE);
 		this.setOutput(!0, "Boolean");
 		this.appendValueInput("A");
-		this.appendValueInput("B").appendField(new Blockly.FieldDropdown(a), "OP");
+		this.appendValueInput("B").appendField(new Blockly.FieldDropdown(a),
+            "OP");
 		this.setInputsInline(!0);
 		var c = this;
 		this.setTooltip(function () {
-			var a =
-                c.getFieldValue("OP");
+			var a = c.getFieldValue("OP");
 			return {
 				EQ: Blockly.Msg.LOGIC_COMPARE_TOOLTIP_EQ,
 				NEQ: Blockly.Msg.LOGIC_COMPARE_TOOLTIP_NEQ,
@@ -717,8 +719,7 @@ Blockly.Blocks.logic_compare = {
             c = this.getInputTargetBlock("B");
 		if (b && c && !b.outputConnection.checkType_(c.outputConnection)) {
 			Blockly.Events.setGroup(a.group);
-			for (a = 0; a <
-                this.prevBlocks_.length; a++) {
+			for (a = 0; a < this.prevBlocks_.length; a++) {
 				var e = this.prevBlocks_[a];
 				if (e === b || e === c) e.unplug(), e.bumpNeighbours_()
 			}
@@ -1205,7 +1206,7 @@ Blockly.Blocks.math_change = {
 			}],
 			previousStatement: null,
 			nextStatement: null,
-			colour: Blockly.Blocks.math.HUE,
+			colour: Blockly.Blocks.variables.HUE,
 			helpUrl: Blockly.Msg.MATH_CHANGE_HELPURL
 		});
 		var a = this;
@@ -1370,7 +1371,8 @@ Blockly.Blocks.procedures_defnoreturn = {
 		a.setSpellcheck(!1);
 		this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_TITLE).appendField(a, "NAME").appendField("", "PARAMS");
 		this.setMutator(new Blockly.Mutator(["procedures_mutatorarg"]));
-		Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT && this.setCommentText(Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT);
+		(this.workspace.options.comments || this.workspace.options.parentWorkspace && this.workspace.options.parentWorkspace.options.comments) &&
+        Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT && this.setCommentText(Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT);
 		this.setColour(Blockly.Blocks.procedures.HUE);
 		this.setTooltip(Blockly.Msg.PROCEDURES_DEFNORETURN_TOOLTIP);
 		this.setHelpUrl(Blockly.Msg.PROCEDURES_DEFNORETURN_HELPURL);
@@ -1379,11 +1381,11 @@ Blockly.Blocks.procedures_defnoreturn = {
 		this.statementConnection_ = null
 	},
 	setStatements_: function (a) {
-		this.hasStatements_ !== a && (a ? (this.appendStatementInput("STACK").appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_DO), this.getInput("RETURN") && this.moveInputBefore("STACK", "RETURN")) : this.removeInput("STACK", !0), this.hasStatements_ = a)
+		this.hasStatements_ !== a && (a ? (this.appendStatementInput("STACK").appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_DO), this.getInput("RETURN") &&
+            this.moveInputBefore("STACK", "RETURN")) : this.removeInput("STACK", !0), this.hasStatements_ = a)
 	},
 	updateParams_: function () {
-		for (var a = !1, b = {}, c = 0; c <
-            this.arguments_.length; c++) {
+		for (var a = !1, b = {}, c = 0; c < this.arguments_.length; c++) {
 			if (b["arg_" + this.arguments_[c].toLowerCase()]) {
 				a = !0;
 				break
@@ -1395,15 +1397,15 @@ Blockly.Blocks.procedures_defnoreturn = {
 		this.arguments_.length && (a = Blockly.Msg.PROCEDURES_BEFORE_PARAMS + " " + this.arguments_.join(", "));
 		Blockly.Events.disable();
 		try {
-			this.setFieldValue(a, "PARAMS")
+			this.setFieldValue(a,
+                "PARAMS")
 		} finally {
 			Blockly.Events.enable()
 		}
 	},
 	mutationToDom: function (a) {
 		var b = document.createElement("mutation");
-		a && b.setAttribute("name",
-            this.getFieldValue("NAME"));
+		a && b.setAttribute("name", this.getFieldValue("NAME"));
 		for (var c = 0; c < this.arguments_.length; c++) {
 			var e = document.createElement("arg");
 			e.setAttribute("name", this.arguments_[c]);
@@ -1415,7 +1417,8 @@ Blockly.Blocks.procedures_defnoreturn = {
 	},
 	domToMutation: function (a) {
 		this.arguments_ = [];
-		for (var b = 0, c; c = a.childNodes[b]; b++) "arg" == c.nodeName.toLowerCase() && this.arguments_.push(c.getAttribute("name"));
+		for (var b = 0, c; c = a.childNodes[b]; b++) "arg" ==
+            c.nodeName.toLowerCase() && this.arguments_.push(c.getAttribute("name"));
 		this.updateParams_();
 		Blockly.Procedures.mutateCallers(this);
 		this.setStatements_("false" !== a.getAttribute("statements"))
@@ -1442,7 +1445,8 @@ Blockly.Blocks.procedures_defnoreturn = {
 		this.updateParams_();
 		Blockly.Procedures.mutateCallers(this);
 		a = a.getFieldValue("STATEMENTS");
-		if (null !== a && (a = "TRUE" == a, this.hasStatements_ != a))
+		if (null !== a && (a =
+                "TRUE" == a, this.hasStatements_ != a))
 			if (a) this.setStatements_(!0), Blockly.Mutator.reconnect(this.statementConnection_, this, "STACK"), this.statementConnection_ = null;
 			else {
 				a = this.getInput("STACK").connection;
@@ -1457,10 +1461,10 @@ Blockly.Blocks.procedures_defnoreturn = {
 		return this.arguments_
 	},
 	renameVar: function (a, b) {
-		for (var c = !1, e = 0; e < this.arguments_.length; e++) Blockly.Names.equals(a, this.arguments_[e]) && (this.arguments_[e] = b, c = !0);
+		for (var c = !1, e = 0; e < this.arguments_.length; e++) Blockly.Names.equals(a,
+            this.arguments_[e]) && (this.arguments_[e] = b, c = !0);
 		if (c && (this.updateParams_(), this.mutator.isVisible()))
-			for (var c = this.mutator.workspace_.getAllBlocks(),
-                    e = 0, d; d = c[e]; e++) "procedures_mutatorarg" == d.type && Blockly.Names.equals(a, d.getFieldValue("NAME")) && d.setFieldValue(b, "NAME")
+			for (var c = this.mutator.workspace_.getAllBlocks(), e = 0, d; d = c[e]; e++) "procedures_mutatorarg" == d.type && Blockly.Names.equals(a, d.getFieldValue("NAME")) && d.setFieldValue(b, "NAME")
 	},
 	customContextMenu: function (a) {
 		var b = {
@@ -1470,16 +1474,17 @@ Blockly.Blocks.procedures_defnoreturn = {
 		b.text = Blockly.Msg.PROCEDURES_CREATE_DO.replace("%1", c);
 		var e = goog.dom.createDom("mutation");
 		e.setAttribute("name", c);
-		for (var d = 0; d < this.arguments_.length; d++) c = goog.dom.createDom("arg"), c.setAttribute("name", this.arguments_[d]), e.appendChild(c);
+		for (var d = 0; d < this.arguments_.length; d++) c =
+            goog.dom.createDom("arg"), c.setAttribute("name", this.arguments_[d]), e.appendChild(c);
 		e = goog.dom.createDom("block", null, e);
-		e.setAttribute("type",
-            this.callType_);
+		e.setAttribute("type", this.callType_);
 		b.callback = Blockly.ContextMenu.callbackFactory(this, e);
 		a.push(b);
 		if (!this.isCollapsed())
 			for (d = 0; d < this.arguments_.length; d++) b = {
 				enabled: !0
-			}, c = this.arguments_[d], b.text = Blockly.Msg.VARIABLES_SET_CREATE_GET.replace("%1", c), e = goog.dom.createDom("field", null, c), e.setAttribute("name", "VAR"), e = goog.dom.createDom("block", null, e), e.setAttribute("type", "variables_get"), b.callback = Blockly.ContextMenu.callbackFactory(this, e), a.push(b)
+			}, c = this.arguments_[d], b.text = Blockly.Msg.VARIABLES_SET_CREATE_GET.replace("%1", c), e = goog.dom.createDom("field", null, c), e.setAttribute("name", "VAR"), e = goog.dom.createDom("block", null, e), e.setAttribute("type",
+                "variables_get"), b.callback = Blockly.ContextMenu.callbackFactory(this, e), a.push(b)
 	},
 	callType_: "procedures_callnoreturn"
 };
@@ -1490,8 +1495,8 @@ Blockly.Blocks.procedures_defreturn = {
 		this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_DEFRETURN_TITLE).appendField(a, "NAME").appendField("", "PARAMS");
 		this.appendValueInput("RETURN").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
 		this.setMutator(new Blockly.Mutator(["procedures_mutatorarg"]));
-		Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT &&
-            this.setCommentText(Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT);
+		(this.workspace.options.comments ||
+            this.workspace.options.parentWorkspace && this.workspace.options.parentWorkspace.options.comments) && Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT && this.setCommentText(Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT);
 		this.setColour(Blockly.Blocks.procedures.HUE);
 		this.setTooltip(Blockly.Msg.PROCEDURES_DEFRETURN_TOOLTIP);
 		this.setHelpUrl(Blockly.Msg.PROCEDURES_DEFRETURN_HELPURL);
@@ -1525,15 +1530,23 @@ Blockly.Blocks.procedures_mutatorcontainer = {
 };
 Blockly.Blocks.procedures_mutatorarg = {
 	init: function () {
-		this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_MUTATORARG_TITLE).appendField(new Blockly.FieldTextInput("x", this.validator_), "NAME");
+		var a = new Blockly.FieldTextInput("x", this.validator_);
+		this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_MUTATORARG_TITLE).appendField(a, "NAME");
 		this.setPreviousStatement(!0);
 		this.setNextStatement(!0);
 		this.setColour(Blockly.Blocks.procedures.HUE);
 		this.setTooltip(Blockly.Msg.PROCEDURES_MUTATORARG_TOOLTIP);
-		this.contextMenu = !1
+		this.contextMenu = !1;
+		a.onFinishEditing_ = this.createNewVar_;
+		a.onFinishEditing_("x")
 	},
 	validator_: function (a) {
-		return (a = a.replace(/[\s\xa0]+/g, " ").replace(/^ | $/g, "")) || null
+		return (a = a.replace(/[\s\xa0]+/g,
+            " ").replace(/^ | $/g, "")) || null
+	},
+	createNewVar_: function (a) {
+		var b = this.sourceBlock_;
+		b && b.workspace && b.workspace.options && b.workspace.options.parentWorkspace && b.workspace.options.parentWorkspace.createVariable(a)
 	}
 };
 Blockly.Blocks.procedures_callnoreturn = {
@@ -1872,8 +1885,10 @@ Blockly.Blocks.text_indexOf = {
 		this.appendValueInput("FIND").setCheck("String").appendField(new Blockly.FieldDropdown(a), "END");
 		Blockly.Msg.TEXT_INDEXOF_TAIL && this.appendDummyInput().appendField(Blockly.Msg.TEXT_INDEXOF_TAIL);
 		this.setInputsInline(!0);
-		a = Blockly.Msg.TEXT_INDEXOF_TOOLTIP.replace("%1", Blockly.Blocks.ONE_BASED_INDEXING ? "0" : "-1");
-		this.setTooltip(a)
+		var b = this;
+		this.setTooltip(function () {
+			return Blockly.Msg.TEXT_INDEXOF_TOOLTIP.replace("%1", b.workspace.options.oneBasedIndex ? "0" : "-1")
+		})
 	}
 };
 Blockly.Blocks.text_charAt = {
@@ -1896,7 +1911,7 @@ Blockly.Blocks.text_charAt = {
 		this.setTooltip(function () {
 			var b = a.getFieldValue("WHERE"),
                 c = Blockly.Msg.TEXT_CHARAT_TOOLTIP;
-			if ("FROM_START" == b || "FROM_END" == b) c += "  " + Blockly.Msg.LISTS_INDEX_FROM_END_TOOLTIP.replace("%1", Blockly.Blocks.ONE_BASED_INDEXING ? "#1" : "#0");
+			if ("FROM_START" == b || "FROM_END" == b) c += "  " + ("FROM_START" == b ? Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP : Blockly.Msg.LISTS_INDEX_FROM_END_TOOLTIP).replace("%1", a.workspace.options.oneBasedIndex ? "#1" : "#0");
 			return c
 		})
 	},
@@ -1915,16 +1930,16 @@ Blockly.Blocks.text_charAt = {
 		this.removeInput("ORDINAL", !0);
 		a ? (this.appendValueInput("AT").setCheck("Number"), Blockly.Msg.ORDINAL_NUMBER_SUFFIX && this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) : this.appendDummyInput("AT");
 		Blockly.Msg.TEXT_CHARAT_TAIL && (this.removeInput("TAIL", !0), this.appendDummyInput("TAIL").appendField(Blockly.Msg.TEXT_CHARAT_TAIL));
-		var b = new Blockly.FieldDropdown(this.WHERE_OPTIONS, function (b) {
-			var e = "FROM_START" ==
-                b || "FROM_END" == b;
-			if (e != a) {
-				var d = this.sourceBlock_;
-				d.updateAt_(e);
-				d.setFieldValue(b, "WHERE");
-				return null
-			}
-		});
+		var b = new Blockly.FieldDropdown(this.WHERE_OPTIONS,
+            function (b) {
+            	var e = "FROM_START" == b || "FROM_END" == b;
+            	if (e != a) {
+            		var d = this.sourceBlock_;
+            		d.updateAt_(e);
+            		d.setFieldValue(b, "WHERE");
+            		return null
+            	}
+            });
 		this.getInput("AT").appendField(b, "WHERE")
 	}
 };
