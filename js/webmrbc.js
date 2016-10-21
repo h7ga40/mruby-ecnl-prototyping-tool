@@ -1,6 +1,397 @@
 ﻿Bridge.assembly("WebMrbc", function ($asm, globals) {
     "use strict";
 
+    Bridge.define("Blockly.Msg", {
+        statics: {
+            ADD_COMMENT: "コメントを追加",
+            CHANGE_VALUE_TITLE: "値を変更します。",
+            CLEAN_UP: "ブロックの整理",
+            COLLAPSE_ALL: "ブロックを折りたたむ",
+            COLLAPSE_BLOCK: "ブロックを折りたたむ",
+            DELETE_ALL_BLOCKS: "%1件のすべてのブロックを消しますか？",
+            DELETE_BLOCK: "ブロックを消す",
+            DELETE_VARIABLE: "Delete the '%1' variable",
+            DELETE_VARIABLE_CONFIRMATION: "Delete %1 uses of the '%2' variable?",
+            DELETE_X_BLOCKS: "%1 個のブロックを消す",
+            DISABLE_BLOCK: "ブロックを無効にします。",
+            DUPLICATE_BLOCK: "複製",
+            ENABLE_BLOCK: "ブロックを有効にします。",
+            EXPAND_ALL: "ブロックを展開します。",
+            EXPAND_BLOCK: "ブロックを展開します。",
+            EXTERNAL_INPUTS: "外部入力",
+            HELP: "ヘルプ",
+            INLINE_INPUTS: "インライン入力",
+            NEW_VARIABLE: "新しい変数",
+            NEW_VARIABLE_TITLE: "新しい変数の、名前",
+            REDO: "やり直し",
+            REMOVE_COMMENT: "コメントを削除",
+            RENAME_VARIABLE: "変数の名前を変更.",
+            RENAME_VARIABLE_TITLE: "%1の変数すべてを名前変更します。",
+            TODAY: "今日",
+            UNDO: "取り消し",
+            VARIABLE_ALREADY_EXISTS: "A variable named '%1' already exists.",
+            COLOUR_BLEND_COLOUR1: "色 1",
+            COLOUR_BLEND_COLOUR2: "色 2",
+            COLOUR_BLEND_HELPURL: "http://meyerwebcom/eric/tools/color-blend/",
+            COLOUR_BLEND_RATIO: "割合",
+            COLOUR_BLEND_TITLE: "ブレンド",
+            COLOUR_BLEND_TOOLTIP: "ブレンド2 つの色を指定された比率に混ぜる」  (00 ～ 10)。",
+            COLOUR_PICKER_HELPURL: "https://jawikipediaorg/wiki/色",
+            COLOUR_PICKER_TOOLTIP: "パレットから色を選んでください。",
+            COLOUR_RANDOM_HELPURL: "http://randomcolourcom",
+            COLOUR_RANDOM_TITLE: "ランダムな色",
+            COLOUR_RANDOM_TOOLTIP: "ランダムな色を選択します。",
+            COLOUR_RGB_BLUE: "青",
+            COLOUR_RGB_GREEN: "緑",
+            COLOUR_RGB_HELPURL: "http://wwwdecembercom/html/spec/colorperhtml",
+            COLOUR_RGB_RED: "赤",
+            COLOUR_RGB_TITLE: "カラーと",
+            COLOUR_RGB_TOOLTIP: "赤、緑、および青の指定された量で色を作成します。すべての値は 0 ～ 100 の間でなければなりません。",
+            CONTROLS_FLOW_STATEMENTS_HELPURL: "https://githubcom/google/blockly/wiki/Loops#loop-termination-blocks",
+            CONTROLS_FLOW_STATEMENTS_OPERATOR_BREAK: "ループから抜け出す",
+            CONTROLS_FLOW_STATEMENTS_OPERATOR_CONTINUE: "ループの次の反復処理を続行します。",
+            CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK: "含むループから抜け出します。",
+            CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE: "このループの残りの部分をスキップし、次のイテレーションに進みます。",
+            CONTROLS_FLOW_STATEMENTS_WARNING: "注意: このブロックは、ループ内でのみ使用します。",
+            CONTROLS_FOREACH_HELPURL: "https://githubcom/google/blockly/wiki/Loops#for-each",
+            CONTROLS_FOREACH_INPUT_DO: "してください",
+            CONTROLS_FOREACH_TITLE: "各項目の %1 リストで %2",
+            CONTROLS_FOREACH_TOOLTIP: "リストの各項目に対して変数 '%1' のアイテムに設定し、いくつかのステートメントをしてください。",
+            CONTROLS_FOR_HELPURL: "https://githubcom/google/blockly/wiki/Loops#count-with",
+            CONTROLS_FOR_INPUT_DO: "してください",
+            CONTROLS_FOR_TITLE: "で、カウントします。 %1 %2 から%3、 %4 で",
+            CONTROLS_FOR_TOOLTIP: "変数 \"%1\"は、指定した間隔ごとのカウントを開始番号から 終了番号まで、値をとり、指定したブロックを行う必要があります。",
+            CONTROLS_IF_ELSEIF_TITLE_ELSEIF: "他でもし",
+            CONTROLS_IF_ELSEIF_TOOLTIP: "場合に条件にブロック追加。",
+            CONTROLS_IF_ELSE_TITLE_ELSE: "他",
+            CONTROLS_IF_ELSE_TOOLTIP: "Ifブロックに、すべてをキャッチする条件を追加。",
+            CONTROLS_IF_HELPURL: "https://githubcom/google/blockly/wiki/IfElse",
+            CONTROLS_IF_IF_TITLE_IF: "もし",
+            CONTROLS_IF_IF_TOOLTIP: "追加、削除、またはセクションを順序変更して、ブロックをこれを再構成します。",
+            CONTROLS_IF_MSG_ELSE: "他",
+            CONTROLS_IF_MSG_ELSEIF: "他でもし",
+            CONTROLS_IF_MSG_IF: "もし",
+            CONTROLS_IF_MSG_THEN: "してください",
+            CONTROLS_IF_TOOLTIP_1: "値が true の場合はその後ステートメントを行をいくつかします。",
+            CONTROLS_IF_TOOLTIP_2: "値が true 場合は、ステートメントの最初のブロックを行います。それ以外の場合は、ステートメントの 2 番目のブロックを行います。",
+            CONTROLS_IF_TOOLTIP_3: "最初の値が true 場合は、ステートメントの最初のブロックを行います。それ以外の場合は、2 番目の値が true の場合、ステートメントの 2 番目のブロックをします。",
+            CONTROLS_IF_TOOLTIP_4: "最初の値が true 場合は、ステートメントの最初のブロックを行います。2 番目の値が true の場合は、ステートメントの 2 番目のブロックを行います。それ以外の場合は最後のブロックのステートメントを行います。",
+            CONTROLS_REPEAT_HELPURL: "https://jawikipediaorg/wiki/for文",
+            CONTROLS_REPEAT_INPUT_DO: "してください",
+            CONTROLS_REPEAT_TITLE: "%1 回、繰り返します",
+            CONTROLS_REPEAT_TOOLTIP: "いくつかのステートメントを数回行います。",
+            CONTROLS_WHILEUNTIL_HELPURL: "https://githubcom/google/blockly/wiki/Loops#repeat",
+            CONTROLS_WHILEUNTIL_INPUT_DO: "してください",
+            CONTROLS_WHILEUNTIL_OPERATOR_UNTIL: "までを繰り返します",
+            CONTROLS_WHILEUNTIL_OPERATOR_WHILE: "つつその間、繰り返す4",
+            CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL: "値は false のあいだ、いくつかのステートメントを行います。",
+            CONTROLS_WHILEUNTIL_TOOLTIP_WHILE: "値は true のあいだ、いくつかのステートメントを行います。",
+            LISTS_CREATE_EMPTY_HELPURL: "https://githubcom/google/blockly/wiki/Lists#create-empty-list",
+            LISTS_CREATE_EMPTY_TITLE: "空のリストを作成します。",
+            LISTS_CREATE_EMPTY_TOOLTIP: "長さゼロ、データ レコード空のリストを返します",
+            LISTS_CREATE_WITH_CONTAINER_TITLE_ADD: "リスト",
+            LISTS_CREATE_WITH_CONTAINER_TOOLTIP: "追加、削除、またはセクションを順序変更して、ブロックを再構成します。",
+            LISTS_CREATE_WITH_HELPURL: "https://githubcom/google/blockly/wiki/Lists#create-list-with",
+            LISTS_CREATE_WITH_INPUT_WITH: "これを使ってリストを作成します。",
+            LISTS_CREATE_WITH_ITEM_TITLE: "項目",
+            LISTS_CREATE_WITH_ITEM_TOOLTIP: "リストにアイテムを追加します。",
+            LISTS_CREATE_WITH_TOOLTIP: "アイテム数かぎりないのリストを作成します。",
+            LISTS_GET_INDEX_FIRST: "最初",
+            LISTS_GET_INDEX_FROM_END: "終しまいから #",
+            LISTS_GET_INDEX_FROM_START: "#",
+            LISTS_GET_INDEX_GET: "取得",
+            LISTS_GET_INDEX_GET_REMOVE: "取得と削除",
+            LISTS_GET_INDEX_HELPURL: "https://githubcom/google/blockly/wiki/Lists#getting-items-from-a-list",
+            LISTS_GET_INDEX_INPUT_IN_LIST: "リストで",
+            LISTS_GET_INDEX_LAST: "最後",
+            LISTS_GET_INDEX_RANDOM: "ランダム",
+            LISTS_GET_INDEX_REMOVE: "削除",
+            LISTS_GET_INDEX_TAIL: "",
+            LISTS_GET_INDEX_TOOLTIP_GET_FIRST: "リストの最初の項目を返信します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_FROM: "リスト内の指定位置にある項目を返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_LAST: "リストの最後の項目を返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_RANDOM: "ランダム アイテム リストを返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST: "リスト内の最初の項目を削除したあと返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM: "リスト内の指定位置にある項目を削除し、返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST: "リスト内の最後の項目を削除したあと返します。",
+            LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM: "リストのランダムなアイテムを削除し、返します。",
+            LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST: "リスト内の最初の項目を削除します。",
+            LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM: "リスト内の指定位置にある項目を返します。",
+            LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST: "リスト内の最後の項目を削除します。",
+            LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM: "リスト内にある任意のアイテムを削除します。",
+            LISTS_GET_SUBLIST_END_FROM_END: "最後から＃へ",
+            LISTS_GET_SUBLIST_END_FROM_START: "＃へ",
+            LISTS_GET_SUBLIST_END_LAST: "最後へ",
+            LISTS_GET_SUBLIST_HELPURL: "https://githubcom/google/blockly/wiki/Lists#getting-a-sublist",
+            LISTS_GET_SUBLIST_INPUT_IN_LIST: "リストで",
+            LISTS_GET_SUBLIST_START_FIRST: "最初からサブリストを取得する。",
+            LISTS_GET_SUBLIST_START_FROM_END: "端から #のサブリストを取得します。",
+            LISTS_GET_SUBLIST_START_FROM_START: "# からサブディレクトリのリストを取得します。",
+            LISTS_GET_SUBLIST_TAIL: "",
+            LISTS_GET_SUBLIST_TOOLTIP: "リストの指定された部分のコピーを作成してくださ。",
+            LISTS_INDEX_FROM_END_TOOLTIP: "%1 は、最後の項目です。",
+            LISTS_INDEX_FROM_START_TOOLTIP: "%1 は、最初の項目です。",
+            LISTS_INDEX_OF_FIRST: "最初に見つかった項目を検索します。",
+            LISTS_INDEX_OF_HELPURL: "https://githubcom/google/blockly/wiki/Lists#getting-items-from-a-list",
+            LISTS_INDEX_OF_INPUT_IN_LIST: "リストで",
+            LISTS_INDEX_OF_LAST: "最後に見つかったアイテムを見つける",
+            LISTS_INDEX_OF_TOOLTIP: "リスト項目の最初/最後に出現するインデックス位置を返します。項目が見つからない場合は %1 を返します。",
+            LISTS_INLIST: "リストで",
+            LISTS_ISEMPTY_HELPURL: "https://githubcom/google/blockly/wiki/Lists#is-empty",
+            LISTS_ISEMPTY_TITLE: "%1 が空",
+            LISTS_ISEMPTY_TOOLTIP: "リストが空の場合は、true を返します。",
+            LISTS_LENGTH_HELPURL: "https://githubcom/google/blockly/wiki/Lists#length-of",
+            LISTS_LENGTH_TITLE: " %1の長さ",
+            LISTS_LENGTH_TOOLTIP: "リストの長さを返します。",
+            LISTS_REPEAT_HELPURL: "https://githubcom/google/blockly/wiki/Lists#create-list-with",
+            LISTS_REPEAT_TITLE: "アイテム %1 と一緒にリストを作成し %2 回繰り",
+            LISTS_REPEAT_TOOLTIP: "指定された値をなんどか繰り返してリストを作ります。",
+            LISTS_SET_INDEX_HELPURL: "https://githubcom/google/blockly/wiki/Lists#in-list--set",
+            LISTS_SET_INDEX_INPUT_IN_LIST: "リストで",
+            LISTS_SET_INDEX_INPUT_TO: "として",
+            LISTS_SET_INDEX_INSERT: "挿入します。",
+            LISTS_SET_INDEX_SET: "セット",
+            LISTS_SET_INDEX_TOOLTIP: "",
+            LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST: "リストの先頭に項目を挿入します。",
+            LISTS_SET_INDEX_TOOLTIP_INSERT_FROM: "リスト内の指定位置に項目を挿入します。",
+            LISTS_SET_INDEX_TOOLTIP_INSERT_LAST: "リストの末尾に項目を追加します。",
+            LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM: "リストに項目をランダムに挿入します。",
+            LISTS_SET_INDEX_TOOLTIP_SET_FIRST: "リスト内に最初の項目を設定します。",
+            LISTS_SET_INDEX_TOOLTIP_SET_FROM: "リスト内の指定された位置に項目を設定します。",
+            LISTS_SET_INDEX_TOOLTIP_SET_LAST: "リスト内の最後の項目を設定します。",
+            LISTS_SET_INDEX_TOOLTIP_SET_RANDOM: "リスト内にランダムなアイテムを設定します。",
+            LISTS_SORT_HELPURL: "https://githubcom/google/blockly/wiki/Lists#sorting-a-list",
+            LISTS_SORT_ORDER_ASCENDING: "昇順",
+            LISTS_SORT_ORDER_DESCENDING: "降順",
+            LISTS_SORT_TITLE: "sort %1 %2 %3",
+            LISTS_SORT_TOOLTIP: "Sort a copy of a list.",
+            LISTS_SORT_TYPE_IGNORECASE: "alphabetic, ignore case",
+            LISTS_SORT_TYPE_NUMERIC: "numeric",
+            LISTS_SORT_TYPE_TEXT: "alphabetic",
+            LISTS_SPLIT_HELPURL: "https://githubcom/google/blockly/wiki/Lists#splitting-strings-and-joining-lists",
+            LISTS_SPLIT_LIST_FROM_TEXT: "テキストからリストを作る",
+            LISTS_SPLIT_TEXT_FROM_LIST: "リストからテキストを作る",
+            LISTS_SPLIT_TOOLTIP_JOIN: "Join a list of texts into one text, separated by a delimiter.",
+            LISTS_SPLIT_TOOLTIP_SPLIT: "Split text into a list of texts, breaking at each delimiter.",
+            LISTS_SPLIT_WITH_DELIMITER: "with delimiter",
+            LOGIC_BOOLEAN_FALSE: "false",
+            LOGIC_BOOLEAN_HELPURL: "https://githubcom/google/blockly/wiki/Logic#values",
+            LOGIC_BOOLEAN_TOOLTIP: "True または false を返します。",
+            LOGIC_BOOLEAN_TRUE: "true",
+            LOGIC_COMPARE_HELPURL: "https://jawikipediaorg/wiki/不等式",
+            LOGIC_COMPARE_TOOLTIP_EQ: "もし両方がお互いに等しく入力した場合は true を返します。",
+            LOGIC_COMPARE_TOOLTIP_GT: "最初の入力が 2 番目の入力よりも大きい場合は true を返します。",
+            LOGIC_COMPARE_TOOLTIP_GTE: "もし入力がふたつめの入よりも大きかったらtrueをり返します。",
+            LOGIC_COMPARE_TOOLTIP_LT: "最初の入力が 2 番目の入力よりも小さいい場合は true を返します。",
+            LOGIC_COMPARE_TOOLTIP_LTE: "もし、最初の入力が二つ目入力より少ないか、おなじであったらTRUEをかえしてください",
+            LOGIC_COMPARE_TOOLTIP_NEQ: "両方の入力が互いに等しくない場合に true を返します。",
+            LOGIC_NEGATE_HELPURL: "https://jawikipediaorg/wiki/否定",
+            LOGIC_NEGATE_TITLE: "%1 ではないです。",
+            LOGIC_NEGATE_TOOLTIP: "入力が false の場合は、true を返します。入力が true の場合は false を返します。",
+            LOGIC_NULL: "null",
+            LOGIC_NULL_HELPURL: "https://enwikipediaorg/wiki/Nullable_type",
+            LOGIC_NULL_TOOLTIP: "Null を返します。",
+            LOGIC_OPERATION_AND: "そして",
+            LOGIC_OPERATION_HELPURL: "https://githubcom/google/blockly/wiki/Logic#logical-operations",
+            LOGIC_OPERATION_OR: "または",
+            LOGIC_OPERATION_TOOLTIP_AND: "両方の入力がおんなじ場わいわtrue を返します。",
+            LOGIC_OPERATION_TOOLTIP_OR: "最低少なくとも 1 つの入力が true の場合は true を返します。",
+            LOGIC_TERNARY_CONDITION: "テスト",
+            LOGIC_TERNARY_HELPURL: "https://jawikipediaorg/wiki/%3F:",
+            LOGIC_TERNARY_IF_FALSE: "false の場合",
+            LOGIC_TERNARY_IF_TRUE: "true の場合",
+            LOGIC_TERNARY_TOOLTIP: "'テスト' の条件をチェックします。条件が true の場合、'true' の値を返します。それ以外の場合 'false' のを返します。",
+            MATH_ADDITION_SYMBOL: "+",
+            MATH_ARITHMETIC_HELPURL: "https://jawikipediaorg/wiki/算術",
+            MATH_ARITHMETIC_TOOLTIP_ADD: "2 つの数の合計を返します。",
+            MATH_ARITHMETIC_TOOLTIP_DIVIDE: "2 つの数の商を返します。",
+            MATH_ARITHMETIC_TOOLTIP_MINUS: "2 つの数の差を返します。",
+            MATH_ARITHMETIC_TOOLTIP_MULTIPLY: "2 つの数の積を返します。",
+            MATH_ARITHMETIC_TOOLTIP_POWER: "最初の数を2 番目の値で累乗した結果を返します。",
+            MATH_CHANGE_HELPURL: "https://jawikipediaorg/wiki/加法",
+            MATH_CHANGE_TITLE: "変更 %1 に %2",
+            MATH_CHANGE_TITLE_ITEM: "項目",
+            MATH_CHANGE_TOOLTIP: "'%1' をたします。",
+            MATH_CONSTANT_HELPURL: "https://jawikipediaorg/wiki/数学定数",
+            MATH_CONSTANT_TOOLTIP: "いずれかの共通の定数のを返す: π (3141…), e (2718…), φ (1618…), sqrt(2) (1414…), sqrt(½) (0707…), or ∞ (無限).",
+            MATH_CONSTRAIN_HELPURL: "https://enwikipediaorg/wiki/Clamping_%28graphics%29",
+            MATH_CONSTRAIN_TITLE: "制限%1下リミット%2上限リミット%3",
+            MATH_CONSTRAIN_TOOLTIP: "値を、上限 x と下限 y のあいだに制限んする（上限と下限が、x と  y　とに同じ場合わ、上限の値は　x, 下限の値はy）。",
+            MATH_DIVISION_SYMBOL: "÷",
+            MATH_IS_DIVISIBLE_BY: "割り切れる",
+            MATH_IS_EVEN: "わ偶数",
+            MATH_IS_NEGATIVE: "負の値",
+            MATH_IS_ODD: "奇数です。",
+            MATH_IS_POSITIVE: "正の値",
+            MATH_IS_PRIME: "素数です",
+            MATH_IS_TOOLTIP: "数字が、偶数、奇数、素数、整数、正数、負数、またはそれが特定の数で割り切れる場合かどうかを確認してください。どの制限が一つでも本当でしたら true をかえしてください、そうでない場合わ falseを返してください。",
+            MATH_IS_WHOLE: "は整数",
+            MATH_MODULO_HELPURL: "https://enwikipediaorg/wiki/Modulo_operation",
+            MATH_MODULO_TITLE: "残りの %1 ÷ %2",
+            MATH_MODULO_TOOLTIP: "2つの数値を除算した余りを返します。",
+            MATH_MULTIPLICATION_SYMBOL: "×",
+            MATH_NUMBER_HELPURL: "https://jawikipediaorg/wiki/数",
+            MATH_NUMBER_TOOLTIP: "数です。",
+            MATH_ONLIST_HELPURL: "",
+            MATH_ONLIST_OPERATOR_AVERAGE: "リストの平均",
+            MATH_ONLIST_OPERATOR_MAX: "リストの最大値",
+            MATH_ONLIST_OPERATOR_MEDIAN: "リストの中央値",
+            MATH_ONLIST_OPERATOR_MIN: "リストの最小の数",
+            MATH_ONLIST_OPERATOR_MODE: "一覧モード",
+            MATH_ONLIST_OPERATOR_RANDOM: "リストのランダム アイテム",
+            MATH_ONLIST_OPERATOR_STD_DEV: "リストの標準偏差",
+            MATH_ONLIST_OPERATOR_SUM: "リストの合計",
+            MATH_ONLIST_TOOLTIP_AVERAGE: "リストの数値の平均 (算術平均) を返します。",
+            MATH_ONLIST_TOOLTIP_MAX: "リストの最大数を返します。",
+            MATH_ONLIST_TOOLTIP_MEDIAN: "リストの中央値の数を返します。",
+            MATH_ONLIST_TOOLTIP_MIN: "リストの最小数を返します。",
+            MATH_ONLIST_TOOLTIP_MODE: "リストで最も一般的な項目のリストを返します。",
+            MATH_ONLIST_TOOLTIP_RANDOM: "リストからランダムに要素を返します。",
+            MATH_ONLIST_TOOLTIP_STD_DEV: "リウトの標準偏差をかえす",
+            MATH_ONLIST_TOOLTIP_SUM: "全部リストの数をたして返す",
+            MATH_POWER_SYMBOL: "^",
+            MATH_RANDOM_FLOAT_HELPURL: "https://enwikipediaorg/wiki/Random_number_generation",
+            MATH_RANDOM_FLOAT_TITLE_RANDOM: "ランダムな分数",
+            MATH_RANDOM_FLOAT_TOOLTIP: "ランダムな分数を返すー00 (包括) の間のと 10 (排他的な)。",
+            MATH_RANDOM_INT_HELPURL: "https://enwikipediaorg/wiki/Random_number_generation",
+            MATH_RANDOM_INT_TITLE: "%1 から %2 への無作為の整数",
+            MATH_RANDOM_INT_TOOLTIP: "指定した下限の間、無作為なランダムな整数を返します。",
+            MATH_ROUND_HELPURL: "https://jawikipediaorg/wiki/端数処理",
+            MATH_ROUND_OPERATOR_ROUND: "概数",
+            MATH_ROUND_OPERATOR_ROUNDDOWN: "端数を切り捨てる",
+            MATH_ROUND_OPERATOR_ROUNDUP: "数値を切り上げ",
+            MATH_ROUND_TOOLTIP: "数値を切り上げるか切り捨てる",
+            MATH_SINGLE_HELPURL: "https://jawikipediaorg/wiki/平方根",
+            MATH_SINGLE_OP_ABSOLUTE: "絶対値",
+            MATH_SINGLE_OP_ROOT: "平方根",
+            MATH_SINGLE_TOOLTIP_ABS: "絶対値を返す",
+            MATH_SINGLE_TOOLTIP_EXP: "数値の e 粂を返す",
+            MATH_SINGLE_TOOLTIP_LN: "数値の自然対数をかえしてください",
+            MATH_SINGLE_TOOLTIP_LOG10: "log 10 を返す。",
+            MATH_SINGLE_TOOLTIP_NEG: "負の数を返す",
+            MATH_SINGLE_TOOLTIP_POW10: "１０の　x　乗",
+            MATH_SINGLE_TOOLTIP_ROOT: "平方根を返す",
+            MATH_SUBTRACTION_SYMBOL: "-",
+            MATH_TRIG_ACOS: "acos",
+            MATH_TRIG_ASIN: "asin",
+            MATH_TRIG_ATAN: "atan",
+            MATH_TRIG_COS: "cos",
+            MATH_TRIG_HELPURL: "https://jawikipediaorg/wiki/三角関数",
+            MATH_TRIG_SIN: "sin",
+            MATH_TRIG_TAN: "tan",
+            MATH_TRIG_TOOLTIP_ACOS: "arccosine の値を返す",
+            MATH_TRIG_TOOLTIP_ASIN: "番号のarcsine を返すます",
+            MATH_TRIG_TOOLTIP_ATAN: "番号のarctangent を返すます",
+            MATH_TRIG_TOOLTIP_COS: "番号のcosineの次数を返す",
+            MATH_TRIG_TOOLTIP_SIN: "番号のsineの次数を返す",
+            MATH_TRIG_TOOLTIP_TAN: "番号のtangentの次数を返す",
+            ORDINAL_NUMBER_SUFFIX: "",
+            PROCEDURES_ALLOW_STATEMENTS: "allow statements",
+            PROCEDURES_BEFORE_PARAMS: "で。",
+            PROCEDURES_CALLNORETURN_HELPURL: "https://jawikipediaorg/wiki/サブルーチン",
+            PROCEDURES_CALLNORETURN_TOOLTIP: "ユーザー定義関数 '%1' を実行します。",
+            PROCEDURES_CALLRETURN_HELPURL: "https://jawikipediaorg/wiki/サブルーチン",
+            PROCEDURES_CALLRETURN_TOOLTIP: "ユーザー定義関数 '%1' を実行し、その出力を使用します。",
+            PROCEDURES_CALL_BEFORE_PARAMS: "で。",
+            PROCEDURES_CREATE_DO: "%1をつくる",
+            PROCEDURES_DEFNORETURN_COMMENT: "Describe this function...",
+            PROCEDURES_DEFNORETURN_DO: "",
+            PROCEDURES_DEFNORETURN_HELPURL: "https://jawikipediaorg/wiki/サブルーチン",
+            PROCEDURES_DEFNORETURN_PROCEDURE: "何かしてください",
+            PROCEDURES_DEFNORETURN_TITLE: "宛先",
+            PROCEDURES_DEFNORETURN_TOOLTIP: "出力なしで関数を作成します。",
+            PROCEDURES_DEFRETURN_COMMENT: "Describe this function...",
+            PROCEDURES_DEFRETURN_DO: "",
+            PROCEDURES_DEFRETURN_HELPURL: "https://jawikipediaorg/wiki/サブルーチン",
+            PROCEDURES_DEFRETURN_PROCEDURE: "何かしてください",
+            PROCEDURES_DEFRETURN_RETURN: "返す",
+            PROCEDURES_DEFRETURN_TITLE: "宛先",
+            PROCEDURES_DEFRETURN_TOOLTIP: "出力を持つ関数を作成します。",
+            PROCEDURES_DEF_DUPLICATE_WARNING: "警告: この関数は、重複するパラメーターがあります。",
+            PROCEDURES_HIGHLIGHT_DEF: "関数の内容を強調表示します。",
+            PROCEDURES_IFRETURN_HELPURL: "http://c2com/cgi/wiki?GuardClause",
+            PROCEDURES_IFRETURN_TOOLTIP: "1番目値が true の場合、2 番目の値を返します。",
+            PROCEDURES_IFRETURN_WARNING: "警告: このブロックは、関数定義内でのみ使用できます。",
+            PROCEDURES_MUTATORARG_TITLE: "入力名:",
+            PROCEDURES_MUTATORARG_TOOLTIP: "Add an input to the function.",
+            PROCEDURES_MUTATORCONTAINER_TITLE: "入力",
+            PROCEDURES_MUTATORCONTAINER_TOOLTIP: "Add, remove, or reorder inputs to this function.",
+            TEXT_APPEND_APPENDTEXT: "テキストを追加します。",
+            TEXT_APPEND_HELPURL: "https://githubcom/google/blockly/wiki/Text#text-modification",
+            TEXT_APPEND_TO: "宛先",
+            TEXT_APPEND_TOOLTIP: "変数 '%1' にいくつかのテキストを追加します。",
+            TEXT_APPEND_VARIABLE: "項目",
+            TEXT_CHANGECASE_HELPURL: "https://githubcom/google/blockly/wiki/Text#adjusting-text-case",
+            TEXT_CHANGECASE_OPERATOR_LOWERCASE: "小文字に",
+            TEXT_CHANGECASE_OPERATOR_TITLECASE: "タイトル ケースに",
+            TEXT_CHANGECASE_OPERATOR_UPPERCASE: "大文字に変換する",
+            TEXT_CHANGECASE_TOOLTIP: "別のケースに、テキストのコピーを返します。",
+            TEXT_CHARAT_FIRST: "最初の文字を得る",
+            TEXT_CHARAT_FROM_END: "一番最後の言葉、キャラクターを所得",
+            TEXT_CHARAT_FROM_START: "文字# を取得",
+            TEXT_CHARAT_HELPURL: "https://githubcom/google/blockly/wiki/Text#extracting-text",
+            TEXT_CHARAT_INPUT_INTEXT: "テキストで",
+            TEXT_CHARAT_LAST: "最後の文字を得る",
+            TEXT_CHARAT_RANDOM: "ランダムな文字を得る",
+            TEXT_CHARAT_TAIL: "",
+            TEXT_CHARAT_TOOLTIP: "指定された位置に文字を返します。",
+            TEXT_CREATE_JOIN_ITEM_TITLE_ITEM: "項目",
+            TEXT_CREATE_JOIN_ITEM_TOOLTIP: "テキスト をアイテム追加します。",
+            TEXT_CREATE_JOIN_TITLE_JOIN: "結合",
+            TEXT_CREATE_JOIN_TOOLTIP: "追加、削除、またはセクションを順序変更して、ブロックを再構成します。",
+            TEXT_GET_SUBSTRING_END_FROM_END: "文字列の＃ 終わりからの＃",
+            TEXT_GET_SUBSTRING_END_FROM_START: "# の文字",
+            TEXT_GET_SUBSTRING_END_LAST: "最後のの文字",
+            TEXT_GET_SUBSTRING_HELPURL: "https://githubcom/google/blockly/wiki/Text#extracting-a-region-of-text",
+            TEXT_GET_SUBSTRING_INPUT_IN_TEXT: "テキストで",
+            TEXT_GET_SUBSTRING_START_FIRST: "部分文字列を取得する。",
+            TEXT_GET_SUBSTRING_START_FROM_END: "部分文字列を取得する #端から得る",
+            TEXT_GET_SUBSTRING_START_FROM_START: "文字列からの部分文字列を取得 ＃",
+            TEXT_GET_SUBSTRING_TAIL: "",
+            TEXT_GET_SUBSTRING_TOOLTIP: "テキストの指定部分を返します。",
+            TEXT_INDEXOF_HELPURL: "https://githubcom/google/blockly/wiki/Text#finding-text",
+            TEXT_INDEXOF_INPUT_INTEXT: "テキストで",
+            TEXT_INDEXOF_OPERATOR_FIRST: "テキストの最初の出現箇所を検索します。",
+            TEXT_INDEXOF_OPERATOR_LAST: "テキストの最後に見つかったを検索します。",
+            TEXT_INDEXOF_TAIL: "",
+            TEXT_INDEXOF_TOOLTIP: "最初のテキストの二番目のてきすとの、最初と最後の、出現したインデックスをかえします。テキストが見つからない場合は %1 を返します。",
+            TEXT_ISEMPTY_HELPURL: "https://githubcom/google/blockly/wiki/Text#checking-for-empty-text",
+            TEXT_ISEMPTY_TITLE: "%1 が空",
+            TEXT_ISEMPTY_TOOLTIP: "指定されたテキストが空の場合は、true を返します。",
+            TEXT_JOIN_HELPURL: "https://githubcom/google/blockly/wiki/Text#text-creation",
+            TEXT_JOIN_TITLE_CREATEWITH: "テキストを作成します。",
+            TEXT_JOIN_TOOLTIP: "任意の数の項目一部を一緒に接合してテキストの作成します。",
+            TEXT_LENGTH_HELPURL: "https://githubcom/google/blockly/wiki/Text#text-modification",
+            TEXT_LENGTH_TITLE: "%1 の長さ",
+            TEXT_LENGTH_TOOLTIP: "指定されたテキストの文字 (スペースを含む) の数を返します。",
+            TEXT_PRINT_HELPURL: "https://githubcom/google/blockly/wiki/Text#printing-text",
+            TEXT_PRINT_TITLE: "%1 を印刷します。",
+            TEXT_PRINT_TOOLTIP: "指定したテキスト、番号または他の値を印刷します。",
+            TEXT_PROMPT_HELPURL: "https://githubcom/google/blockly/wiki/Text#getting-input-from-the-user",
+            TEXT_PROMPT_TOOLTIP_NUMBER: "ユーザーにプロンプトで数字のインプットを求めます",
+            TEXT_PROMPT_TOOLTIP_TEXT: "ユーザーにプロンプトでテキストのインプットを求めます",
+            TEXT_PROMPT_TYPE_NUMBER: "プロンプトで数字の入力を求める",
+            TEXT_PROMPT_TYPE_TEXT: "プロンプトでテキストの入力を求める",
+            TEXT_TEXT_HELPURL: "https://jawikipediaorg/wiki/文字列",
+            TEXT_TEXT_TOOLTIP: "文字、単語、または行のテキスト。",
+            TEXT_TRIM_HELPURL: "https://githubcom/google/blockly/wiki/Text#trimming-removing-spaces",
+            TEXT_TRIM_OPERATOR_BOTH: "両端のスペースを取り除く",
+            TEXT_TRIM_OPERATOR_LEFT: "左端のスペースを取り除く",
+            TEXT_TRIM_OPERATOR_RIGHT: "右端のスペースを取り除く",
+            TEXT_TRIM_TOOLTIP: "スペースを 1 つまたは両方の端から削除したのち、テキストのコピーを返します。",
+            VARIABLES_DEFAULT_NAME: "項目",
+            VARIABLES_GET_CREATE_SET: "'セット%1を作成します。",
+            VARIABLES_GET_HELPURL: "https://githubcom/google/blockly/wiki/Variables#get",
+            VARIABLES_GET_TOOLTIP: "この変数の値を返します。",
+            VARIABLES_SET: "セット %1 宛先 %2",
+            VARIABLES_SET_CREATE_GET: "'%1 を取得' を作成します。",
+            VARIABLES_SET_HELPURL: "https://githubcom/google/blockly/wiki/Variables#set",
+            VARIABLES_SET_TOOLTIP: "この入力を変数と等しくなるように設定します。",
+            VIEWS_MAIN_MENU_VIEW_LOAD_ERROR: "{$filename}{$error}",
+            VIEWS_MAIN_MENU_VIEW_LOAD_SUCCEEDED: "ロードしました"
+        }
+    });
+
     Bridge.define("WebMrbc.Block", {
         type: null,
         ctor: function (type) {
@@ -58,6 +449,27 @@
                 WebMrbc.Views.MainMenuView = new WebMrbc.MainMenuView();
                 WebMrbc.Views.ClassSelectorView = new WebMrbc.ClassSelectorView(WebMrbc.Collections.ClassWorkspaces);
                 WebMrbc.Views.EObjectModalView = new WebMrbc.EObjectModalView();
+                Blockly.Blocks["colour_picker"] = new WebMrbc.ColourPickerBlock("colour_picker");
+                Blockly.Blocks["colour_random"] = new WebMrbc.ColourRandomBlock("colour_random");
+                Blockly.Blocks["colour_rgb"] = new WebMrbc.ColourRGBBlock("colour_rgb");
+                Blockly.Blocks["colour_blend"] = new WebMrbc.ColourBlendBlock("colour_blend");
+                Blockly.Blocks["lists_create_empty"] = new WebMrbc.ListsCreateEmptyBlock("lists_create_empty");
+                Blockly.Blocks["lists_create_with"] = new WebMrbc.ListsCreateWithBlock("lists_create_with");
+                Blockly.Blocks["lists_create_with_container"] = new WebMrbc.ListsCreateWithContainerBlock("lists_create_with_container");
+                Blockly.Blocks["lists_create_with_item"] = new WebMrbc.ListsCreateWithItemBlock("lists_create_with_item");
+                Blockly.Blocks["lists_repeat"] = new WebMrbc.ListsRepeatBlock("lists_repeat");
+                Blockly.Blocks["lists_length"] = new WebMrbc.ListsLengthBlock("lists_length");
+                Blockly.Blocks["lists_isEmpty"] = new WebMrbc.ListsIsEmptyBlock("lists_isEmpty");
+                Blockly.Blocks["lists_indexOf"] = new WebMrbc.ListsIndexOfBlock("lists_indexOf");
+                Blockly.Blocks["lists_getIndex"] = new WebMrbc.ListsGetIndexBlock("lists_getIndex");
+                Blockly.Blocks["lists_setIndex"] = new WebMrbc.ListsSetIndexBlock("lists_setIndex");
+                Blockly.Blocks["lists_getSublist"] = new WebMrbc.ListsGetSublistBlock("lists_getSublist");
+                Blockly.Blocks["lists_sort"] = new WebMrbc.ListsSortBlock("lists_sort");
+                Blockly.Blocks["lists_split"] = new WebMrbc.ListsSplitBlock("lists_split");
+                Blockly.Blocks["controls_if"] = new WebMrbc.ControlsIfBlock("controls_if");
+                Blockly.Blocks["controls_if_if"] = new WebMrbc.ControlsIfIfBlock("controls_if_if");
+                Blockly.Blocks["controls_if_elseif"] = new WebMrbc.ControlsIfElseIfBlock("controls_if_elseif");
+                Blockly.Blocks["controls_if_else"] = new WebMrbc.ControlsIfElseBlock("controls_if_else");
                 Blockly.Blocks["switch_case_number"] = new WebMrbc.SwitchCaseNumberBlock("switch_case_number");
                 Blockly.Blocks["switch_case_number_first_case"] = new WebMrbc.SwitchCaseNumberFirstCaseBlock("switch_case_number_first_case");
                 Blockly.Blocks["switch_case_number_case"] = new WebMrbc.SwitchCaseNumberCaseBlock("switch_case_number_case");
@@ -66,6 +478,55 @@
                 Blockly.Blocks["switch_case_text_first_case"] = new WebMrbc.SwitchCaseTextFirstCaseBlock("switch_case_text_first_case");
                 Blockly.Blocks["switch_case_text_case"] = new WebMrbc.SwitchCaseTextCaseBlock("switch_case_text_case");
                 Blockly.Blocks["switch_case_text_default"] = new WebMrbc.SwitchCaseTextDefaultBlock("switch_case_text_default");
+                Blockly.Blocks["logic_compare"] = new WebMrbc.LogicCompareBlock("logic_compare");
+                Blockly.Blocks["logic_operation"] = new WebMrbc.LogicOperationBlock("logic_operation");
+                Blockly.Blocks["logic_negate"] = new WebMrbc.LogicNegateBlock("logic_negate");
+                Blockly.Blocks["logic_boolean"] = new WebMrbc.LogicBooleanBlock("logic_boolean");
+                Blockly.Blocks["logic_null"] = new WebMrbc.LogicNullBlock("logic_null");
+                Blockly.Blocks["logic_ternary"] = new WebMrbc.LogicTernaryBlock("logic_ternary");
+                Blockly.Blocks["controls_repeat_ext"] = new WebMrbc.ControlsRepeatExtBlock("controls_repeat_ext");
+                Blockly.Blocks["controls_repeat"] = new WebMrbc.ControlsRepeatBlock("controls_repeat");
+                Blockly.Blocks["controls_whileUntil"] = new WebMrbc.ControlsWhileUntilBlock("controls_whileUntil");
+                Blockly.Blocks["controls_for"] = new WebMrbc.ControlsForBlock("controls_for");
+                Blockly.Blocks["controls_forEach"] = new WebMrbc.ControlsForEachBlock("controls_forEach");
+                Blockly.Blocks["controls_flow_statements"] = new WebMrbc.ControlsFlowStatementsBlock("controls_flow_statements");
+                Blockly.Blocks["math_number"] = new WebMrbc.MathNumberBlock("math_number");
+                Blockly.Blocks["math_arithmetic"] = new WebMrbc.MathArithmeticBlock("math_arithmetic");
+                Blockly.Blocks["math_single"] = new WebMrbc.MathSingleBlock("math_single");
+                Blockly.Blocks["math_trig"] = new WebMrbc.MathTrigBlock("math_trig");
+                Blockly.Blocks["math_constant"] = new WebMrbc.MathConstantBlock("math_constant");
+                Blockly.Blocks["math_number_property"] = new WebMrbc.MathNumberPropertyBlock("math_number_property");
+                Blockly.Blocks["math_change"] = new WebMrbc.MathChangeBlock("math_change");
+                Blockly.Blocks["math_round"] = new WebMrbc.MathRoundBlock("math_round");
+                Blockly.Blocks["math_on_list"] = new WebMrbc.MathOnListBlock("math_on_list");
+                Blockly.Blocks["math_modulo"] = new WebMrbc.MathModuloBlock("math_modulo");
+                Blockly.Blocks["math_constrain"] = new WebMrbc.MathConstrainBlock("math_constrain");
+                Blockly.Blocks["math_random_int"] = new WebMrbc.MathRandomIntBlock("math_random_int");
+                Blockly.Blocks["math_random_float"] = new WebMrbc.MathRandomFloatBlock("math_random_float");
+                Blockly.Blocks["procedures_defnoreturn"] = new WebMrbc.ProceduresDefnoreturnBlock("procedures_defnoreturn");
+                Blockly.Blocks["procedures_defreturn"] = new WebMrbc.ProceduresDefreturnBlock("procedures_defreturn");
+                Blockly.Blocks["procedures_mutatorcontainer"] = new WebMrbc.ProceduresMutatorcontainerBlock("procedures_mutatorcontainer");
+                Blockly.Blocks["procedures_mutatorarg"] = new WebMrbc.ProceduresMutatorargBlock("procedures_mutatorarg");
+                Blockly.Blocks["procedures_callnoreturn"] = new WebMrbc.ProceduresCallnoreturnBlock("procedures_callnoreturn");
+                Blockly.Blocks["procedures_callreturn"] = new WebMrbc.ProceduresCallreturnBlock("procedures_callreturn");
+                Blockly.Blocks["procedures_ifreturn"] = new WebMrbc.ProceduresIfreturnBlock("procedures_ifreturn");
+                Blockly.Blocks["text"] = new WebMrbc.TextBlock("text");
+                Blockly.Blocks["text_join"] = new WebMrbc.TextJoinBlock("text_join");
+                Blockly.Blocks["text_create_join_container"] = new WebMrbc.TextCreateJoinContainerBlock("text_create_join_container");
+                Blockly.Blocks["text_create_join_item"] = new WebMrbc.TextCreateJoinItemBlock("text_create_join_item");
+                Blockly.Blocks["text_append"] = new WebMrbc.TextAppendBlock("text_append");
+                Blockly.Blocks["text_length"] = new WebMrbc.TextLengthBlock("text_length");
+                Blockly.Blocks["text_isEmpty"] = new WebMrbc.TextIsEmptyBlock("text_isEmpty");
+                Blockly.Blocks["text_indexOf"] = new WebMrbc.TextIndexOfBlock("text_indexOf");
+                Blockly.Blocks["text_charAt"] = new WebMrbc.TextCharAtBlock("text_charAt");
+                Blockly.Blocks["text_getSubstring"] = new WebMrbc.TextGetSubstringBlock("text_getSubstring");
+                Blockly.Blocks["text_changeCase"] = new WebMrbc.TextChangeCaseBlock("text_changeCase");
+                Blockly.Blocks["text_trim"] = new WebMrbc.TextTrimBlock("text_trim");
+                Blockly.Blocks["text_print"] = new WebMrbc.TextPrintBlock("text_print");
+                Blockly.Blocks["text_prompt_ext"] = new WebMrbc.TextPromptExtBlock("text_prompt_ext");
+                Blockly.Blocks["text_prompt"] = new WebMrbc.TextPromptBlock("text_prompt");
+                Blockly.Blocks["variables_get"] = new WebMrbc.VariablesGetBlock("variables_get");
+                Blockly.Blocks["variables_set"] = new WebMrbc.VariablesSetBlock("variables_set");
                 Blockly.Blocks["eproperty_new"] = new WebMrbc.EPropertyBlock("eproperty_new");
                 Blockly.Blocks["property_attribute"] = new WebMrbc.EcnlPropertyAttributeBlock("property_attribute");
                 Blockly.Blocks["service_code"] = new WebMrbc.EcnlServiceCodeBlock("service_code");
@@ -80,8 +541,8 @@
                 Blockly.Blocks["received_data"] = new WebMrbc.EcnlReceivedDataBlock("received_data");
                 Blockly.Blocks["received_data_size"] = new WebMrbc.EcnlReceivedDataSizeBlock("received_data_size");
                 Blockly.Blocks["data_join"] = new WebMrbc.DataJoinBlock("data_join");
-                Blockly.Blocks["data_create_join_container"] = new WebMrbc.DataCreateJoinContainer("data_create_join_container");
-                Blockly.Blocks["data_create_join_item"] = new WebMrbc.DataCreateJoinItem("data_create_join_item");
+                Blockly.Blocks["data_create_join_container"] = new WebMrbc.DataCreateJoinContainerBlock("data_create_join_container");
+                Blockly.Blocks["data_create_join_item"] = new WebMrbc.DataCreateJoinItemBlock("data_create_join_item");
                 Blockly.Blocks["create_esv_get"] = new WebMrbc.CreateEsvGetBlock("create_esv_get");
                 Blockly.Blocks["create_esv_set"] = new WebMrbc.CreateEsvSetBlock("create_esv_set");
                 Blockly.Blocks["esv_add_edt"] = new WebMrbc.EsvAddEdtBlock("esv_add_edt");
@@ -494,10 +955,6 @@
                 window["textEditor"].moveCursorTo(0, 0);
                 WebMrbc.App.addEObjectFromBeginning();
                 window["changed"] = false;
-            },
-            bm: function (name) {
-                var msg = Blockly.Msg[name];
-                return (Bridge.referenceEquals(String, String)) ? msg : name;
             },
             addEObjectFromBeginning: function () {
                 var $t;
@@ -1211,6 +1668,18 @@
             EcnlTaskWorkspace: null,
             MainLoopWorkspace: null
         }
+    });
+
+    Bridge.define("WebMrbc.Colour", {
+        statics: {
+            HUE: 20
+        }
+    });
+
+    Bridge.define("WebMrbc.ContextMenuOption", {
+        enabled: false,
+        text: null,
+        callback: null
     });
 
     Bridge.define("WebMrbc.EmModule", {
@@ -2198,6 +2667,24 @@
         config: null
     });
 
+    Bridge.define("WebMrbc.Lists", {
+        statics: {
+            HUE: 260
+        }
+    });
+
+    Bridge.define("WebMrbc.Logic", {
+        statics: {
+            HUE: 210
+        }
+    });
+
+    Bridge.define("WebMrbc.Loops", {
+        statics: {
+            HUE: 120
+        }
+    });
+
     Bridge.define("WebMrbc.MainMenuView", {
         el: null,
         ctor: function () {
@@ -2322,7 +2809,7 @@
         },
         load: function (info) {
             if (info.error != null) {
-                window["errorMessage"].call(null, goog.getMsg(WebMrbc.App.bm("VIEWS_MAIN_MENU_VIEW_LOAD_ERROR"), new $_.$AnonymousType$4(info.filename, info.error)));
+                window["errorMessage"].call(null, goog.getMsg(Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_ERROR, new $_.$AnonymousType$4(info.filename, info.error)));
             } else {
                 clearMessages();
 
@@ -2354,7 +2841,7 @@
                 // TODO: Window.changed -> Smalruby.Models.SourceCode.changed
                 window["changed"] = false;
                 WebMrbc.App.changedAfterTranslating = true;
-                window["successMessage"].call(null, WebMrbc.App.bm("VIEWS_MAIN_MENU_VIEW_LOAD_SUCCEEDED"));
+                window["successMessage"].call(null, Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_SUCCEEDED);
             }
         }
     });
@@ -2431,6 +2918,12 @@
         }
     });
 
+    Bridge.define("WebMrbc.Math", {
+        statics: {
+            HUE: 230
+        }
+    });
+
     Bridge.define("WebMrbc.State", {
         $kind: "enum",
         statics: {
@@ -2452,6 +2945,12 @@
             BitFieldDescription: 15,
             BitRangeEnd: 16,
             Colon: 17
+        }
+    });
+
+    Bridge.define("WebMrbc.Texts", {
+        statics: {
+            HUE: 160
         }
     });
 
@@ -2977,6 +3476,12 @@
         }
     });
 
+    Bridge.define("WebMrbc.Variables", {
+        statics: {
+            HUE: 330
+        }
+    });
+
     Bridge.define("WebMrbc.Views", {
         statics: {
             ClassSelectorView: null,
@@ -3306,6 +3811,866 @@
         }
     }; });
 
+    Bridge.define("WebMrbc.ColourBlendBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.COLOUR_BLEND_HELPURL);
+            this.setColour(WebMrbc.Colour.HUE);
+            this.appendValueInput("COLOUR1").setCheck("Colour").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_BLEND_TITLE).appendField(Blockly.Msg.COLOUR_BLEND_COLOUR1);
+            this.appendValueInput("COLOUR2").setCheck("Colour").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_BLEND_COLOUR2);
+            this.appendValueInput("RATIO").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_BLEND_RATIO);
+            this.setOutput(true, "Colour");
+            this.setTooltip(Blockly.Msg.COLOUR_BLEND_TOOLTIP);
+        }
+    });
+
+    Bridge.define("WebMrbc.ColourPickerBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$5("%1", [new $_.$AnonymousType$6("field_colour", "COLOUR", "#ff0000")], "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_PICKER_HELPURL));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            // Colour block is trivial.  Use tooltip of parent block if it exists.
+            this.setTooltip(function () {
+                var parent = thisBlock.getParent();
+                return (parent != null && parent.getInputsInline() && !System.String.isNullOrEmpty(parent.tooltip)) ? parent.tooltip : Blockly.Msg.COLOUR_PICKER_TOOLTIP;
+            });
+        }
+    });
+
+    Bridge.define("$AnonymousType$5", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, output, colour, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.output = output;
+            this.colour = colour;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getoutput : function () {
+            return this.output;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$5)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([6320534454, this.message0, this.args0, this.output, this.colour, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                output : this.output,
+                colour : this.colour,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("$AnonymousType$6", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, colour) {
+            this.type = type;
+            this.name = name;
+            this.colour = colour;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$6)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.colour, o.colour);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([6320599990, this.type, this.name, this.colour]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                colour : this.colour
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ColourRandomBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$7(Blockly.Msg.COLOUR_RANDOM_TITLE, "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_RANDOM_TOOLTIP, Blockly.Msg.COLOUR_RANDOM_HELPURL));
+        }
+    });
+
+    Bridge.define("$AnonymousType$7", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, output, colour, tooltip, helpUrl) {
+            this.message0 = message0;
+            this.output = output;
+            this.colour = colour;
+            this.tooltip = tooltip;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getoutput : function () {
+            return this.output;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gettooltip : function () {
+            return this.tooltip;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$7)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([6320665526, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                output : this.output,
+                colour : this.colour,
+                tooltip : this.tooltip,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ColourRGBBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.COLOUR_RGB_HELPURL);
+            this.setColour(WebMrbc.Colour.HUE);
+            this.appendValueInput("RED").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_RGB_TITLE).appendField(Blockly.Msg.COLOUR_RGB_RED);
+            this.appendValueInput("GREEN").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_RGB_GREEN);
+            this.appendValueInput("BLUE").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.COLOUR_RGB_BLUE);
+            this.setOutput(true, "Colour");
+            this.setTooltip(Blockly.Msg.COLOUR_RGB_TOOLTIP);
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsFlowStatementsBlock", {
+        inherits: [WebMrbc.Block],
+        LOOP_TYPES: null,
+        config: {
+            init: function () {
+                this.LOOP_TYPES = ["controls_repeat", "controls_repeat_ext", "controls_forEach", "controls_for", "controls_whileUntil"];
+            }
+        },
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.CONTROLS_FLOW_STATEMENTS_OPERATOR_BREAK, "BREAK"], [Blockly.Msg.CONTROLS_FLOW_STATEMENTS_OPERATOR_CONTINUE, "CONTINUE"]];
+            this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+            this.setColour(WebMrbc.Loops.HUE);
+            this.appendDummyInput().appendField(new Blockly.FieldDropdown(OPERATORS), "FLOW");
+            this.setPreviousStatement(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("FLOW")) {
+                    case "BREAK": 
+                        return Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK;
+                    case "CONTINUE": 
+                        return Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE;
+                }
+                return "";
+            });
+        },
+        onchange: function (e) {
+            var legal = false;
+            // Is the block nested in a loop?
+            var block = Bridge.cast(this, WebMrbc.Block);
+            do {
+                if (this.LOOP_TYPES.indexOf(block.type) !== -1) {
+                    legal = true;
+                    break;
+                }
+                block = block.getSurroundParent();
+            } while (block != null);
+            if (legal) {
+                this.setWarningText(null);
+            } else {
+                this.setWarningText(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_WARNING);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsForBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$8(Blockly.Msg.CONTROLS_FOR_TITLE, [new $_.$AnonymousType$9("field_variable", "VAR", null), new $_.$AnonymousType$10("input_value", "FROM", "Number", "RIGHT"), new $_.$AnonymousType$10("input_value", "TO", "Number", "RIGHT"), new $_.$AnonymousType$10("input_value", "BY", "Number", "RIGHT")], true, null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOR_HELPURL));
+            this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOR_INPUT_DO);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                return System.String.replaceAll(Blockly.Msg.CONTROLS_FOR_TOOLTIP, "%1", thisBlock.getFieldValue("VAR"));
+            });
+        },
+        customContextMenu: function (options) {
+            if (!this.isCollapsed()) {
+                var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                    enabled: true
+                } );
+                var name = this.getFieldValue("VAR");
+                option.text = System.String.replaceAll(Blockly.Msg.VARIABLES_SET_CREATE_GET, "%1", name);
+                var xmlField = goog.dom.createDom("field", null, name);
+                xmlField.setAttribute("name", "VAR");
+                var xmlBlock = goog.dom.createDom("block", null, xmlField);
+                xmlBlock.setAttribute("type", "variables_get");
+                option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+                options.push(option);
+            }
+        }
+    });
+
+    Bridge.define("$AnonymousType$8", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, inputsInline, previousStatement, nextStatement, colour, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.inputsInline = inputsInline;
+            this.previousStatement = previousStatement;
+            this.nextStatement = nextStatement;
+            this.colour = colour;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getinputsInline : function () {
+            return this.inputsInline;
+        },
+        getpreviousStatement : function () {
+            return this.previousStatement;
+        },
+        getnextStatement : function () {
+            return this.nextStatement;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$8)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([6320731062, this.message0, this.args0, this.inputsInline, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                inputsInline : this.inputsInline,
+                previousStatement : this.previousStatement,
+                nextStatement : this.nextStatement,
+                colour : this.colour,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("$AnonymousType$9", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, variable) {
+            this.type = type;
+            this.name = name;
+            this.variable = variable;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getvariable : function () {
+            return this.variable;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$9)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([6320796598, this.type, this.name, this.variable]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                variable : this.variable
+            };
+        }
+    });
+
+    Bridge.define("$AnonymousType$10", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, check, align) {
+            this.type = type;
+            this.name = name;
+            this.check = check;
+            this.align = align;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getcheck : function () {
+            return this.check;
+        },
+        getalign : function () {
+            return this.align;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$10)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check) && Bridge.equals(this.align, o.align);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7125578678, this.type, this.name, this.check, this.align]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                check : this.check,
+                align : this.align
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsForEachBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$11(Blockly.Msg.CONTROLS_FOREACH_TITLE, [new $_.$AnonymousType$9("field_variable", "VAR", null), new $_.$AnonymousType$12("input_value", "LIST", "Array")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOREACH_HELPURL));
+            this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOREACH_INPUT_DO);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                return System.String.replaceAll(Blockly.Msg.CONTROLS_FOREACH_TOOLTIP, "%1", thisBlock.getFieldValue("VAR"));
+            });
+        },
+        customContextMenu: function (options) {
+            if (!this.isCollapsed()) {
+                var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                    enabled: true
+                } );
+                var name = this.getFieldValue("VAR");
+                option.text = System.String.replaceAll(Blockly.Msg.VARIABLES_SET_CREATE_GET, "%1", name);
+                var xmlField = goog.dom.createDom("field", null, name);
+                xmlField.setAttribute("name", "VAR");
+                var xmlBlock = goog.dom.createDom("block", null, xmlField);
+                xmlBlock.setAttribute("type", "variables_get");
+                option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+                options.push(option);
+            }
+        }
+    });
+
+    Bridge.define("$AnonymousType$11", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, previousStatement, nextStatement, colour, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.previousStatement = previousStatement;
+            this.nextStatement = nextStatement;
+            this.colour = colour;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getpreviousStatement : function () {
+            return this.previousStatement;
+        },
+        getnextStatement : function () {
+            return this.nextStatement;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$11)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7142355894, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                previousStatement : this.previousStatement,
+                nextStatement : this.nextStatement,
+                colour : this.colour,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("$AnonymousType$12", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, check) {
+            this.type = type;
+            this.name = name;
+            this.check = check;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getcheck : function () {
+            return this.check;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$12)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7159133110, this.type, this.name, this.check]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                check : this.check
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsIfBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.CONTROLS_IF_HELPURL);
+            this.setColour(WebMrbc.Logic.HUE);
+            this.appendValueInput("IF0").setCheck("Boolean").appendField(Blockly.Msg.CONTROLS_IF_MSG_IF);
+            this.appendStatementInput("DO0").appendField(Blockly.Msg.CONTROLS_IF_MSG_THEN);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setMutator(new Blockly.Mutator(["controls_if_elseif", "controls_if_else"]));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                if (thisBlock.elseifCount_ === 0 && thisBlock.elseCount_ === 0) {
+                    return Blockly.Msg.CONTROLS_IF_TOOLTIP_1;
+                } else if (thisBlock.elseifCount_ === 0 && thisBlock.elseCount_ !== 0) {
+                    return Blockly.Msg.CONTROLS_IF_TOOLTIP_2;
+                } else if (thisBlock.elseifCount_ !== 0 && thisBlock.elseCount_ === 0) {
+                    return Blockly.Msg.CONTROLS_IF_TOOLTIP_3;
+                } else if (thisBlock.elseifCount_ !== 0 && thisBlock.elseCount_ !== 0) {
+                    return Blockly.Msg.CONTROLS_IF_TOOLTIP_4;
+                }
+                return "";
+            });
+            this.elseifCount_ = 0;
+            this.elseCount_ = 0;
+        },
+        mutationToDom: function () {
+            if (this.elseifCount_ === 0 && this.elseCount_ === 0) {
+                return null;
+            }
+            var container = document.createElement("mutation");
+            if (this.elseifCount_ !== 0) {
+                container.setAttribute("elseif", this.elseifCount_.toString());
+            }
+            if (this.elseCount_ !== 0) {
+                container.setAttribute("else", "1");
+            }
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.elseifCount_ = parseInt(xmlElement.getAttribute("elseif"), 10);
+            this.elseCount_ = parseInt(xmlElement.getAttribute("else"), 10);
+            this.updateShape_();
+        },
+        decompose: function (workspace) {
+            var containerBlock = workspace.newBlock("controls_if_if");
+            containerBlock.initSvg();
+            var connection = containerBlock.nextConnection;
+            for (var i = 1; i <= this.elseifCount_; i = (i + 1) | 0) {
+                var elseifBlock = workspace.newBlock("controls_if_elseif");
+                elseifBlock.initSvg();
+                connection.connect(elseifBlock.previousConnection);
+                connection = elseifBlock.nextConnection;
+            }
+            if (this.elseCount_ !== 0) {
+                var elseBlock = workspace.newBlock("controls_if_else");
+                elseBlock.initSvg();
+                connection.connect(elseBlock.previousConnection);
+            }
+            return containerBlock;
+        },
+        compose: function (containerBlock) {
+            var clauseBlock = containerBlock.nextConnection.targetBlock();
+            // Count number of inputs.
+            this.elseifCount_ = 0;
+            this.elseCount_ = 0;
+            var valueConnections = [null];
+            var statementConnections = [null];
+            var elseStatementConnection = null;
+            while (clauseBlock != null) {
+                switch (clauseBlock.type) {
+                    case "controls_if_elseif": 
+                        this.elseifCount_ = (this.elseifCount_ + 1) | 0;
+                        valueConnections.push(clauseBlock.valueConnection_);
+                        statementConnections.push(clauseBlock.statementConnection_);
+                        break;
+                    case "controls_if_else": 
+                        this.elseCount_ = (this.elseCount_ + 1) | 0;
+                        elseStatementConnection = clauseBlock.statementConnection_;
+                        break;
+                    default: 
+                        throw new System.Exception("Unknown block type.");
+                }
+                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
+            }
+            this.updateShape_();
+            // Reconnect any child blocks.
+            for (var i = 1; i <= this.elseifCount_; i = (i + 1) | 0) {
+                Blockly.Mutator.reconnect(valueConnections[i], this, System.String.concat("IF", i));
+                Blockly.Mutator.reconnect(statementConnections[i], this, System.String.concat("DO", i));
+            }
+            Blockly.Mutator.reconnect(elseStatementConnection, this, "ELSE");
+        },
+        saveConnections: function (containerBlock) {
+            var clauseBlock = containerBlock.nextConnection.targetBlock();
+            var i = 1;
+            while (clauseBlock != null) {
+                switch (clauseBlock.type) {
+                    case "controls_if_elseif": 
+                        {
+                            var inputIf = this.getInput(System.String.concat("IF", i));
+                            var inputDo = this.getInput(System.String.concat("DO", i));
+                            clauseBlock.valueConnection_ = (inputIf != null) ? inputIf.connection.targetConnection : null;
+                            clauseBlock.statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
+                            i = (i + 1) | 0;
+                        }
+                        break;
+                    case "controls_if_else": 
+                        {
+                            var inputDo1 = this.getInput("ELSE");
+                            clauseBlock.statementConnection_ = (inputDo1 != null) ? inputDo1.connection.targetConnection : null;
+                        }
+                        break;
+                    default: 
+                        throw new System.Exception("Unknown block type.");
+                }
+                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
+            }
+        },
+        updateShape_: function () {
+            // Delete everything.
+            if (this.getInput("ELSE") != null) {
+                this.removeInput("ELSE");
+            }
+            var i = 1;
+            while (this.getInput(System.String.concat("IF", i)) != null) {
+                this.removeInput(System.String.concat("IF", i));
+                this.removeInput(System.String.concat("DO", i));
+                i = (i + 1) | 0;
+            }
+            // Rebuild block.
+            for (i = 1; i <= this.elseifCount_; i = (i + 1) | 0) {
+                this.appendValueInput(System.String.concat("IF", i)).setCheck("Boolean").appendField(Blockly.Msg.CONTROLS_IF_MSG_ELSEIF);
+                this.appendStatementInput(System.String.concat("DO", i)).appendField(Blockly.Msg.CONTROLS_IF_MSG_THEN);
+            }
+            if (this.elseCount_ !== 0) {
+                this.appendStatementInput("ELSE").appendField(Blockly.Msg.CONTROLS_IF_MSG_ELSE);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsIfElseBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Logic.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.CONTROLS_IF_ELSE_TITLE_ELSE);
+            this.setPreviousStatement(true);
+            this.setTooltip(Blockly.Msg.CONTROLS_IF_ELSE_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsIfElseIfBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Logic.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.CONTROLS_IF_ELSEIF_TITLE_ELSEIF);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setTooltip(Blockly.Msg.CONTROLS_IF_ELSEIF_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsIfIfBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Logic.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.CONTROLS_IF_IF_TITLE_IF);
+            this.setNextStatement(true);
+            this.setTooltip(Blockly.Msg.CONTROLS_IF_IF_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsRepeatBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$13(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $_.$AnonymousType$14("field_number", "TIMES", 10, 0, 1)], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+        }
+    });
+
+    Bridge.define("$AnonymousType$13", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.previousStatement = previousStatement;
+            this.nextStatement = nextStatement;
+            this.colour = colour;
+            this.tooltip = tooltip;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getpreviousStatement : function () {
+            return this.previousStatement;
+        },
+        getnextStatement : function () {
+            return this.nextStatement;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gettooltip : function () {
+            return this.tooltip;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$13)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7175910326, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                previousStatement : this.previousStatement,
+                nextStatement : this.nextStatement,
+                colour : this.colour,
+                tooltip : this.tooltip,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("$AnonymousType$14", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, value, min, precision) {
+            this.type = type;
+            this.name = name;
+            this.value = value;
+            this.min = min;
+            this.precision = precision;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getvalue : function () {
+            return this.value;
+        },
+        getmin : function () {
+            return this.min;
+        },
+        getprecision : function () {
+            return this.precision;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$14)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.value, o.value) && Bridge.equals(this.min, o.min) && Bridge.equals(this.precision, o.precision);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7192687542, this.type, this.name, this.value, this.min, this.precision]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                value : this.value,
+                min : this.min,
+                precision : this.precision
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsRepeatExtBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$13(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $_.$AnonymousType$12("input_value", "TIMES", "Number")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
+        }
+    });
+
+    Bridge.define("WebMrbc.ControlsWhileUntilBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.CONTROLS_WHILEUNTIL_OPERATOR_WHILE, "WHILE"], [Blockly.Msg.CONTROLS_WHILEUNTIL_OPERATOR_UNTIL, "UNTIL"]];
+            this.setHelpUrl(Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL);
+            this.setColour(WebMrbc.Loops.HUE);
+            this.appendValueInput("BOOL").setCheck("Boolean").appendField(new Blockly.FieldDropdown(OPERATORS), "MODE");
+            this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_WHILEUNTIL_INPUT_DO);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("MODE")) {
+                    case "WHILE": 
+                        return Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP_WHILE;
+                    case "UNTIL": 
+                        return Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL;
+                }
+                return "";
+            });
+        }
+    });
+
     Bridge.define("WebMrbc.CreateEsvGetBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
@@ -3313,11 +4678,11 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1 電文の作成 %2 プロパティコード %3", [new $_.$AnonymousType$6("field_dropdown", "TYPE", [["読み出し要求", "esv_get"], ["通知要求", "esv_inf_req"]]), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$8("input_value", "EPC", "Number", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1 電文の作成 %2 プロパティコード %3", [new $_.$AnonymousType$16("field_dropdown", "TYPE", [["読み出し要求", "esv_get"], ["通知要求", "esv_inf_req"]]), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$10("input_value", "EPC", "Number", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$5", $_, {
+    Bridge.define("$AnonymousType$15", $_, {
         $kind: "anonymous",
         ctor: function (message0, args0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -3346,13 +4711,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$5)) {
+            if (!Bridge.is(o, $_.$AnonymousType$15)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320534454, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7209464758, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -3367,7 +4732,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$6", $_, {
+    Bridge.define("$AnonymousType$16", $_, {
         $kind: "anonymous",
         ctor: function (type, name, options) {
             this.type = type;
@@ -3384,13 +4749,13 @@
             return this.options;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$6)) {
+            if (!Bridge.is(o, $_.$AnonymousType$16)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.options, o.options);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320599990, this.type, this.name, this.options]);
+            var h = Bridge.addHash([7226241974, this.type, this.name, this.options]);
             return h;
         },
         toJSON: function () {
@@ -3402,7 +4767,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$7", $_, {
+    Bridge.define("$AnonymousType$17", $_, {
         $kind: "anonymous",
         ctor: function (type) {
             this.type = type;
@@ -3411,58 +4776,18 @@
             return this.type;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$7)) {
+            if (!Bridge.is(o, $_.$AnonymousType$17)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320665526, this.type]);
+            var h = Bridge.addHash([7243019190, this.type]);
             return h;
         },
         toJSON: function () {
             return {
                 type : this.type
-            };
-        }
-    });
-
-    Bridge.define("$AnonymousType$8", $_, {
-        $kind: "anonymous",
-        ctor: function (type, name, check, align) {
-            this.type = type;
-            this.name = name;
-            this.check = check;
-            this.align = align;
-        },
-        gettype : function () {
-            return this.type;
-        },
-        getname : function () {
-            return this.name;
-        },
-        getcheck : function () {
-            return this.check;
-        },
-        getalign : function () {
-            return this.align;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$8)) {
-                return false;
-            }
-            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check) && Bridge.equals(this.align, o.align);
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([6320731062, this.type, this.name, this.check, this.align]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-                type : this.type,
-                name : this.name,
-                check : this.check,
-                align : this.align
             };
         }
     });
@@ -3474,7 +4799,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", [new $_.$AnonymousType$6("field_dropdown", "TYPE", [["書き込み要求（応答不要）", "esv_set_i"], ["書き込み要求（応答要）", "esv_set_c"], ["書き込み・読み出し要求", "esv_set_get"], ["通知（応答要）", "esv_infc"]]), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$8("input_value", "EPC", "Number", "RIGHT"), new $_.$AnonymousType$8("input_value", "EDT", "String", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", [new $_.$AnonymousType$16("field_dropdown", "TYPE", [["書き込み要求（応答不要）", "esv_set_i"], ["書き込み要求（応答要）", "esv_set_c"], ["書き込み・読み出し要求", "esv_set_get"], ["通知（応答要）", "esv_infc"]]), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$10("input_value", "EPC", "Number", "RIGHT"), new $_.$AnonymousType$10("input_value", "EDT", "String", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -3493,7 +4818,7 @@
         }
     });
 
-    Bridge.define("WebMrbc.DataCreateJoinContainer", {
+    Bridge.define("WebMrbc.DataCreateJoinContainerBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
             this.$initialize();
@@ -3508,7 +4833,7 @@
         }
     });
 
-    Bridge.define("WebMrbc.DataCreateJoinItem", {
+    Bridge.define("WebMrbc.DataCreateJoinItemBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
             this.$initialize();
@@ -3832,66 +5157,11 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 に %2 %3 として %4 %5 を追加", [new $_.$AnonymousType$10("field_variable", "ESV", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "EPC", "Number"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "EDT", "String")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 に %2 %3 として %4 %5 を追加", [new $_.$AnonymousType$18("field_variable", "ESV", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "EPC", "Number"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "EDT", "String")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$9", $_, {
-        $kind: "anonymous",
-        ctor: function (message0, args0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
-            this.message0 = message0;
-            this.args0 = args0;
-            this.previousStatement = previousStatement;
-            this.nextStatement = nextStatement;
-            this.colour = colour;
-            this.tooltip = tooltip;
-            this.helpUrl = helpUrl;
-        },
-        getmessage0 : function () {
-            return this.message0;
-        },
-        getargs0 : function () {
-            return this.args0;
-        },
-        getpreviousStatement : function () {
-            return this.previousStatement;
-        },
-        getnextStatement : function () {
-            return this.nextStatement;
-        },
-        getcolour : function () {
-            return this.colour;
-        },
-        gettooltip : function () {
-            return this.tooltip;
-        },
-        gethelpUrl : function () {
-            return this.helpUrl;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$9)) {
-                return false;
-            }
-            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([6320796598, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-                message0 : this.message0,
-                args0 : this.args0,
-                previousStatement : this.previousStatement,
-                nextStatement : this.nextStatement,
-                colour : this.colour,
-                tooltip : this.tooltip,
-                helpUrl : this.helpUrl
-            };
-        }
-    });
-
-    Bridge.define("$AnonymousType$10", $_, {
+    Bridge.define("$AnonymousType$18", $_, {
         $kind: "anonymous",
         ctor: function (type, name, variable) {
             this.type = type;
@@ -3908,13 +5178,13 @@
             return this.variable;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$10)) {
+            if (!Bridge.is(o, $_.$AnonymousType$18)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7125578678, this.type, this.name, this.variable]);
+            var h = Bridge.addHash([7259796406, this.type, this.name, this.variable]);
             return h;
         },
         toJSON: function () {
@@ -3926,41 +5196,6 @@
         }
     });
 
-    Bridge.define("$AnonymousType$11", $_, {
-        $kind: "anonymous",
-        ctor: function (type, name, check) {
-            this.type = type;
-            this.name = name;
-            this.check = check;
-        },
-        gettype : function () {
-            return this.type;
-        },
-        getname : function () {
-            return this.name;
-        },
-        getcheck : function () {
-            return this.check;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$11)) {
-                return false;
-            }
-            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([7142355894, this.type, this.name, this.check]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-                type : this.type,
-                name : this.name,
-                check : this.check
-            };
-        }
-    });
-
     Bridge.define("WebMrbc.EsvAddEpcBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
@@ -3968,7 +5203,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 に %2 %3 を追加", [new $_.$AnonymousType$10("field_variable", "ESV", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "EPC", "Number")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 に %2 %3 を追加", [new $_.$AnonymousType$18("field_variable", "ESV", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "EPC", "Number")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -3979,7 +5214,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1 のサービスコード", [new $_.$AnonymousType$10("field_variable", "ESV", "item")], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1 のサービスコード", [new $_.$AnonymousType$18("field_variable", "ESV", "item")], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -3990,11 +5225,11 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 にある要素で繰り返し %2 %3", [new $_.$AnonymousType$10("field_variable", "ESV", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$12("input_statement", "DO")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 にある要素で繰り返し %2 %3", [new $_.$AnonymousType$18("field_variable", "ESV", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$19("input_statement", "DO")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$12", $_, {
+    Bridge.define("$AnonymousType$19", $_, {
         $kind: "anonymous",
         ctor: function (type, name) {
             this.type = type;
@@ -4007,13 +5242,13 @@
             return this.name;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$12)) {
+            if (!Bridge.is(o, $_.$AnonymousType$19)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7159133110, this.type, this.name]);
+            var h = Bridge.addHash([7276573622, this.type, this.name]);
             return h;
         },
         toJSON: function () {
@@ -4031,7 +5266,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1", [new $_.$AnonymousType$6("field_dropdown", "ITEM", [["プロパティコード", "epc"], ["プロパティ値", "edt"], ["要素の番号", "state"]])], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1", [new $_.$AnonymousType$16("field_dropdown", "ITEM", [["プロパティコード", "epc"], ["プロパティ値", "edt"], ["要素の番号", "state"]])], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -4332,6 +5567,1242 @@
         }
     });
 
+    Bridge.define("WebMrbc.ListsCreateEmptyBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$7(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE, "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_CREATE_EMPTY_TOOLTIP, Blockly.Msg.LISTS_CREATE_EMPTY_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsCreateWithBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.LISTS_CREATE_WITH_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            this.itemCount_ = 3;
+            this.updateShape_();
+            this.setOutput(true, "Array");
+            this.setMutator(new Blockly.Mutator(["lists_create_with_item"]));
+            this.setTooltip(Blockly.Msg.LISTS_CREATE_WITH_TOOLTIP);
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("items", this.itemCount_.toString());
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.itemCount_ = parseInt(xmlElement.getAttribute("items"), 10);
+            this.updateShape_();
+        },
+        decompose: function (workspace) {
+            var containerBlock = workspace.newBlock("lists_create_with_container");
+            containerBlock.initSvg();
+            var connection = containerBlock.getInput("STACK").connection;
+            for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                var itemBlock = workspace.newBlock("lists_create_with_item");
+                itemBlock.initSvg();
+                connection.connect(itemBlock.previousConnection);
+                connection = itemBlock.nextConnection;
+            }
+            return containerBlock;
+        },
+        compose: function (containerBlock) {
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
+            // Count number of inputs.
+            var connections = System.Array.init(0, null);
+            while (itemBlock != null) {
+                connections.push(itemBlock.valueConnection_);
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
+            }
+            // Disconnect any children that don"t belong.
+            for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                var connection = this.getInput(System.String.concat("ADD", i)).connection.targetConnection;
+                if (connection != null && System.Array.indexOfT(connections, connection) === -1) {
+                    connection.disconnect();
+                }
+            }
+            this.itemCount_ = connections.length;
+            this.updateShape_();
+            // Reconnect any child blocks.
+            for (var i1 = 0; i1 < this.itemCount_; i1 = (i1 + 1) | 0) {
+                Blockly.Mutator.reconnect(connections[i1], this, System.String.concat("ADD", i1));
+            }
+        },
+        saveConnections: function (containerBlock) {
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
+            var i = 0;
+            while (itemBlock != null) {
+                var input = this.getInput(System.String.concat("ADD", i));
+                itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
+                i = (i + 1) | 0;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
+            }
+        },
+        updateShape_: function () {
+            if (this.itemCount_ !== 0 && this.getInput("EMPTY") != null) {
+                this.removeInput("EMPTY");
+            } else if (this.itemCount_ === 0 && this.getInput("EMPTY") == null) {
+                this.appendDummyInput("EMPTY").appendField(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE);
+            }
+            // Add new inputs.
+            var i;
+            for (i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                if (this.getInput(System.String.concat("ADD", i)) == null) {
+                    var input = this.appendValueInput(System.String.concat("ADD", i));
+                    if (i === 0) {
+                        input.appendField(Blockly.Msg.LISTS_CREATE_WITH_INPUT_WITH);
+                    }
+                }
+            }
+            // Remove deleted inputs.
+            while (this.getInput(System.String.concat("ADD", i)) != null) {
+                this.removeInput(System.String.concat("ADD", i));
+                i = (i + 1) | 0;
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsCreateWithContainerBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Lists.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.LISTS_CREATE_WITH_CONTAINER_TITLE_ADD);
+            this.appendStatementInput("STACK");
+            this.setTooltip(Blockly.Msg.LISTS_CREATE_WITH_CONTAINER_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsCreateWithItemBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Lists.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.LISTS_CREATE_WITH_ITEM_TITLE);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setTooltip(Blockly.Msg.LISTS_CREATE_WITH_ITEM_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsGetIndexBlock", {
+        inherits: [WebMrbc.Block],
+        WHERE_OPTIONS: null,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var MODE = [[Blockly.Msg.LISTS_GET_INDEX_GET, "GET"], [Blockly.Msg.LISTS_GET_INDEX_GET_REMOVE, "GET_REMOVE"], [Blockly.Msg.LISTS_GET_INDEX_REMOVE, "REMOVE"]];
+            this.WHERE_OPTIONS = [[Blockly.Msg.LISTS_GET_INDEX_FROM_START, "FROM_START"], [Blockly.Msg.LISTS_GET_INDEX_FROM_END, "FROM_END"], [Blockly.Msg.LISTS_GET_INDEX_FIRST, "FIRST"], [Blockly.Msg.LISTS_GET_INDEX_LAST, "LAST"], [Blockly.Msg.LISTS_GET_INDEX_RANDOM, "RANDOM"]];
+            this.setHelpUrl(Blockly.Msg.LISTS_GET_INDEX_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            var modeMenu = new Blockly.FieldDropdown(MODE, Bridge.fn.bind(this, $_.WebMrbc.ListsGetIndexBlock.f1));
+            this.appendValueInput("VALUE").setCheck("Array").appendField(Blockly.Msg.LISTS_GET_INDEX_INPUT_IN_LIST);
+            this.appendDummyInput().appendField(modeMenu, "MODE").appendField("", "SPACE");
+            this.appendDummyInput("AT");
+            if (!System.String.isNullOrEmpty(Blockly.Msg.LISTS_GET_INDEX_TAIL)) {
+                this.appendDummyInput("TAIL").appendField(Blockly.Msg.LISTS_GET_INDEX_TAIL);
+            }
+            this.setInputsInline(true);
+            this.setOutput(true);
+            this.updateAt_(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                var mode = thisBlock.getFieldValue("MODE");
+                var where = thisBlock.getFieldValue("WHERE");
+                var tooltip = "";
+                switch (System.String.concat(System.String.concat(mode, " "), where)) {
+                    case "GET FROM_START": 
+                    case "GET FROM_END": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FROM;
+                        break;
+                    case "GET FIRST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FIRST;
+                        break;
+                    case "GET LAST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_LAST;
+                        break;
+                    case "GET RANDOM": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_RANDOM;
+                        break;
+                    case "GET_REMOVE FROM_START": 
+                    case "GET_REMOVE FROM_END": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM;
+                        break;
+                    case "GET_REMOVE FIRST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST;
+                        break;
+                    case "GET_REMOVE LAST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST;
+                        break;
+                    case "GET_REMOVE RANDOM": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM;
+                        break;
+                    case "REMOVE FROM_START": 
+                    case "REMOVE FROM_END": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM;
+                        break;
+                    case "REMOVE FIRST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST;
+                        break;
+                    case "REMOVE LAST": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST;
+                        break;
+                    case "REMOVE RANDOM": 
+                        tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM;
+                        break;
+                }
+                if (Bridge.referenceEquals(where, "FROM_START") || Bridge.referenceEquals(where, "FROM_END")) {
+                    var msg = (Bridge.referenceEquals(where, "FROM_START")) ? Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP : Blockly.Msg.LISTS_INDEX_FROM_END_TOOLTIP;
+                    tooltip = System.String.concat(tooltip, (System.String.concat("  ", System.String.replaceAll(msg, "%1", thisBlock.workspace.options.oneBasedIndex ? "#1" : "#0"))));
+                }
+                return tooltip;
+            });
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var isStatement = this.outputConnection == null;
+            container.setAttribute("statement", System.Boolean.toString(isStatement));
+            var isAt = this.getInput("AT").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at", System.Boolean.toString(isAt));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            // Note: Until January 2013 this block did not have mutations,
+            // so "statement" defaults to false and "at" defaults to true.
+            var isStatement = (Bridge.referenceEquals(xmlElement.getAttribute("statement"), "true"));
+            this.updateStatement_(isStatement);
+            var isAt = (!Bridge.referenceEquals(xmlElement.getAttribute("at"), "false"));
+            this.updateAt_(isAt);
+        },
+        updateStatement_: function (newStatement) {
+            var oldStatement = this.outputConnection == null;
+            if (newStatement !== oldStatement) {
+                this.unplug(true);
+                if (newStatement) {
+                    this.setOutput(false);
+                    this.setPreviousStatement(true);
+                    this.setNextStatement(true);
+                } else {
+                    this.setPreviousStatement(false);
+                    this.setNextStatement(false);
+                    this.setOutput(true);
+                }
+            }
+        },
+        updateAt_: function (isAt) {
+            // Destroy old "AT" and "ORDINAL" inputs.
+            this.removeInput("AT");
+            this.removeInput("ORDINAL", true);
+            // Create either a value "AT" input or a dummy input.
+            if (isAt) {
+                this.appendValueInput("AT").setCheck("Number");
+                if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
+                    this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                }
+            } else {
+                this.appendDummyInput("AT");
+            }
+            var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS, Bridge.fn.bind(this, function (value) {
+                var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
+                // The "isAt" variable is available due to this function being a closure.
+                if (newAt !== isAt) {
+                    var block = this.sourceBlock_;
+                    Bridge.cast(block, WebMrbc.ListsGetIndexBlock).updateAt_(newAt);
+                    // This menu has been destroyed and replaced.  Update the replacement.
+                    block.setFieldValue(value, "WHERE");
+                    return null;
+                }
+                return undefined;
+            }));
+            this.getInput("AT").appendField(menu, "WHERE");
+            if (!System.String.isNullOrEmpty(Blockly.Msg.LISTS_GET_INDEX_TAIL)) {
+                this.moveInputBefore("TAIL", null);
+            }
+        }
+    });
+
+    Bridge.ns("WebMrbc.ListsGetIndexBlock", $_);
+
+    Bridge.apply($_.WebMrbc.ListsGetIndexBlock, {
+        f1: function (value) {
+            var isStatement = (Bridge.referenceEquals(value, "REMOVE"));
+            Bridge.cast(this.sourceBlock_, WebMrbc.ListsGetIndexBlock).updateStatement_(isStatement);
+            return undefined;
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsGetSublistBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.WHERE_OPTIONS_1 = [[Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_START, "FROM_START"], [Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_END, "FROM_END"], [Blockly.Msg.LISTS_GET_SUBLIST_START_FIRST, "FIRST"]];
+            this.WHERE_OPTIONS_2 = [[Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_START, "FROM_START"], [Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_END, "FROM_END"], [Blockly.Msg.LISTS_GET_SUBLIST_END_LAST, "LAST"]];
+            this.setHelpUrl(Blockly.Msg.LISTS_GET_SUBLIST_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            this.appendValueInput("LIST").setCheck("Array").appendField(Blockly.Msg.LISTS_GET_SUBLIST_INPUT_IN_LIST);
+            this.appendDummyInput("AT1");
+            this.appendDummyInput("AT2");
+            if (!System.String.isNullOrEmpty(Blockly.Msg.LISTS_GET_SUBLIST_TAIL)) {
+                this.appendDummyInput("TAIL").appendField(Blockly.Msg.LISTS_GET_SUBLIST_TAIL);
+            }
+            this.setInputsInline(true);
+            this.setOutput(true, "Array");
+            this.updateAt_(1, true);
+            this.updateAt_(2, true);
+            this.setTooltip(Blockly.Msg.LISTS_GET_SUBLIST_TOOLTIP);
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var isAt1 = this.getInput("AT1").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at1", System.Boolean.toString(isAt1));
+            var isAt2 = this.getInput("AT2").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at2", System.Boolean.toString(isAt2));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            var isAt1 = (Bridge.referenceEquals(xmlElement.getAttribute("at1"), "true"));
+            var isAt2 = (Bridge.referenceEquals(xmlElement.getAttribute("at2"), "true"));
+            this.updateAt_(1, isAt1);
+            this.updateAt_(2, isAt2);
+        },
+        updateAt_: function (n, isAt) {
+            // Create or delete an input for the numeric index.
+            // Destroy old "AT" and "ORDINAL" inputs.
+            this.removeInput(System.String.concat("AT", n));
+            this.removeInput(System.String.concat("ORDINAL", n), true);
+            // Create either a value "AT" input or a dummy input.
+            if (isAt) {
+                this.appendValueInput(System.String.concat("AT", n)).setCheck("Number");
+                if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
+                    this.appendDummyInput(System.String.concat("ORDINAL", n)).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                }
+            } else {
+                this.appendDummyInput(System.String.concat("AT", n));
+            }
+            var menu = new Blockly.FieldDropdown(this[System.String.concat("WHERE_OPTIONS_", n)], Bridge.fn.bind(this, function (value) {
+                var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
+                // The "isAt" variable is available due to this function being a
+                // closure.
+                if (newAt !== isAt) {
+                    var block = this.sourceBlock_;
+                    Bridge.cast(block, WebMrbc.ListsGetSublistBlock).updateAt_(n, newAt);
+                    // This menu has been destroyed and replaced.
+                    // Update the replacement.
+                    block.setFieldValue(value, System.String.concat("WHERE", n));
+                    return null;
+                }
+                return undefined;
+            }));
+            this.getInput(System.String.concat("AT", n)).appendField(menu, System.String.concat("WHERE", n));
+            if (n === 1) {
+                this.moveInputBefore("AT1", "AT2");
+                if (this.getInput("ORDINAL1") != null) {
+                    this.moveInputBefore("ORDINAL1", "AT2");
+                }
+            }
+            if (!System.String.isNullOrEmpty(Blockly.Msg.LISTS_GET_SUBLIST_TAIL)) {
+                this.moveInputBefore("TAIL", null);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsIndexOfBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.LISTS_INDEX_OF_FIRST, "FIRST"], [Blockly.Msg.LISTS_INDEX_OF_LAST, "LAST"]];
+            this.setHelpUrl(Blockly.Msg.LISTS_INDEX_OF_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            this.setOutput(true, "Number");
+            this.appendValueInput("VALUE").setCheck("Array").appendField(Blockly.Msg.LISTS_INDEX_OF_INPUT_IN_LIST);
+            this.appendValueInput("FIND").appendField(new Blockly.FieldDropdown(OPERATORS), "END");
+            this.setInputsInline(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(Bridge.fn.bind(this, $_.WebMrbc.ListsIndexOfBlock.f1));
+        }
+    });
+
+    Bridge.ns("WebMrbc.ListsIndexOfBlock", $_);
+
+    Bridge.apply($_.WebMrbc.ListsIndexOfBlock, {
+        f1: function () {
+            return System.String.replaceAll(Blockly.Msg.LISTS_INDEX_OF_TOOLTIP, "%1", this.workspace.options.oneBasedIndex ? "0" : "-1");
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsIsEmptyBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.LISTS_ISEMPTY_TITLE, [new $_.$AnonymousType$20("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_ISEMPTY_TOOLTIP, Blockly.Msg.LISTS_ISEMPTY_HELPURL));
+        }
+    });
+
+    Bridge.define("$AnonymousType$20", $_, {
+        $kind: "anonymous",
+        ctor: function (type, name, check) {
+            this.type = type;
+            this.name = name;
+            this.check = check;
+        },
+        gettype : function () {
+            return this.type;
+        },
+        getname : function () {
+            return this.name;
+        },
+        getcheck : function () {
+            return this.check;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$20)) {
+                return false;
+            }
+            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7125644214, this.type, this.name, this.check]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                type : this.type,
+                name : this.name,
+                check : this.check
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsLengthBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.LISTS_LENGTH_TITLE, [new $_.$AnonymousType$20("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_LENGTH_TOOLTIP, Blockly.Msg.LISTS_LENGTH_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsRepeatBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.LISTS_REPEAT_TITLE, [new $_.$AnonymousType$19("input_value", "ITEM"), new $_.$AnonymousType$12("input_value", "NUM", "Number")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_REPEAT_TOOLTIP, Blockly.Msg.LISTS_REPEAT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsSetIndexBlock", {
+        inherits: [WebMrbc.Block],
+        WHERE_OPTIONS: null,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var MODE = [[Blockly.Msg.LISTS_SET_INDEX_SET, "SET"], [Blockly.Msg.LISTS_SET_INDEX_INSERT, "INSERT"]];
+            this.WHERE_OPTIONS = [[Blockly.Msg.LISTS_GET_INDEX_FROM_START, "FROM_START"], [Blockly.Msg.LISTS_GET_INDEX_FROM_END, "FROM_END"], [Blockly.Msg.LISTS_GET_INDEX_FIRST, "FIRST"], [Blockly.Msg.LISTS_GET_INDEX_LAST, "LAST"], [Blockly.Msg.LISTS_GET_INDEX_RANDOM, "RANDOM"]];
+            this.setHelpUrl(Blockly.Msg.LISTS_SET_INDEX_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            this.appendValueInput("LIST").setCheck("Array").appendField(Blockly.Msg.LISTS_SET_INDEX_INPUT_IN_LIST);
+            this.appendDummyInput().appendField(new Blockly.FieldDropdown(MODE), "MODE").appendField("", "SPACE");
+            this.appendDummyInput("AT");
+            this.appendValueInput("TO").appendField(Blockly.Msg.LISTS_SET_INDEX_INPUT_TO);
+            this.setInputsInline(true);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setTooltip(Blockly.Msg.LISTS_SET_INDEX_TOOLTIP);
+            this.updateAt_(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                var mode = thisBlock.getFieldValue("MODE");
+                var where = thisBlock.getFieldValue("WHERE");
+                var tooltip = "";
+                switch (System.String.concat(System.String.concat(mode, " "), where)) {
+                    case "SET FROM_START": 
+                    case "SET FROM_END": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FROM;
+                        break;
+                    case "SET FIRST": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FIRST;
+                        break;
+                    case "SET LAST": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_LAST;
+                        break;
+                    case "SET RANDOM": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_RANDOM;
+                        break;
+                    case "INSERT FROM_START": 
+                    case "INSERT FROM_END": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_FROM;
+                        break;
+                    case "INSERT FIRST": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST;
+                        break;
+                    case "INSERT LAST": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_LAST;
+                        break;
+                    case "INSERT RANDOM": 
+                        tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM;
+                        break;
+                }
+                if (Bridge.referenceEquals(where, "FROM_START") || Bridge.referenceEquals(where, "FROM_END")) {
+                    tooltip = System.String.concat(tooltip, (System.String.concat("  ", System.String.replaceAll(Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP, "%1", thisBlock.workspace.options.oneBasedIndex ? "#1" : "#0"))));
+                }
+                return tooltip;
+            });
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var isAt = this.getInput("AT").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at", System.Boolean.toString(isAt));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            // Note: Until January 2013 this block did not have mutations,
+            // so "at" defaults to true.
+            var isAt = (!Bridge.referenceEquals(xmlElement.getAttribute("at"), "false"));
+            this.updateAt_(isAt);
+        },
+        updateAt_: function (isAt) {
+            // Destroy old "AT" and "ORDINAL" input.
+            this.removeInput("AT");
+            this.removeInput("ORDINAL", true);
+            // Create either a value "AT" input or a dummy input.
+            if (isAt) {
+                this.appendValueInput("AT").setCheck("Number");
+                if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
+                    this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                }
+            } else {
+                this.appendDummyInput("AT");
+            }
+            var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS, Bridge.fn.bind(this, function (value) {
+                var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
+                // The "isAt" variable is available due to this function being a closure.
+                if (newAt !== isAt) {
+                    var block = this.sourceBlock_;
+                    Bridge.cast(block, WebMrbc.ListsSetIndexBlock).updateAt_(newAt);
+                    // This menu has been destroyed and replaced.  Update the replacement.
+                    block.setFieldValue(value, "WHERE");
+                    return null;
+                }
+                return undefined;
+            }));
+            this.moveInputBefore("AT", "TO");
+            if (this.getInput("ORDINAL") != null) {
+                this.moveInputBefore("ORDINAL", "TO");
+            }
+
+            this.getInput("AT").appendField(menu, "WHERE");
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsSortBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.LISTS_SORT_TITLE, [new $_.$AnonymousType$16("field_dropdown", "TYPE", [[Blockly.Msg.LISTS_SORT_TYPE_NUMERIC, "NUMERIC"], [Blockly.Msg.LISTS_SORT_TYPE_TEXT, "TEXT"], [Blockly.Msg.LISTS_SORT_TYPE_IGNORECASE, "IGNORE_CASE"]]), new $_.$AnonymousType$16("field_dropdown", "DIRECTION", [[Blockly.Msg.LISTS_SORT_ORDER_ASCENDING, "1"], [Blockly.Msg.LISTS_SORT_ORDER_DESCENDING, "-1"]]), new $_.$AnonymousType$12("input_value", "LIST", "Array")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_SORT_TOOLTIP, Blockly.Msg.LISTS_SORT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.ListsSplitBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            // Assign "this" to a variable for use in the closures below.
+            var thisBlock = this;
+            var dropdown = new Blockly.FieldDropdown([[Blockly.Msg.LISTS_SPLIT_LIST_FROM_TEXT, "SPLIT"], [Blockly.Msg.LISTS_SPLIT_TEXT_FROM_LIST, "JOIN"]], function (newMode) {
+                thisBlock.updateType_(newMode);
+                return undefined;
+            });
+            this.setHelpUrl(Blockly.Msg.LISTS_SPLIT_HELPURL);
+            this.setColour(WebMrbc.Lists.HUE);
+            this.appendValueInput("INPUT").setCheck("String").appendField(dropdown, "MODE");
+            this.appendValueInput("DELIM").setCheck("String").appendField(Blockly.Msg.LISTS_SPLIT_WITH_DELIMITER);
+            this.setInputsInline(true);
+            this.setOutput(true, "Array");
+            this.setTooltip(function () {
+                var mode = thisBlock.getFieldValue("MODE");
+                if (Bridge.referenceEquals(mode, "SPLIT")) {
+                    return Blockly.Msg.LISTS_SPLIT_TOOLTIP_SPLIT;
+                } else if (Bridge.referenceEquals(mode, "JOIN")) {
+                    return Blockly.Msg.LISTS_SPLIT_TOOLTIP_JOIN;
+                }
+                throw new System.Exception(System.String.concat("Unknown mode: ", mode));
+            });
+        },
+        updateType_: function (newMode) {
+            if (Bridge.referenceEquals(newMode, "SPLIT")) {
+                this.outputConnection.setCheck("Array");
+                this.getInput("INPUT").setCheck("String");
+            } else {
+                this.outputConnection.setCheck("String");
+                this.getInput("INPUT").setCheck("Array");
+            }
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("mode", this.getFieldValue("MODE"));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.updateType_(xmlElement.getAttribute("mode"));
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicBooleanBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15("%1", [new $_.$AnonymousType$16("field_dropdown", "BOOL", [[Blockly.Msg.LOGIC_BOOLEAN_TRUE, "TRUE"], [Blockly.Msg.LOGIC_BOOLEAN_FALSE, "FALSE"]])], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP, Blockly.Msg.LOGIC_BOOLEAN_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicCompareBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var rtlOperators = [["=", "EQ"], ["≠", "NEQ"], ["‏<‏", "LT"], ["‏≤‏", "LTE"], ["‏>‏", "GT"], ["‏≥‏", "GTE"]];
+            var ltrOperators = [["=", "EQ"], ["≠", "NEQ"], ["<", "LT"], ["≤", "LTE"], [">", "GT"], ["≥", "GTE"]];
+            var OPERATORS = this.RTL ? rtlOperators : ltrOperators;
+            this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
+            this.setColour(WebMrbc.Logic.HUE);
+            this.setOutput(true, "Boolean");
+            this.appendValueInput("A");
+            this.appendValueInput("B").appendField(new Blockly.FieldDropdown(OPERATORS), "OP");
+            this.setInputsInline(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "EQ": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_EQ;
+                    case "NEQ": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_NEQ;
+                    case "LT": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_LT;
+                    case "LTE": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_LTE;
+                    case "GT": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_GT;
+                    case "GTE": 
+                        return Blockly.Msg.LOGIC_COMPARE_TOOLTIP_GTE;
+                }
+                return "";
+            });
+            this.prevBlocks_ = [null, null];
+        },
+        onchange: function (e) {
+            var blockA = this.getInputTargetBlock("A");
+            var blockB = this.getInputTargetBlock("B");
+            // Disconnect blocks that existed prior to this change if they don"t match.
+            if (blockA != null && blockB != null && !blockA.outputConnection.checkType_(blockB.outputConnection)) {
+                // Mismatch between two inputs.  Disconnect previous and bump it away.
+                // Ensure that any disconnections are grouped with the causing event.
+                Blockly.Events.setGroup(e.group);
+                for (var i = 0; i < this.prevBlocks_.length; i = (i + 1) | 0) {
+                    var block = this.prevBlocks_[i];
+                    if (Bridge.referenceEquals(block, blockA) || Bridge.referenceEquals(block, blockB)) {
+                        block.unplug();
+                        block.bumpNeighbours_();
+                    }
+                }
+                Blockly.Events.setGroup(System.Boolean.toString((false)));
+            }
+            this.prevBlocks_[0] = blockA;
+            this.prevBlocks_[1] = blockB;
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicNegateBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.LOGIC_NEGATE_TITLE, [new $_.$AnonymousType$12("input_value", "BOOL", "Boolean")], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NEGATE_TOOLTIP, Blockly.Msg.LOGIC_NEGATE_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicNullBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$21(Blockly.Msg.LOGIC_NULL, null, WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NULL_TOOLTIP, Blockly.Msg.LOGIC_NULL_HELPURL));
+        }
+    });
+
+    Bridge.define("$AnonymousType$21", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, output, colour, tooltip, helpUrl) {
+            this.message0 = message0;
+            this.output = output;
+            this.colour = colour;
+            this.tooltip = tooltip;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getoutput : function () {
+            return this.output;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gettooltip : function () {
+            return this.tooltip;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$21)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7142421430, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                output : this.output,
+                colour : this.colour,
+                tooltip : this.tooltip,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicOperationBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.LOGIC_OPERATION_AND, "AND"], [Blockly.Msg.LOGIC_OPERATION_OR, "OR"]];
+            this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
+            this.setColour(WebMrbc.Logic.HUE);
+            this.setOutput(true, "Boolean");
+            this.appendValueInput("A").setCheck("Boolean");
+            this.appendValueInput("B").setCheck("Boolean").appendField(new Blockly.FieldDropdown(OPERATORS), "OP");
+            this.setInputsInline(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "AND": 
+                        return Blockly.Msg.LOGIC_OPERATION_TOOLTIP_AND;
+                    case "OR": 
+                        return Blockly.Msg.LOGIC_OPERATION_TOOLTIP_OR;
+                }
+                return "";
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.LogicTernaryBlock", {
+        inherits: [WebMrbc.Block],
+        prevParentConnection_: null,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.LOGIC_TERNARY_HELPURL);
+            this.setColour(WebMrbc.Logic.HUE);
+            this.appendValueInput("IF").setCheck("Boolean").appendField(Blockly.Msg.LOGIC_TERNARY_CONDITION);
+            this.appendValueInput("THEN").appendField(Blockly.Msg.LOGIC_TERNARY_IF_TRUE);
+            this.appendValueInput("ELSE").appendField(Blockly.Msg.LOGIC_TERNARY_IF_FALSE);
+            this.setOutput(true);
+            this.setTooltip(Blockly.Msg.LOGIC_TERNARY_TOOLTIP);
+            this.prevParentConnection_ = null;
+        },
+        onchange: function (e) {
+            var blockA = this.getInputTargetBlock("THEN");
+            var blockB = this.getInputTargetBlock("ELSE");
+            var parentConnection = this.outputConnection.targetConnection;
+            // Disconnect blocks that existed prior to this change if they don"t match.
+            if ((blockA != null || blockB != null) && parentConnection != null) {
+                for (var i = 0; i < 2; i = (i + 1) | 0) {
+                    var block = (i === 1) ? blockA : blockB;
+                    if (block != null && !block.outputConnection.checkType_(parentConnection)) {
+                        // Ensure that any disconnections are grouped with the causing event.
+                        Blockly.Events.setGroup(e.group);
+                        if (Bridge.referenceEquals(parentConnection, this.prevParentConnection_)) {
+                            this.unplug();
+                            parentConnection.getSourceBlock().bumpNeighbours_();
+                        } else {
+                            block.unplug();
+                            block.bumpNeighbours_();
+                        }
+                        Blockly.Events.setGroup(System.Boolean.toString((false)));
+                    }
+                }
+            }
+            this.prevParentConnection_ = parentConnection;
+        }
+    });
+
+    Bridge.define("WebMrbc.MathArithmeticBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$22("%1 %2 %3", [new $_.$AnonymousType$12("input_value", "A", "Number"), new $_.$AnonymousType$16("field_dropdown", "OP", [[Blockly.Msg.MATH_ADDITION_SYMBOL, "ADD"], [Blockly.Msg.MATH_SUBTRACTION_SYMBOL, "MINUS"], [Blockly.Msg.MATH_MULTIPLICATION_SYMBOL, "MULTIPLY"], [Blockly.Msg.MATH_DIVISION_SYMBOL, "DIVIDE"], [Blockly.Msg.MATH_POWER_SYMBOL, "POWER"]]), new $_.$AnonymousType$12("input_value", "B", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ARITHMETIC_HELPURL));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "ADD": 
+                        return Blockly.Msg.MATH_ARITHMETIC_TOOLTIP_ADD;
+                    case "MINUS": 
+                        return Blockly.Msg.MATH_ARITHMETIC_TOOLTIP_MINUS;
+                    case "MULTIPLY": 
+                        return Blockly.Msg.MATH_ARITHMETIC_TOOLTIP_MULTIPLY;
+                    case "DIVIDE": 
+                        return Blockly.Msg.MATH_ARITHMETIC_TOOLTIP_DIVIDE;
+                    case "POWER": 
+                        return Blockly.Msg.MATH_ARITHMETIC_TOOLTIP_POWER;
+                }
+                ;
+                return "";
+            });
+        }
+    });
+
+    Bridge.define("$AnonymousType$22", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, inputsInline, output, colour, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.inputsInline = inputsInline;
+            this.output = output;
+            this.colour = colour;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getinputsInline : function () {
+            return this.inputsInline;
+        },
+        getoutput : function () {
+            return this.output;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$22)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7159198646, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                inputsInline : this.inputsInline,
+                output : this.output,
+                colour : this.colour,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.MathChangeBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$11(Blockly.Msg.MATH_CHANGE_TITLE, [new $_.$AnonymousType$18("field_variable", "VAR", Blockly.Msg.MATH_CHANGE_TITLE_ITEM), new $_.$AnonymousType$12("input_value", "DELTA", "Number")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.MATH_CHANGE_HELPURL));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                return System.String.replaceAll(Blockly.Msg.MATH_CHANGE_TOOLTIP, "%1", thisBlock.getFieldValue("VAR"));
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.MathConstantBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15("%1", [new $_.$AnonymousType$16("field_dropdown", "CONSTANT", [["π", "PI"], ["e", "E"], ["φ", "GOLDEN_RATIO"], ["sqrt(2)", "SQRT2"], ["sqrt(½)", "SQRT1_2"], ["∞", "INFINITY"]])], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTANT_TOOLTIP, Blockly.Msg.MATH_CONSTANT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathConstrainBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$23(Blockly.Msg.MATH_CONSTRAIN_TITLE, [new $_.$AnonymousType$12("input_value", "VALUE", "Number"), new $_.$AnonymousType$12("input_value", "LOW", "Number"), new $_.$AnonymousType$12("input_value", "HIGH", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTRAIN_TOOLTIP, Blockly.Msg.MATH_CONSTRAIN_HELPURL));
+        }
+    });
+
+    Bridge.define("$AnonymousType$23", $_, {
+        $kind: "anonymous",
+        ctor: function (message0, args0, inputsInline, output, colour, tooltip, helpUrl) {
+            this.message0 = message0;
+            this.args0 = args0;
+            this.inputsInline = inputsInline;
+            this.output = output;
+            this.colour = colour;
+            this.tooltip = tooltip;
+            this.helpUrl = helpUrl;
+        },
+        getmessage0 : function () {
+            return this.message0;
+        },
+        getargs0 : function () {
+            return this.args0;
+        },
+        getinputsInline : function () {
+            return this.inputsInline;
+        },
+        getoutput : function () {
+            return this.output;
+        },
+        getcolour : function () {
+            return this.colour;
+        },
+        gettooltip : function () {
+            return this.tooltip;
+        },
+        gethelpUrl : function () {
+            return this.helpUrl;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$23)) {
+                return false;
+            }
+            return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7175975862, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.tooltip, this.helpUrl]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                message0 : this.message0,
+                args0 : this.args0,
+                inputsInline : this.inputsInline,
+                output : this.output,
+                colour : this.colour,
+                tooltip : this.tooltip,
+                helpUrl : this.helpUrl
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.MathModuloBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$23(Blockly.Msg.MATH_MODULO_TITLE, [new $_.$AnonymousType$12("input_value", "DIVIDEND", "Number"), new $_.$AnonymousType$12("input_value", "DIVISOR", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_MODULO_TOOLTIP, Blockly.Msg.MATH_MODULO_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathNumberBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.MATH_NUMBER_HELPURL);
+            this.setColour(WebMrbc.Math.HUE);
+            this.appendDummyInput().appendField(new Blockly.FieldNumber("0", "-Infinity", "Infinity", 0), "NUM");
+            this.setOutput(true, "Number");
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            // Number block is trivial.  Use tooltip of parent block if it exists.
+            this.setTooltip(function () {
+                var parent = thisBlock.getParent();
+                return (parent != null && parent.getInputsInline() && !System.String.isNullOrEmpty(parent.tooltip)) ? parent.tooltip : Blockly.Msg.MATH_NUMBER_TOOLTIP;
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.MathNumberPropertyBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var PROPERTIES = [[Blockly.Msg.MATH_IS_EVEN, "EVEN"], [Blockly.Msg.MATH_IS_ODD, "ODD"], [Blockly.Msg.MATH_IS_PRIME, "PRIME"], [Blockly.Msg.MATH_IS_WHOLE, "WHOLE"], [Blockly.Msg.MATH_IS_POSITIVE, "POSITIVE"], [Blockly.Msg.MATH_IS_NEGATIVE, "NEGATIVE"], [Blockly.Msg.MATH_IS_DIVISIBLE_BY, "DIVISIBLE_BY"]];
+            this.setColour(WebMrbc.Math.HUE);
+            this.appendValueInput("NUMBER_TO_CHECK").setCheck("Number");
+            var dropdown = new Blockly.FieldDropdown(PROPERTIES, Bridge.fn.bind(this, $_.WebMrbc.MathNumberPropertyBlock.f1));
+            this.appendDummyInput().appendField(dropdown, "PROPERTY");
+            this.setInputsInline(true);
+            this.setOutput(true, "Boolean");
+            this.setTooltip(Blockly.Msg.MATH_IS_TOOLTIP);
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var divisorInput = (Bridge.referenceEquals(this.getFieldValue("PROPERTY"), "DIVISIBLE_BY"));
+            container.setAttribute("divisor_input", System.Boolean.toString(divisorInput));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            var divisorInput = (Bridge.referenceEquals(xmlElement.getAttribute("divisor_input"), "true"));
+            this.updateShape_(divisorInput);
+        },
+        updateShape_: function (divisorInput) {
+            // Add or remove a Value Input.
+            var inputExists = this.getInput("DIVISOR");
+            if (divisorInput) {
+                if (inputExists == null) {
+                    this.appendValueInput("DIVISOR").setCheck("Number");
+                }
+            } else if (inputExists != null) {
+                this.removeInput("DIVISOR");
+            }
+        }
+    });
+
+    Bridge.ns("WebMrbc.MathNumberPropertyBlock", $_);
+
+    Bridge.apply($_.WebMrbc.MathNumberPropertyBlock, {
+        f1: function (option) {
+            var divisorInput = (Bridge.referenceEquals(option, "DIVISIBLE_BY"));
+            Bridge.cast(this.sourceBlock_, WebMrbc.MathNumberPropertyBlock).updateShape_(divisorInput);
+            return undefined;
+        }
+    });
+
+    Bridge.define("WebMrbc.MathOnListBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.MATH_ONLIST_OPERATOR_SUM, "SUM"], [Blockly.Msg.MATH_ONLIST_OPERATOR_MIN, "MIN"], [Blockly.Msg.MATH_ONLIST_OPERATOR_MAX, "MAX"], [Blockly.Msg.MATH_ONLIST_OPERATOR_AVERAGE, "AVERAGE"], [Blockly.Msg.MATH_ONLIST_OPERATOR_MEDIAN, "MEDIAN"], [Blockly.Msg.MATH_ONLIST_OPERATOR_MODE, "MODE"], [Blockly.Msg.MATH_ONLIST_OPERATOR_STD_DEV, "STD_DEV"], [Blockly.Msg.MATH_ONLIST_OPERATOR_RANDOM, "RANDOM"]];
+            // Assign "this" to a variable for use in the closures below.
+            var thisBlock = this;
+            this.setHelpUrl(Blockly.Msg.MATH_ONLIST_HELPURL);
+            this.setColour(WebMrbc.Math.HUE);
+            this.setOutput(true, "Number");
+            var dropdown = new Blockly.FieldDropdown(OPERATORS, function (newOp) {
+                thisBlock.updateType_(newOp);
+                return undefined;
+            });
+            this.appendValueInput("LIST").setCheck("Array").appendField(dropdown, "OP");
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "SUM": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_SUM;
+                    case "MIN": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_MIN;
+                    case "MAX": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_MAX;
+                    case "AVERAGE": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_AVERAGE;
+                    case "MEDIAN": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_MEDIAN;
+                    case "MODE": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_MODE;
+                    case "STD_DEV": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_STD_DEV;
+                    case "RANDOM": 
+                        return Blockly.Msg.MATH_ONLIST_TOOLTIP_RANDOM;
+                }
+                return "";
+            });
+        },
+        updateType_: function (newOp) {
+            if (Bridge.referenceEquals(newOp, "MODE")) {
+                this.outputConnection.setCheck("Array");
+            } else {
+                this.outputConnection.setCheck("Number");
+            }
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("op", this.getFieldValue("OP"));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.updateType_(xmlElement.getAttribute("op"));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathRandomFloatBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$7(Blockly.Msg.MATH_RANDOM_FLOAT_TITLE_RANDOM, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_FLOAT_TOOLTIP, Blockly.Msg.MATH_RANDOM_FLOAT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathRandomIntBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$23(Blockly.Msg.MATH_RANDOM_INT_TITLE, [new $_.$AnonymousType$12("input_value", "FROM", "Number"), new $_.$AnonymousType$12("input_value", "TO", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_INT_TOOLTIP, Blockly.Msg.MATH_RANDOM_INT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathRoundBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15("%1 %2", [new $_.$AnonymousType$16("field_dropdown", "OP", [[Blockly.Msg.MATH_ROUND_OPERATOR_ROUND, "ROUND"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDUP, "ROUNDUP"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDDOWN, "ROUNDDOWN"]]), new $_.$AnonymousType$12("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ROUND_TOOLTIP, Blockly.Msg.MATH_ROUND_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.MathSingleBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$5("%1 %2", [new $_.$AnonymousType$16("field_dropdown", "OP", [[Blockly.Msg.MATH_SINGLE_OP_ROOT, "ROOT"], [Blockly.Msg.MATH_SINGLE_OP_ABSOLUTE, "ABS"], ["-", "NEG"], ["ln", "LN"], ["log10", "LOG10"], ["e^", "EXP"], ["10^", "POW10"]]), new $_.$AnonymousType$12("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_SINGLE_HELPURL));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "ROOT": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_ROOT;
+                    case "ABS": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_ABS;
+                    case "NEG": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_NEG;
+                    case "LN": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_LN;
+                    case "LOG10": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_LOG10;
+                    case "EXP": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_EXP;
+                    case "POW10": 
+                        return Blockly.Msg.MATH_SINGLE_TOOLTIP_POW10;
+                }
+                return "";
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.MathTrigBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$5("%1 %2", [new $_.$AnonymousType$16("field_dropdown", "OP", [[Blockly.Msg.MATH_TRIG_SIN, "SIN"], [Blockly.Msg.MATH_TRIG_COS, "COS"], [Blockly.Msg.MATH_TRIG_TAN, "TAN"], [Blockly.Msg.MATH_TRIG_ASIN, "ASIN"], [Blockly.Msg.MATH_TRIG_ACOS, "ACOS"], [Blockly.Msg.MATH_TRIG_ATAN, "ATAN"]]), new $_.$AnonymousType$12("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_TRIG_HELPURL));
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                switch (thisBlock.getFieldValue("OP")) {
+                    case "SIN": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_SIN;
+                    case "COS": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_COS;
+                    case "TAN": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_TAN;
+                    case "ASIN": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_ASIN;
+                    case "ACOS": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_ACOS;
+                    case "ATAN": 
+                        return Blockly.Msg.MATH_TRIG_TOOLTIP_ATAN;
+                }
+                return "";
+            });
+        }
+    });
+
     Bridge.define("WebMrbc.MemFileCloseBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
@@ -4494,11 +6965,11 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$13("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$24("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$13", $_, {
+    Bridge.define("$AnonymousType$24", $_, {
         $kind: "anonymous",
         ctor: function (message0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -4527,13 +6998,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$13)) {
+            if (!Bridge.is(o, $_.$AnonymousType$24)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7175910326, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7192753078, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -4601,6 +7072,580 @@
             this.setColour(160);
             this.setTooltip("");
             this.setHelpUrl("http://www.example.com/");
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresBlock", {
+        inherits: [WebMrbc.Block],
+        statics: {
+            HUE: 290
+        },
+        callType_: null,
+        paramIds_: null,
+        hasStatements_: false,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        setStatements_: function (hasStatements) {
+            if (this.hasStatements_ === hasStatements) {
+                return;
+            }
+            if (hasStatements) {
+                this.appendStatementInput("STACK").appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_DO);
+                if (this.getInput("RETURN") != null) {
+                    this.moveInputBefore("STACK", "RETURN");
+                }
+            } else {
+                this.removeInput("STACK", true);
+            }
+            this.hasStatements_ = hasStatements;
+        },
+        updateParams_: function () {
+            // Check for duplicated arguments.
+            var badArg = false;
+            var hash = new $_.$AnonymousType$25();
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                if (hash[System.String.concat("arg_", this.arguments_[i].toLowerCase())]) {
+                    badArg = true;
+                    break;
+                }
+                hash[System.String.concat("arg_", this.arguments_[i].toLowerCase())] = true;
+            }
+            if (badArg) {
+                this.setWarningText(Blockly.Msg.PROCEDURES_DEF_DUPLICATE_WARNING);
+            } else {
+                this.setWarningText(null);
+            }
+            // Merge the arguments into a human-readable list.
+            var paramString = "";
+            if (this.arguments_.length !== 0) {
+                paramString = System.String.concat("で。 ", this.arguments_.join(", "));
+            }
+            // The params field is deterministic based on the mutation,
+            // no need to fire a change event.
+            Blockly.Events.disable();
+            try {
+                this.setFieldValue(paramString, "PARAMS");
+            }
+            finally {
+                Blockly.Events.enable();
+            }
+        },
+        mutationToDom: function (opt_paramIds) {
+            var container = document.createElement("mutation");
+            if (opt_paramIds) {
+                container.setAttribute("name", this.getFieldValue("NAME"));
+            }
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var parameter = document.createElement("arg");
+                parameter.setAttribute("name", this.arguments_[i]);
+                if (opt_paramIds && this.paramIds_ != null) {
+                    parameter.setAttribute("paramId", this.paramIds_[i]);
+                }
+                container.appendChild(parameter);
+            }
+
+            // Save whether the statement input is visible.
+            if (!this.hasStatements_) {
+                container.setAttribute("statements", "false");
+            }
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.arguments_ = System.Array.init(0, null);
+            var childNode;
+            for (var i = 0; ((childNode = xmlElement.childNodes[i])) != null; i = (i + 1) | 0) {
+                if (Bridge.referenceEquals(childNode.nodeName.toLowerCase(), "arg")) {
+                    this.arguments_.push(childNode.getAttribute("name"));
+                }
+            }
+            this.updateParams_();
+            Blockly.Procedures.mutateCallers(this);
+
+            // Show or hide the statement input.
+            this.setStatements_(!Bridge.referenceEquals(xmlElement.getAttribute("statements"), "false"));
+        },
+        decompose: function (workspace) {
+            var containerBlock = workspace.newBlock("procedures_mutatorcontainer");
+            containerBlock.initSvg();
+
+            // Check/uncheck the allow statement box.
+            if (this.getInput("RETURN") != null) {
+                containerBlock.setFieldValue(this.hasStatements_ ? "TRUE" : "FALSE", "STATEMENTS");
+            } else {
+                containerBlock.getInput("STATEMENT_INPUT").setVisible(false);
+            }
+
+            // Parameter list.
+            var connection = containerBlock.getInput("STACK").connection;
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var paramBlock = workspace.newBlock("procedures_mutatorarg");
+                paramBlock.initSvg();
+                paramBlock.setFieldValue(this.arguments_[i], "NAME");
+                // Store the old location.
+                paramBlock.oldLocation = i;
+                connection.connect(paramBlock.previousConnection);
+                connection = paramBlock.nextConnection;
+            }
+            // Initialize procedure"s callers with blank IDs.
+            Blockly.Procedures.mutateCallers(this);
+            return containerBlock;
+        },
+        compose: function (containerBlock) {
+            // Parameter list.
+            this.arguments_ = System.Array.init(0, null);
+            this.paramIds_ = System.Array.init(0, null);
+            var paramBlock = containerBlock.getInputTargetBlock("STACK");
+            while (paramBlock != null) {
+                this.arguments_.push(paramBlock.getFieldValue("NAME"));
+                this.paramIds_.push(paramBlock.id);
+                paramBlock = (paramBlock.nextConnection != null) ? paramBlock.nextConnection.targetBlock() : null;
+            }
+            this.updateParams_();
+            Blockly.Procedures.mutateCallers(this);
+
+            // Show/hide the statement input.
+            var hasStatements_ = containerBlock.getFieldValue("STATEMENTS");
+            if (hasStatements_ != null) {
+                var hasStatements = Bridge.referenceEquals(hasStatements_, "TRUE");
+                if (this.hasStatements_ !== hasStatements) {
+                    if (hasStatements) {
+                        this.setStatements_(true);
+                        // Restore the stack, if one was saved.
+                        Blockly.Mutator.reconnect(this.statementConnection_, this, "STACK");
+                        this.statementConnection_ = null;
+                    } else {
+                        // Save the stack, then disconnect it.
+                        var stackConnection = this.getInput("STACK").connection;
+                        this.statementConnection_ = stackConnection.targetConnection;
+                        if (this.statementConnection_ != null) {
+                            var stackBlock = stackConnection.targetBlock();
+                            stackBlock.unplug();
+                            stackBlock.bumpNeighbours_();
+                        }
+                        this.setStatements_(false);
+                    }
+                }
+            }
+        },
+        getVars: function () {
+            return this.arguments_;
+        },
+        renameVar: function (oldName, newName) {
+            var change = false;
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                if (Blockly.Names.equals(oldName, this.arguments_[i])) {
+                    this.arguments_[i] = newName;
+                    change = true;
+                }
+            }
+            if (change) {
+                this.updateParams_();
+                // Update the mutator"s variables if the mutator is open.
+                if (this.mutator.isVisible()) {
+                    var blocks = Bridge.cast(this.mutator.workspace_.getAllBlocks(), Array);
+                    var block;
+                    for (var i1 = 0; ((block = blocks[i1])) != null; i1 = (i1 + 1) | 0) {
+                        if (Bridge.referenceEquals(block.type, "procedures_mutatorarg") && Blockly.Names.equals(oldName, block.getFieldValue("NAME"))) {
+                            block.setFieldValue(newName, "NAME");
+                        }
+                    }
+                }
+            }
+        },
+        customContextMenu: function (options) {
+            // Add option to create caller.
+            var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                enabled: true
+            } );
+            var name = this.getFieldValue("NAME");
+            option.text = System.String.replaceAll(Blockly.Msg.PROCEDURES_CREATE_DO, "%1", name);
+            var xmlMutation = goog.dom.createDom("mutation");
+            xmlMutation.setAttribute("name", name);
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var xmlArg = goog.dom.createDom("arg");
+                xmlArg.setAttribute("name", this.arguments_[i]);
+                xmlMutation.appendChild(xmlArg);
+            }
+            var xmlBlock = goog.dom.createDom("block", null, xmlMutation);
+            xmlBlock.setAttribute("type", this.callType_);
+            option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+            options.push(option);
+
+            // Add options to create getters for each parameter.
+            if (!this.isCollapsed()) {
+                for (var i1 = 0; i1 < this.arguments_.length; i1 = (i1 + 1) | 0) {
+                    option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                        enabled: true
+                    } );
+                    name = this.arguments_[i1];
+                    option.text = System.String.replaceAll(Blockly.Msg.VARIABLES_SET_CREATE_GET, "%1", name);
+                    var xmlField = goog.dom.createDom("field", null, name);
+                    xmlField.setAttribute("name", "VAR");
+                    xmlBlock = goog.dom.createDom("block", null, xmlField);
+                    xmlBlock.setAttribute("type", "variables_get");
+                    option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+                    options.push(option);
+                }
+            }
+        }
+    });
+
+    Bridge.define("$AnonymousType$25", $_, {
+        $kind: "anonymous",
+        ctor: function () {
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $_.$AnonymousType$25)) {
+                return false;
+            }
+            return ;
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7209530294]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+
+            };
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresCall", {
+        inherits: [WebMrbc.Block],
+        quarkConnections_: null,
+        quarkIds_: null,
+        rendered: false,
+        defType_: null,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        getProcedureCall: function () {
+            // The NAME field is guaranteed to exist, null will never be returned.
+            return (this.getFieldValue("NAME"));
+        },
+        renameProcedure: function (oldName, newName) {
+            if (Blockly.Names.equals(oldName, this.getProcedureCall())) {
+                this.setFieldValue(newName, "NAME");
+                this.setTooltip(System.String.replaceAll((this.outputConnection != null ? Blockly.Msg.PROCEDURES_CALLRETURN_TOOLTIP : Blockly.Msg.PROCEDURES_CALLNORETURN_TOOLTIP), "%1", newName));
+            }
+        },
+        setProcedureParameters_: function (paramNames, paramIds) {
+            // Data structures:
+            // this.arguments = ["x", "y"]
+            //     Existing param names.
+            // this.quarkConnections_ {piua: null, f8b_: Blockly.Connection}
+            //     Look-up of paramIds to connections plugged into the call block.
+            // this.quarkIds_ = ["piua", "f8b_"]
+            //     Existing param IDs.
+            // Note that quarkConnections_ may include IDs that no longer exist, but
+            // which might reappear if a param is reattached in the mutator.
+            var defBlock = Blockly.Procedures.getDefinition(this.getProcedureCall(), this.workspace);
+            var mutatorOpen = defBlock != null && defBlock.mutator != null && defBlock.mutator.isVisible();
+            if (!mutatorOpen) {
+                this.quarkConnections_ = new (System.Collections.Generic.Dictionary$2(String,Blockly.Connection))();
+                this.quarkIds_ = null;
+            }
+            if (paramIds == null) {
+                // Reset the quarks (a mutator is about to open).
+                return;
+            }
+            if (goog.array.equals(this.arguments_, paramNames)) {
+                // No change.
+                this.quarkIds_ = paramIds;
+                return;
+            }
+            if (paramIds.length !== paramNames.length) {
+                throw new System.Exception("Error: paramNames and paramIds must be the same length.");
+            }
+            this.setCollapsed(false);
+            if (this.quarkIds_ == null) {
+                // Initialize tracking for this block.
+                this.quarkConnections_ = new (System.Collections.Generic.Dictionary$2(String,Blockly.Connection))();
+                if (Bridge.referenceEquals(paramNames.join("\n"), this.arguments_.join("\n"))) {
+                    // No change to the parameters, allow quarkConnections_ to be
+                    // populated with the existing connections.
+                    this.quarkIds_ = paramIds;
+                } else {
+                    this.quarkIds_ = System.Array.init(0, null);
+                }
+            }
+            // Switch off rendering while the block is rebuilt.
+            var savedRendered = this.rendered;
+            this.rendered = false;
+            // Update the quarkConnections_ with existing connections.
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var input = this.getInput(System.String.concat("ARG", i));
+                if (input != null) {
+                    var connection = input.connection.targetConnection;
+                    this.quarkConnections_.set(this.quarkIds_[i], connection);
+                    if (mutatorOpen && connection != null && paramIds.indexOf(this.quarkIds_[i]) === -1) {
+                        // This connection should no longer be attached to this block.
+                        connection.disconnect();
+                        connection.getSourceBlock().bumpNeighbours_();
+                    }
+                }
+            }
+            // Rebuild the block"s arguments.
+            this.arguments_ = (System.Array.init(0, null)).concat.apply((System.Array.init(0, null)), paramNames);
+            this.updateShape_();
+            this.quarkIds_ = paramIds;
+            // Reconnect any child blocks.
+            if (this.quarkIds_ != null) {
+                for (var i1 = 0; i1 < this.arguments_.length; i1 = (i1 + 1) | 0) {
+                    var quarkId = this.quarkIds_[i1];
+                    var connection1 = { };
+                    if (this.quarkConnections_.tryGetValue(quarkId, connection1)) {
+                        if (!Blockly.Mutator.reconnect(connection1.v, this, System.String.concat("ARG", i1))) {
+                            // Block no longer exists or has been attached elsewhere.
+                            delete this.quarkConnections_.get(quarkId);
+                        }
+                    }
+                }
+            }
+            // Restore rendering and show the changes.
+            this.rendered = savedRendered;
+            if (this.rendered) {
+                this.render();
+            }
+        },
+        updateShape_: function () {
+            var i;
+            for (i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var field = this.getField(System.String.concat("ARGNAME", i));
+                if (field != null) {
+                    // Ensure argument name is up to date.
+                    // The argument name field is deterministic based on the mutation,
+                    // no need to fire a change event.
+                    Blockly.Events.disable();
+                    try {
+                        field.setValue(this.arguments_[i]);
+                    }
+                    finally {
+                        Blockly.Events.enable();
+                    }
+                } else {
+                    // Add new input.
+                    field = new Blockly.FieldLabel(this.arguments_[i]);
+                    var input = this.appendValueInput(System.String.concat("ARG", i)).setAlign(Blockly.ALIGN_RIGHT).appendField(field, System.String.concat("ARGNAME", i));
+                    input.init();
+                }
+            }
+            // Remove deleted inputs.
+            while (this.getInput(System.String.concat("ARG", i)) != null) {
+                this.removeInput(System.String.concat("ARG", i));
+                i = (i + 1) | 0;
+            }
+            // Add "with:" if there are parameters, remove otherwise.
+            var topRow = this.getInput("TOPROW");
+            if (topRow != null) {
+                if (this.arguments_.length !== 0) {
+                    if (this.getField("WITH") == null) {
+                        topRow.appendField(Blockly.Msg.PROCEDURES_CALL_BEFORE_PARAMS, "WITH");
+                        topRow.init();
+                    }
+                } else {
+                    if (this.getField("WITH") != null) {
+                        topRow.removeField("WITH");
+                    }
+                }
+            }
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("name", this.getProcedureCall());
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                var parameter = document.createElement("arg");
+                parameter.setAttribute("name", this.arguments_[i]);
+                container.appendChild(parameter);
+            }
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            var name = xmlElement.getAttribute("name");
+            this.renameProcedure(this.getProcedureCall(), name);
+            var args = System.Array.init(0, null);
+            var paramIds = System.Array.init(0, null);
+            var childNode;
+            for (var i = 0; ((childNode = xmlElement.childNodes[i])) != null; i = (i + 1) | 0) {
+                if (Bridge.referenceEquals(childNode.nodeName.toLowerCase(), "arg")) {
+                    args.push(childNode.getAttribute("name"));
+                    paramIds.push(childNode.getAttribute("paramId"));
+                }
+            }
+            this.setProcedureParameters_(args, paramIds);
+        },
+        renameVar: function (oldName, newName) {
+            for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
+                if (Blockly.Names.equals(oldName, this.arguments_[i])) {
+                    this.arguments_[i] = newName;
+                    this.getField(System.String.concat("ARGNAME", i)).setValue(newName);
+                }
+            }
+        },
+        onchange: function (e) {
+            if (this.workspace == null || this.workspace.isFlyout) {
+                // Block is deleted or is in a flyout.
+                return;
+            }
+            if (Bridge.referenceEquals(e.type, Blockly.Events.CREATE) && Bridge.cast(e, Blockly.Events.Create).ids.indexOf(this.id) !== -1) {
+                // Look for the case where a procedure call was created (usually through
+                // paste) and there is no matching definition.  In this case, create
+                // an empty definition block with the correct signature.
+                var name = this.getProcedureCall();
+                var def = Blockly.Procedures.getDefinition(name, this.workspace);
+                if (def != null && (!Bridge.referenceEquals(def.type, this.defType_) || !Bridge.referenceEquals(JSON.stringify(def.arguments_), JSON.stringify(this.arguments_)))) {
+                    // The signatures don"t match.
+                    def = null;
+                }
+                if (def == null) {
+                    Blockly.Events.setGroup(e.group);
+                    var xml = goog.dom.createDom("xml");
+                    var block = goog.dom.createDom("block");
+                    block.setAttribute("type", this.defType_);
+                    var xy = this.getRelativeToSurfaceXY();
+                    var x = xy.x + ((Blockly.SNAP_RADIUS * (this.RTL ? -1 : 1)) | 0);
+                    var y = xy.y + ((Blockly.SNAP_RADIUS * 2) | 0);
+                    block.setAttribute("x", System.Double.format(x, 'G'));
+                    block.setAttribute("y", System.Double.format(y, 'G'));
+                    var mutation = this.mutationToDom();
+                    block.appendChild(mutation);
+                    var field = goog.dom.createDom("field");
+                    field.setAttribute("name", "NAME");
+                    field.appendChild(document.createTextNode(this.getProcedureCall()));
+                    block.appendChild(field);
+                    xml.appendChild(block);
+                    Blockly.Xml.domToWorkspace(xml, this.workspace);
+                    Blockly.Events.setGroup(System.Boolean.toString((false)));
+                }
+            } else if (Bridge.referenceEquals(e.type, Blockly.Events.DELETE)) {
+                // Look for the case where a procedure definition has been deleted,
+                // leaving this block (a procedure call) orphaned.  In this case, delete
+                // the orphan.
+                var name1 = this.getProcedureCall();
+                var def1 = Blockly.Procedures.getDefinition(name1, this.workspace);
+                if (def1 == null) {
+                    Blockly.Events.setGroup(e.group);
+                    this.dispose(true);
+                    Blockly.Events.setGroup(System.Boolean.toString((false)));
+                }
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresIfreturnBlock", {
+        inherits: [WebMrbc.Block],
+        FUNCTION_TYPES: null,
+        config: {
+            init: function () {
+                this.FUNCTION_TYPES = ["procedures_defnoreturn", "procedures_defreturn"];
+            }
+        },
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.appendValueInput("CONDITION").setCheck("Boolean").appendField(Blockly.Msg.CONTROLS_IF_MSG_IF);
+            this.appendValueInput("VALUE").appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
+            this.setInputsInline(true);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            this.setTooltip(Blockly.Msg.PROCEDURES_IFRETURN_TOOLTIP);
+            this.setHelpUrl(Blockly.Msg.PROCEDURES_IFRETURN_HELPURL);
+            this.hasReturnValue_ = true;
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("value", this.hasReturnValue_ ? "1" : "0");
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            var value = xmlElement.getAttribute("value");
+            this.hasReturnValue_ = (Bridge.referenceEquals(value, "1"));
+            if (!this.hasReturnValue_) {
+                this.removeInput("VALUE");
+                this.appendDummyInput("VALUE").appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
+            }
+        },
+        onchange: function (e) {
+            var legal = false;
+            // Is the block nested in a procedure?
+            var block = Bridge.cast(this, WebMrbc.Block);
+            do {
+                if (this.FUNCTION_TYPES.indexOf(block.type) !== -1) {
+                    legal = true;
+                    break;
+                }
+                block = block.getSurroundParent();
+            } while (block != null);
+            if (legal) {
+                // If needed, toggle whether this block has a return value.
+                if (Bridge.referenceEquals(block.type, "procedures_defnoreturn") && this.hasReturnValue_) {
+                    this.removeInput("VALUE");
+                    this.appendDummyInput("VALUE").appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
+                    this.hasReturnValue_ = false;
+                } else if (Bridge.referenceEquals(block.type, "procedures_defreturn") && !this.hasReturnValue_) {
+                    this.removeInput("VALUE");
+                    this.appendValueInput("VALUE").appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
+                    this.hasReturnValue_ = true;
+                }
+                this.setWarningText(null);
+            } else {
+                this.setWarningText(Blockly.Msg.PROCEDURES_IFRETURN_WARNING);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresMutatorargBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var field = new Blockly.FieldTextInput("x", Bridge.fn.bind(this, this.validator_));
+            this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_MUTATORARG_TITLE).appendField(field, "NAME");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            this.setTooltip(Blockly.Msg.PROCEDURES_MUTATORARG_TOOLTIP);
+            this.contextMenu = false;
+
+            // Create the default variable when we drag the block in from the flyout.
+            // Have to do this after installing the field on the block.
+            field.onFinishEditing_ = Bridge.fn.bind(this, this.createNewVar_);
+            field.onFinishEditing_("x");
+        },
+        validator_: function (newVar) {
+            newVar = newVar.replace(new RegExp("[\\s\\xa0]+", "g"), " ").replace(new RegExp("^ | $", "g"), "");
+            return newVar;
+        },
+        createNewVar_: function (newText) {
+            var source = this.sourceBlock_;
+            if (source != null && source.workspace != null && source.workspace.options != null && source.workspace.options.parentWorkspace != null) {
+                source.workspace.options.parentWorkspace.createVariable(newText);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresMutatorcontainerBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TITLE);
+            this.appendStatementInput("STACK");
+            this.appendDummyInput("STATEMENT_INPUT").appendField(Blockly.Msg.PROCEDURES_ALLOW_STATEMENTS).appendField(new Blockly.FieldCheckbox("TRUE"), "STATEMENTS");
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            this.setTooltip(Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TOOLTIP);
+            this.contextMenu = false;
         }
     });
 
@@ -4743,7 +7788,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 を破棄", [new $_.$AnonymousType$10("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 を破棄", [new $_.$AnonymousType$18("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -6055,10 +9100,10 @@
         receiverName: function (options) {
             if (options === void 0) { options = null; }
             if (options == null) {
-                options = new $_.$AnonymousType$14();
+                options = new $_.$AnonymousType$25();
             }
 
-            var opts = new $_.$AnonymousType$15(this.eobject(), true);
+            var opts = new $_.$AnonymousType$26(this.eobject(), true);
 
             for (var o in options) opts[o] = options[o];
             var r = this.receiver();
@@ -6098,7 +9143,7 @@
         eobjectSetVariable_: function (name, val, operator) {
             if (operator === void 0) { operator = "="; }
             if (this.eobject() != null) {
-                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(this.receiverName(new $_.$AnonymousType$16(false)), name), operator), " "), val), "\n");
+                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(this.receiverName(new $_.$AnonymousType$27(false)), name), operator), " "), val), "\n");
             } else {
                 return "";
             }
@@ -6126,7 +9171,7 @@
                     arg = "";
                 }
 
-                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\n", this.receiverName(new $_.$AnonymousType$14())), "on(:"), name), arg), ") do\n"), body), "end\n");
+                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\n", this.receiverName(new $_.$AnonymousType$25())), "on(:"), name), arg), ") do\n"), body), "end\n");
             } else {
                 return "";
             }
@@ -7635,28 +10680,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$14", $_, {
-        $kind: "anonymous",
-        ctor: function () {
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$14)) {
-                return false;
-            }
-            return ;
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([7192687542]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-
-            };
-        }
-    });
-
-    Bridge.define("$AnonymousType$15", $_, {
+    Bridge.define("$AnonymousType$26", $_, {
         $kind: "anonymous",
         ctor: function (object, dropSelf) {
             this.object = object;
@@ -7669,13 +10693,13 @@
             return this.dropSelf;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$15)) {
+            if (!Bridge.is(o, $_.$AnonymousType$26)) {
                 return false;
             }
             return Bridge.equals(this.object, o.object) && Bridge.equals(this.dropSelf, o.dropSelf);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7209464758, this.object, this.dropSelf]);
+            var h = Bridge.addHash([7226307510, this.object, this.dropSelf]);
             return h;
         },
         toJSON: function () {
@@ -7686,7 +10710,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$16", $_, {
+    Bridge.define("$AnonymousType$27", $_, {
         $kind: "anonymous",
         ctor: function (dropSelf) {
             this.dropSelf = dropSelf;
@@ -7695,13 +10719,13 @@
             return this.dropSelf;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$16)) {
+            if (!Bridge.is(o, $_.$AnonymousType$27)) {
                 return false;
             }
             return Bridge.equals(this.dropSelf, o.dropSelf);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7226241974, this.dropSelf]);
+            var h = Bridge.addHash([7243084726, this.dropSelf]);
             return h;
         },
         toJSON: function () {
@@ -7981,7 +11005,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 を送信", [new $_.$AnonymousType$10("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 を送信", [new $_.$AnonymousType$18("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8273,7 +11297,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 のタイムアウト処理を行う", [new $_.$AnonymousType$10("field_variable", "SVC", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 のタイムアウト処理を行う", [new $_.$AnonymousType$18("field_variable", "SVC", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8284,7 +11308,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", [new $_.$AnonymousType$10("field_variable", "SVC", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "NODE", "EObject"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "EDTAT", "String")], "Boolean", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", [new $_.$AnonymousType$18("field_variable", "SVC", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "NODE", "EObject"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "EDTAT", "String")], "Boolean", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8295,7 +11319,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 %2 の時間を %3 [ms]経過させる", [new $_.$AnonymousType$10("field_variable", "SVC", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "ELAPSE", "Number")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 %2 の時間を %3 [ms]経過させる", [new $_.$AnonymousType$18("field_variable", "SVC", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "ELAPSE", "Number")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8306,7 +11330,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", [new $_.$AnonymousType$10("field_variable", "SVC", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "DATA", "String")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$13("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", [new $_.$AnonymousType$18("field_variable", "SVC", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "DATA", "String")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8317,11 +11341,11 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$17("%1 %2 のタイマーを %3 [ms]に設定", [new $_.$AnonymousType$10("field_variable", "SVC", "item"), new $_.$AnonymousType$7("input_dummy"), new $_.$AnonymousType$11("input_value", "TIMER", "Number")], 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$28("%1 %2 のタイマーを %3 [ms]に設定", [new $_.$AnonymousType$18("field_variable", "SVC", "item"), new $_.$AnonymousType$17("input_dummy"), new $_.$AnonymousType$12("input_value", "TIMER", "Number")], 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$17", $_, {
+    Bridge.define("$AnonymousType$28", $_, {
         $kind: "anonymous",
         ctor: function (message0, args0, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -8346,13 +11370,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$17)) {
+            if (!Bridge.is(o, $_.$AnonymousType$28)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7243019190, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7259861942, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -8373,7 +11397,7 @@
             WebMrbc.Block.ctor.call(this, type);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$5("%1 のタイマー値", [new $_.$AnonymousType$10("field_variable", "SVC", "item")], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $_.$AnonymousType$15("%1 のタイマー値", [new $_.$AnonymousType$18("field_variable", "SVC", "item")], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8980,6 +12004,501 @@
         }
     });
 
+    Bridge.define("WebMrbc.TextAppendBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendValueInput("TEXT").appendField(Blockly.Msg.TEXT_APPEND_TO).appendField(new Blockly.FieldVariable(Blockly.Msg.TEXT_APPEND_VARIABLE), "VAR").appendField(Blockly.Msg.TEXT_APPEND_APPENDTEXT);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                return System.String.replaceAll(Blockly.Msg.TEXT_APPEND_TOOLTIP, "%1", thisBlock.getFieldValue("VAR"));
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.TextBlock", {
+        inherits: [WebMrbc.Block],
+        statics: {
+            newQuote_: function (open, RTL) {
+                var file;
+                if (open === RTL) {
+                    file = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAQAAAAqJXdxAAAAqUlEQVQI1z3KvUpCcRiA8ef9E4JNHhI0aFEacm1o0BsI0Slx8wa8gLauoDnoBhq7DcfWhggONDmJJgqCPA7neJ7p934EOOKOnM8Q7PDElo/4x4lFb2DmuUjcUzS3URnGib9qaPNbuXvBO3sGPHJDRG6fGVdMSeWDP2q99FQdFrz26Gu5Tq7dFMzUvbXy8KXeAj57cOklgA+u1B5AoslLtGIHQMaCVnwDnADZIFIrXsoXrgAAAABJRU5ErkJggg==";
+                } else {
+                    file = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAQAAAAqJXdxAAAAn0lEQVQI1z3OMa5BURSF4f/cQhAKjUQhuQmFNwGJEUi0RKN5rU7FHKhpjEH3TEMtkdBSCY1EIv8r7nFX9e29V7EBAOvu7RPjwmWGH/VuF8CyN9/OAdvqIXYLvtRaNjx9mMTDyo+NjAN1HNcl9ZQ5oQMM3dgDUqDo1l8DzvwmtZN7mnD+PkmLa+4mhrxVA9fRowBWmVBhFy5gYEjKMfz9AylsaRRgGzvZAAAAAElFTkSuQmCC";
+                }
+                return new Blockly.FieldImage(file, 12, 12, "\"");
+            }
+        },
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.TEXT_TEXT_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendDummyInput().appendField(this.newQuote_(true)).appendField(new Blockly.FieldTextInput(""), "TEXT").appendField(this.newQuote_(false));
+            this.setOutput(true, "String");
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            // Text block is trivial.  Use tooltip of parent block if it exists.
+            this.setTooltip(function () {
+                var parent = thisBlock.getParent();
+                return (parent != null && parent.getInputsInline() && !System.String.isNullOrEmpty(parent.tooltip)) ? parent.tooltip : Blockly.Msg.TEXT_TEXT_TOOLTIP;
+            });
+        },
+        newQuote_: function (open) {
+            return WebMrbc.TextBlock.newQuote_(open, this.RTL);
+        }
+    });
+
+    Bridge.define("WebMrbc.TextChangeCaseBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.TEXT_CHANGECASE_OPERATOR_UPPERCASE, "UPPERCASE"], [Blockly.Msg.TEXT_CHANGECASE_OPERATOR_LOWERCASE, "LOWERCASE"], [Blockly.Msg.TEXT_CHANGECASE_OPERATOR_TITLECASE, "TITLECASE"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_CHANGECASE_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendValueInput("TEXT").setCheck("String").appendField(new Blockly.FieldDropdown(OPERATORS), "CASE");
+            this.setOutput(true, "String");
+            this.setTooltip(Blockly.Msg.TEXT_CHANGECASE_TOOLTIP);
+        }
+    });
+
+    Bridge.define("WebMrbc.TextCharAtBlock", {
+        inherits: [WebMrbc.Block],
+        WHERE_OPTIONS: null,
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.WHERE_OPTIONS = [[Blockly.Msg.TEXT_CHARAT_FROM_START, "FROM_START"], [Blockly.Msg.TEXT_CHARAT_FROM_END, "FROM_END"], [Blockly.Msg.TEXT_CHARAT_FIRST, "FIRST"], [Blockly.Msg.TEXT_CHARAT_LAST, "LAST"], [Blockly.Msg.TEXT_CHARAT_RANDOM, "RANDOM"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_CHARAT_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.setOutput(true, "String");
+            this.appendValueInput("VALUE").setCheck("String").appendField(Blockly.Msg.TEXT_CHARAT_INPUT_INTEXT);
+            this.appendDummyInput("AT");
+            this.setInputsInline(true);
+            this.updateAt_(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                var where = thisBlock.getFieldValue("WHERE");
+                var tooltip = Blockly.Msg.TEXT_CHARAT_TOOLTIP;
+                if (Bridge.referenceEquals(where, "FROM_START") || Bridge.referenceEquals(where, "FROM_END")) {
+                    var msg = (Bridge.referenceEquals(where, "FROM_START")) ? Blockly.Msg.LISTS_INDEX_FROM_START_TOOLTIP : Blockly.Msg.LISTS_INDEX_FROM_END_TOOLTIP;
+                    tooltip = System.String.concat(tooltip, (System.String.concat("  ", System.String.replaceAll(msg, "%1", thisBlock.workspace.options.oneBasedIndex ? "#1" : "#0"))));
+                }
+                return tooltip;
+            });
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var isAt = this.getInput("AT").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at", System.Boolean.toString(isAt));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            // Note: Until January 2013 this block did not have mutations,
+            // so "at" defaults to true.
+            var isAt = (!Bridge.referenceEquals(xmlElement.getAttribute("at"), "false"));
+            this.updateAt_(isAt);
+        },
+        updateAt_: function (isAt) {
+            // Destroy old "AT" and "ORDINAL" inputs.
+            this.removeInput("AT");
+            this.removeInput("ORDINAL", true);
+            // Create either a value "AT" input or a dummy input.
+            if (isAt) {
+                this.appendValueInput("AT").setCheck("Number");
+                if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
+                    this.appendDummyInput("ORDINAL").appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                }
+            } else {
+                this.appendDummyInput("AT");
+            }
+            if (!System.String.isNullOrEmpty(Blockly.Msg.TEXT_CHARAT_TAIL)) {
+                this.removeInput("TAIL", true);
+                this.appendDummyInput("TAIL").appendField(Blockly.Msg.TEXT_CHARAT_TAIL);
+            }
+            var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS, Bridge.fn.bind(this, function (value) {
+                var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
+                // The "isAt" variable is available due to this function being a closure.
+                if (newAt !== isAt) {
+                    var block = this.sourceBlock_;
+                    Bridge.cast(block, WebMrbc.TextCharAtBlock).updateAt_(newAt);
+                    // This menu has been destroyed and replaced.  Update the replacement.
+                    block.setFieldValue(value, "WHERE");
+                    return null;
+                }
+                return undefined;
+            }));
+            this.getInput("AT").appendField(menu, "WHERE");
+        }
+    });
+
+    Bridge.define("WebMrbc.TextCreateJoinContainerBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.TEXT_CREATE_JOIN_TITLE_JOIN);
+            this.appendStatementInput("STACK");
+            this.setTooltip(Blockly.Msg.TEXT_CREATE_JOIN_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.TextCreateJoinItemBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendDummyInput().appendField(Blockly.Msg.TEXT_CREATE_JOIN_ITEM_TITLE_ITEM);
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setTooltip(Blockly.Msg.TEXT_CREATE_JOIN_ITEM_TOOLTIP);
+            this.contextMenu = false;
+        }
+    });
+
+    Bridge.define("WebMrbc.TextGetSubstringBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.WHERE_OPTIONS_1 = [[Blockly.Msg.TEXT_GET_SUBSTRING_START_FROM_START, "FROM_START"], [Blockly.Msg.TEXT_GET_SUBSTRING_START_FROM_END, "FROM_END"], [Blockly.Msg.TEXT_GET_SUBSTRING_START_FIRST, "FIRST"]];
+            this.WHERE_OPTIONS_2 = [[Blockly.Msg.TEXT_GET_SUBSTRING_END_FROM_START, "FROM_START"], [Blockly.Msg.TEXT_GET_SUBSTRING_END_FROM_END, "FROM_END"], [Blockly.Msg.TEXT_GET_SUBSTRING_END_LAST, "LAST"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendValueInput("STRING").setCheck("String").appendField(Blockly.Msg.TEXT_GET_SUBSTRING_INPUT_IN_TEXT);
+            this.appendDummyInput("AT1");
+            this.appendDummyInput("AT2");
+            if (!System.String.isNullOrEmpty(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL)) {
+                this.appendDummyInput("TAIL").appendField(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL);
+            }
+            this.setInputsInline(true);
+            this.setOutput(true, "String");
+            this.updateAt_(1, true);
+            this.updateAt_(2, true);
+            this.setTooltip(Blockly.Msg.TEXT_GET_SUBSTRING_TOOLTIP);
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            var isAt1 = this.getInput("AT1").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at1", System.Boolean.toString(isAt1));
+            var isAt2 = this.getInput("AT2").type === Blockly.INPUT_VALUE;
+            container.setAttribute("at2", System.Boolean.toString(isAt2));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            var isAt1 = (Bridge.referenceEquals(xmlElement.getAttribute("at1"), "true"));
+            var isAt2 = (Bridge.referenceEquals(xmlElement.getAttribute("at2"), "true"));
+            this.updateAt_(1, isAt1);
+            this.updateAt_(2, isAt2);
+        },
+        updateAt_: function (n, isAt) {
+            // Create or delete an input for the numeric index.
+            // Destroy old "AT" and "ORDINAL" inputs.
+            this.removeInput(System.String.concat("AT", n));
+            this.removeInput(System.String.concat("ORDINAL", n), true);
+            // Create either a value "AT" input or a dummy input.
+            if (isAt) {
+                this.appendValueInput(System.String.concat("AT", n)).setCheck("Number");
+                if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
+                    this.appendDummyInput(System.String.concat("ORDINAL", n)).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                }
+            } else {
+                this.appendDummyInput(System.String.concat("AT", n));
+            }
+            // Move tail, if present, to end of block.
+            if (n === 2 && !System.String.isNullOrEmpty(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL)) {
+                this.removeInput("TAIL", true);
+                this.appendDummyInput("TAIL").appendField(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL);
+            }
+            var menu = new Blockly.FieldDropdown(this[System.String.concat("WHERE_OPTIONS_", n)], Bridge.fn.bind(this, function (value) {
+                var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
+                // The "isAt" variable is available due to this function being a
+                // closure.
+                if (newAt !== isAt) {
+                    var block = this.sourceBlock_;
+                    Bridge.cast(block, WebMrbc.TextGetSubstringBlock).updateAt_(n, newAt);
+                    // This menu has been destroyed and replaced.
+                    // Update the replacement.
+                    block.setFieldValue(value, System.String.concat("WHERE", n));
+                    return null;
+                }
+                return undefined;
+            }));
+
+            this.getInput(System.String.concat("AT", n)).appendField(menu, System.String.concat("WHERE", n));
+            if (n === 1) {
+                this.moveInputBefore("AT1", "AT2");
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.TextIndexOfBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.TEXT_INDEXOF_OPERATOR_FIRST, "FIRST"], [Blockly.Msg.TEXT_INDEXOF_OPERATOR_LAST, "LAST"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_INDEXOF_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.setOutput(true, "Number");
+            this.appendValueInput("VALUE").setCheck("String").appendField(Blockly.Msg.TEXT_INDEXOF_INPUT_INTEXT);
+            this.appendValueInput("FIND").setCheck("String").appendField(new Blockly.FieldDropdown(OPERATORS), "END");
+            if (!System.String.isNullOrEmpty(Blockly.Msg.TEXT_INDEXOF_TAIL)) {
+                this.appendDummyInput().appendField(Blockly.Msg.TEXT_INDEXOF_TAIL);
+            }
+            this.setInputsInline(true);
+            // Assign "this" to a variable for use in the tooltip closure below.
+            var thisBlock = this;
+            this.setTooltip(function () {
+                return System.String.replaceAll(Blockly.Msg.TEXT_INDEXOF_TOOLTIP, "%1", thisBlock.workspace.options.oneBasedIndex ? "0" : "-1");
+            });
+        }
+    });
+
+    Bridge.define("WebMrbc.TextIsEmptyBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.TEXT_ISEMPTY_TITLE, [new $_.$AnonymousType$20("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_ISEMPTY_TOOLTIP, Blockly.Msg.TEXT_ISEMPTY_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.TextJoinBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.TEXT_JOIN_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.itemCount_ = 2;
+            this.updateShape_();
+            this.setOutput(true, "String");
+            this.setMutator(new Blockly.Mutator(["text_create_join_item"]));
+            this.setTooltip(Blockly.Msg.TEXT_JOIN_TOOLTIP);
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("items", this.itemCount_.toString());
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.itemCount_ = parseInt(xmlElement.getAttribute("items"), 10);
+            this.updateShape_();
+        },
+        decompose: function (workspace) {
+            var containerBlock = workspace.newBlock("text_create_join_container");
+            containerBlock.initSvg();
+            var connection = containerBlock.getInput("STACK").connection;
+            for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                var itemBlock = workspace.newBlock("text_create_join_item");
+                itemBlock.initSvg();
+                connection.connect(itemBlock.previousConnection);
+                connection = itemBlock.nextConnection;
+            }
+            return containerBlock;
+        },
+        compose: function (containerBlock) {
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
+            // Count number of inputs.
+            var connections = System.Array.init(0, null);
+            while (itemBlock != null) {
+                connections.push(itemBlock.valueConnection_);
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
+            }
+            // Disconnect any children that don"t belong.
+            for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                var connection = this.getInput(System.String.concat("ADD", i)).connection.targetConnection;
+                if (connection != null && System.Array.indexOfT(connections, connection) === -1) {
+                    connection.disconnect();
+                }
+            }
+            this.itemCount_ = connections.length;
+            this.updateShape_();
+            // Reconnect any child blocks.
+            for (var i1 = 0; i1 < this.itemCount_; i1 = (i1 + 1) | 0) {
+                Blockly.Mutator.reconnect(connections[i1], this, System.String.concat("ADD", i1));
+            }
+        },
+        saveConnections: function (containerBlock) {
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
+            var i = 0;
+            while (itemBlock != null) {
+                var input = this.getInput(System.String.concat("ADD", i));
+                itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
+                i = (i + 1) | 0;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
+            }
+        },
+        updateShape_: function () {
+            if (this.itemCount_ !== 0 && this.getInput("EMPTY") != null) {
+                this.removeInput("EMPTY");
+            } else if (this.itemCount_ === 0 && this.getInput("EMPTY") == null) {
+                this.appendDummyInput("EMPTY").appendField(this.newQuote_(true)).appendField(this.newQuote_(false));
+            }
+            // Add new inputs.
+            var i;
+            for (i = 0; i < this.itemCount_; i = (i + 1) | 0) {
+                if (this.getInput(System.String.concat("ADD", i)) == null) {
+                    var input = this.appendValueInput(System.String.concat("ADD", i));
+                    if (i === 0) {
+                        input.appendField(Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH);
+                    }
+                }
+            }
+            // Remove deleted inputs.
+            while (this.getInput(System.String.concat("ADD", i)) != null) {
+                this.removeInput(System.String.concat("ADD", i));
+                i = (i + 1) | 0;
+            }
+        },
+        newQuote_: function (open) {
+            return WebMrbc.TextBlock.newQuote_(open, this.RTL);
+        }
+    });
+
+    Bridge.define("WebMrbc.TextLengthBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$15(Blockly.Msg.TEXT_LENGTH_TITLE, [new $_.$AnonymousType$20("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_LENGTH_TOOLTIP, Blockly.Msg.TEXT_LENGTH_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.TextPrintBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$13(Blockly.Msg.TEXT_PRINT_TITLE, [new $_.$AnonymousType$19("input_value", "TEXT")], null, null, WebMrbc.Texts.HUE, Blockly.Msg.TEXT_PRINT_TOOLTIP, Blockly.Msg.TEXT_PRINT_HELPURL));
+        }
+    });
+
+    Bridge.define("WebMrbc.TextPromptBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var TYPES = [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, "TEXT"], [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER, "NUMBER"]];
+            // Assign "this" to a variable for use in the closures below.
+            var thisBlock = this;
+            this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            var dropdown = new Blockly.FieldDropdown(TYPES, function (newOp) {
+                thisBlock.updateType_(newOp);
+                return undefined;
+            });
+            this.appendDummyInput().appendField(dropdown, "TYPE").appendField(this.newQuote_(true)).appendField(new Blockly.FieldTextInput(""), "TEXT").appendField(this.newQuote_(false));
+            this.setOutput(true, "String");
+            this.setTooltip(function () {
+                return (Bridge.referenceEquals(thisBlock.getFieldValue("TYPE"), "TEXT")) ? Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT : Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
+            });
+        },
+        newQuote_: function (open) {
+            return WebMrbc.TextBlock.newQuote_(open, this.RTL);
+        },
+        updateType_: function (newOp) {
+            this.outputConnection.setCheck(Bridge.referenceEquals(newOp, "NUMBER") ? "Number" : "String");
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("type", this.getFieldValue("TYPE"));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.updateType_(xmlElement.getAttribute("type"));
+        }
+    });
+
+    Bridge.define("WebMrbc.TextPromptExtBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var TYPES = [[Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, "TEXT"], [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER, "NUMBER"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            // Assign "this" to a variable for use in the closures below.
+            var thisBlock = this;
+            var dropdown = new Blockly.FieldDropdown(TYPES, function (newOp) {
+                thisBlock.updateType_(newOp);
+                return undefined;
+            });
+            this.appendValueInput("TEXT").appendField(dropdown, "TYPE");
+            this.setOutput(true, "String");
+            this.setTooltip(function () {
+                return (Bridge.referenceEquals(thisBlock.getFieldValue("TYPE"), "TEXT")) ? Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT : Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
+            });
+        },
+        updateType_: function (newOp) {
+            this.outputConnection.setCheck(Bridge.referenceEquals(newOp, "NUMBER") ? "Number" : "String");
+        },
+        mutationToDom: function () {
+            var container = document.createElement("mutation");
+            container.setAttribute("type", this.getFieldValue("TYPE"));
+            return container;
+        },
+        domToMutation: function (xmlElement) {
+            this.updateType_(xmlElement.getAttribute("type"));
+        }
+    });
+
+    Bridge.define("WebMrbc.TextTrimBlock", {
+        inherits: [WebMrbc.Block],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            var OPERATORS = [[Blockly.Msg.TEXT_TRIM_OPERATOR_BOTH, "BOTH"], [Blockly.Msg.TEXT_TRIM_OPERATOR_LEFT, "LEFT"], [Blockly.Msg.TEXT_TRIM_OPERATOR_RIGHT, "RIGHT"]];
+            this.setHelpUrl(Blockly.Msg.TEXT_TRIM_HELPURL);
+            this.setColour(WebMrbc.Texts.HUE);
+            this.appendValueInput("TEXT").setCheck("String").appendField(new Blockly.FieldDropdown(OPERATORS), "MODE");
+            this.setOutput(true, "String");
+            this.setTooltip(Blockly.Msg.TEXT_TRIM_TOOLTIP);
+        }
+    });
+
     Bridge.define("WebMrbc.ToneBlock", {
         inherits: [WebMrbc.Block],
         ctor: function (type) {
@@ -9011,6 +12530,62 @@
             this.setColour(160);
             this.setTooltip("Tone 2～62500");
             this.setHelpUrl("http://www.example.com/");
+        }
+    });
+
+    Bridge.define("WebMrbc.VariablesGetBlock", {
+        inherits: [WebMrbc.Block],
+        contextMenuType_: "variables_set",
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.setHelpUrl(Blockly.Msg.VARIABLES_GET_HELPURL);
+            this.setColour(WebMrbc.Variables.HUE);
+            this.appendDummyInput().appendField(new Blockly.FieldVariable(Blockly.Msg.VARIABLES_DEFAULT_NAME), "VAR");
+            this.setOutput(true);
+            this.setTooltip(Blockly.Msg.VARIABLES_GET_TOOLTIP);
+            this.contextMenuMsg_ = Blockly.Msg.VARIABLES_GET_CREATE_SET;
+        },
+        customContextMenu: function (options) {
+            var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                enabled: true
+            } );
+            var name = this.getFieldValue("VAR");
+            option.text = System.String.replaceAll(this.contextMenuMsg_, "%1", name);
+            var xmlField = goog.dom.createDom("field", null, name);
+            xmlField.setAttribute("name", "VAR");
+            var xmlBlock = goog.dom.createDom("block", null, xmlField);
+            xmlBlock.setAttribute("type", this.contextMenuType_);
+            option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+            options.push(option);
+        }
+    });
+
+    Bridge.define("WebMrbc.VariablesSetBlock", {
+        inherits: [WebMrbc.Block],
+        contextMenuType_: "variables_get",
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        init: function () {
+            this.jsonInit(new $_.$AnonymousType$13(Blockly.Msg.VARIABLES_SET, [new $_.$AnonymousType$18("field_variable", "VAR", Blockly.Msg.VARIABLES_DEFAULT_NAME), new $_.$AnonymousType$19("input_value", "VALUE")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.VARIABLES_SET_TOOLTIP, Blockly.Msg.VARIABLES_SET_HELPURL));
+            this.contextMenuMsg_ = Blockly.Msg.VARIABLES_SET_CREATE_GET;
+        },
+        customContextMenu: function (options) {
+            var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                enabled: true
+            } );
+            var name = this.getFieldValue("VAR");
+            option.text = System.String.replaceAll(this.contextMenuMsg_, "%1", name);
+            var xmlField = goog.dom.createDom("field", null, name);
+            xmlField.setAttribute("name", "VAR");
+            var xmlBlock = goog.dom.createDom("block", null, xmlField);
+            xmlBlock.setAttribute("type", this.contextMenuType_);
+            option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+            options.push(option);
         }
     });
 
@@ -10045,6 +13620,115 @@
             template = System.String.replaceAll(template, "%attribute%", "MainLoop");
             template = System.String.replaceAll(template, "%img%", this.getImageUrl());
             return template;
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresCallnoreturnBlock", {
+        inherits: [WebMrbc.ProceduresCall],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.ProceduresCall.ctor.call(this, type);
+            this.defType_ = "procedures_defnoreturn";
+        },
+        init: function () {
+            this.appendDummyInput("TOPROW").appendField(this.id, "NAME");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            // Tooltip is set in renameProcedure.
+            this.setHelpUrl(Blockly.Msg.PROCEDURES_CALLNORETURN_HELPURL);
+            this.arguments_ = System.Array.init(0, null);
+            this.quarkConnections_ = new (System.Collections.Generic.Dictionary$2(String,Blockly.Connection))();
+            this.quarkIds_ = null;
+        },
+        customContextMenu: function (options) {
+            var option = Bridge.merge(new WebMrbc.ContextMenuOption(), {
+                enabled: true
+            } );
+            option.text = Blockly.Msg.PROCEDURES_HIGHLIGHT_DEF;
+            var name = this.getProcedureCall();
+            var workspace = this.workspace;
+            option.callback = function () {
+                var def = Blockly.Procedures.getDefinition(name, workspace);
+                if (def != null) {
+                    def.select();
+                }
+            };
+            options.push(option);
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresCallreturnBlock", {
+        inherits: [WebMrbc.ProceduresCall],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.ProceduresCall.ctor.call(this, type);
+            this.defType_ = "procedures_defreturn";
+        },
+        init: function () {
+            this.appendDummyInput("TOPROW").appendField("", "NAME");
+            this.setOutput(true);
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            // Tooltip is set in domToMutation.
+            this.setHelpUrl(Blockly.Msg.PROCEDURES_CALLRETURN_HELPURL);
+            this.arguments_ = System.Array.init(0, null);
+            this.quarkConnections_ = new (System.Collections.Generic.Dictionary$2(String,Blockly.Connection))();
+            this.quarkIds_ = null;
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresDefnoreturnBlock", {
+        inherits: [WebMrbc.ProceduresBlock],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.ProceduresBlock.ctor.call(this, type);
+            this.callType_ = "procedures_callnoreturn";
+        },
+        init: function () {
+            var nameField = new Blockly.FieldTextInput(Blockly.Msg.PROCEDURES_DEFNORETURN_PROCEDURE, Blockly.Procedures.rename);
+            nameField.setSpellcheck(false);
+            this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_TITLE).appendField(nameField, "NAME").appendField("", "PARAMS");
+            this.setMutator(new Blockly.Mutator(["procedures_mutatorarg"]));
+            if ((this.workspace.options.comments || (this.workspace.options.parentWorkspace != null && this.workspace.options.parentWorkspace.options.comments)) && !System.String.isNullOrEmpty(Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT)) {
+                this.setCommentText(Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT);
+            }
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            this.setTooltip(Blockly.Msg.PROCEDURES_DEFNORETURN_TOOLTIP);
+            this.setHelpUrl(Blockly.Msg.PROCEDURES_DEFNORETURN_HELPURL);
+            this.arguments_ = System.Array.init(0, null);
+            this.setStatements_(true);
+            this.statementConnection_ = null;
+        },
+        getProcedureDef: function () {
+            return [this.getFieldValue("NAME"), this.arguments_, false];
+        }
+    });
+
+    Bridge.define("WebMrbc.ProceduresDefreturnBlock", {
+        inherits: [WebMrbc.ProceduresBlock],
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.ProceduresBlock.ctor.call(this, type);
+            this.callType_ = "procedures_callreturn";
+        },
+        init: function () {
+            var nameField = new Blockly.FieldTextInput(Blockly.Msg.PROCEDURES_DEFRETURN_PROCEDURE, Blockly.Procedures.rename);
+            nameField.setSpellcheck(false);
+            this.appendDummyInput().appendField(Blockly.Msg.PROCEDURES_DEFRETURN_TITLE).appendField(nameField, "NAME").appendField("", "PARAMS");
+            this.appendValueInput("RETURN").setAlign(Blockly.ALIGN_RIGHT).appendField(Blockly.Msg.PROCEDURES_DEFRETURN_RETURN);
+            this.setMutator(new Blockly.Mutator(["procedures_mutatorarg"]));
+            if ((this.workspace.options.comments || (this.workspace.options.parentWorkspace != null && this.workspace.options.parentWorkspace.options.comments)) && !System.String.isNullOrEmpty(Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT)) {
+                this.setCommentText(Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT);
+            }
+            this.setColour(WebMrbc.ProceduresBlock.HUE);
+            this.setTooltip(Blockly.Msg.PROCEDURES_DEFRETURN_TOOLTIP);
+            this.setHelpUrl(Blockly.Msg.PROCEDURES_DEFRETURN_HELPURL);
+            this.arguments_ = System.Array.init(0, null);
+            this.setStatements_(true);
+            this.statementConnection_ = null;
+        },
+        getProcedureDef: function () {
+            return [this.getFieldValue("NAME"), this.arguments_, true];
         }
     });
 
