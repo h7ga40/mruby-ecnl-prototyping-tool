@@ -1,4 +1,9 @@
-﻿Bridge.assembly("WebMrbc", function ($asm, globals) {
+/**
+ * @version 1.0.0.0
+ * @copyright Copyright ©  2016
+ * @compiler Bridge.NET 15.6.0
+ */
+Bridge.assembly("WebMrbc", function ($asm, globals) {
     "use strict";
 
     Bridge.define("Blockly.Msg", {
@@ -401,26 +406,31 @@
             },
             dump_recur: function (T, list, tree) {
                 while (tree != null) {
-                    list.add(System.Nullable.getValue(Bridge.cast(tree.getcar(), T)));
+                    list.add(Bridge.cast(tree.getcar(), T));
                     tree = Bridge.cast(tree.getcdr(), WebMrbc.node);
                 }
             }
         },
         _car: null,
         _cdr: null,
+        block_id: null,
         config: {
             properties: {
                 p: null,
                 lineno: 0,
-                filename_index: 0
+                column: 0,
+                filename: null,
+                start_lineno: 0,
+                start_column: 0
             }
         },
         ctor: function (p, car) {
             this.$initialize();
             this.setp(p);
             this._car = car;
-            this.setlineno(p.lineno);
-            this.setfilename_index(p.current_filename_index);
+            this.setlineno(p.WebMrbc$IMrbParser$getlineno());
+            this.setcolumn(p.WebMrbc$IMrbParser$getcolumn());
+            this.setfilename(p.WebMrbc$IMrbParser$getfilename());
         },
         getcar: function () {
             return this._car;
@@ -447,8 +457,9 @@
         },
         NODE_LINENO: function (n) {
             if (n != null) {
-                this.setfilename_index(n.getfilename_index());
+                this.setfilename(n.getfilename());
                 this.setlineno(n.getlineno());
+                this.setcolumn(n.getcolumn());
             }
         },
         append: function (b) {
@@ -464,6 +475,27 @@
             var a = Bridge.as(this.getcar(), WebMrbc.node);
             if (a != null && this.getcdr() == null) {
                 return a.to_xml();
+            }
+
+            throw new System.NotImplementedException();
+        },
+        to_ruby: function (cond) {
+            this.setfilename(cond.getfilename());
+            this.setstart_lineno(cond.getlineno());
+            this.setstart_column(cond.getcolumn());
+
+            this.to_rb(cond);
+
+            this.setlineno(cond.getlineno());
+            this.setcolumn(cond.getcolumn());
+
+            cond.add_node(this);
+        },
+        to_rb: function (cond) {
+            var a = Bridge.as(this.getcar(), WebMrbc.node);
+            while (a != null) {
+                a.to_ruby(cond);
+                a = Bridge.as(this.getcdr(), WebMrbc.node);
             }
 
             throw new System.NotImplementedException();
@@ -487,6 +519,7 @@
             translating: false,
             classGroups: null,
             nodeProfileClass: null,
+            baseObjectPropertyList: null,
             config: {
                 init: function () {
                     this.preferences = new (System.Collections.Generic.Dictionary$2(String,Object))();
@@ -496,7 +529,7 @@
             initModule: function () {
                 var module = new WebMrbc.EmModule(WebMrbc.App.term);
 
-                window.onerror = function (e) {
+                window.onerror = function (message, url, lineNumber, columnNumber, error) {
                     var spinnerElement = document.getElementById("spinner");
                     // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
                     module.setStatus("Exception thrown, see JavaScript console");
@@ -506,6 +539,7 @@
                             module.printErr([System.String.concat("[post-exception status] ", text)]);
                         }
                     };
+                    return false;
                 };
 
                 return module;
@@ -740,15 +774,15 @@
                 Blockly.Ruby = new WebMrbc.Ruby();
 
                 var termElement = document.getElementById("term");
-                WebMrbc.App.term = new Terminal(new $_.$AnonymousType$1(80, 24, true, true, false));
-                WebMrbc.App.term.on("data", $_.WebMrbc.App.f1);
-                WebMrbc.App.term.on("title", $_.WebMrbc.App.f2);
+                WebMrbc.App.term = new Terminal(new $asm.$AnonymousType$1(80, 24, true, true, false));
+                WebMrbc.App.term.on("data", $asm.$.WebMrbc.App.f1);
+                WebMrbc.App.term.on("title", $asm.$.WebMrbc.App.f2);
 
                 WebMrbc.App.term.open(termElement);
 
                 Blockly.HSV_SATURATION = 1.0;
                 Blockly.HSV_VALUE = 0.8;
-                Blockly.mainWorkspace = Blockly.inject("blockly-div", new $_.$AnonymousType$2(document.getElementById("toolbox"), true, true, true, Infinity, true, false, "start", true, false, true, false, true, new $_.$AnonymousType$3(true, true, 0.8, 3, 0.3)));
+                Blockly.mainWorkspace = Blockly.inject("blockly-div", new $asm.$AnonymousType$2(document.getElementById("toolbox"), true, true, true, Infinity, true, false, "start", true, false, true, false, false, new $asm.$AnonymousType$3(true, true, 0.8, 3, 0.3)));
 
                 WebMrbc.App.hideEmptyCategory();
 
@@ -759,7 +793,7 @@
                 textEditor.setTheme("ace/theme/vibrant_ink");
                 textEditor.setShowInvisibles(true);
                 textEditor.gotoLine(0, 0);
-                textEditor.on("change", $_.WebMrbc.App.f3);
+                textEditor.on("change", $asm.$.WebMrbc.App.f3);
                 var session = textEditor.getSession();
                 session.setMode("ace/mode/ruby");
                 session.setTabSize(2);
@@ -788,7 +822,7 @@
                 WebMrbc.Collections.EcnlTaskWorkspace = new WebMrbc.EcnlTaskWorkspace("EchonetTask");
                 WebMrbc.Collections.ClassWorkspaces.add(WebMrbc.Collections.EcnlTaskWorkspace);
 
-                $($_.WebMrbc.App.f4);
+                $($asm.$.WebMrbc.App.f4);
             },
             workspace_Changed: function (e) {
                 WebMrbc.App.changedAfterTranslating = true;
@@ -868,94 +902,58 @@
                 }
             },
             initClassGroups: function (ele) {
-                $.ajax({ url: "devices/ClassGroupList.json", success: function (data, textStatus, request) {
-                    var $t;
-                    var profileClass = null;
-                    var _classGroups = Bridge.cast(((Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data), Array);
-                    var classGroups = System.Array.init(0, null);
-                    $t = Bridge.getEnumerator(_classGroups);
-                    while ($t.moveNext()) {
-                        var _item = $t.getCurrent();
-                        var item = new WebMrbc.JsonClassGroupInfo(_item);
-                        classGroups.push(item);
-                        if (item.classGroupCode === 14) {
-                            profileClass = item;
-                            continue;
-                        } else if (item.classGroupCode === 15) {
-                            continue;
-                        }
-                    }
-                    WebMrbc.App.classGroups = classGroups;
-
-                    WebMrbc.Views.EObjectModalView.initClassGroups();
-
-                    if (profileClass != null) {
-                        WebMrbc.App.updateClass(profileClass, $_.WebMrbc.App.f6);
-                    }
-                }, error: WebMrbc.App.ajaxError });
+                $.ajax({ url: "echonet_objects.json", success: WebMrbc.App.classGroupsSuccess, error: WebMrbc.App.ajaxError });
             },
-            updateClass: function (eclass, success) {
-                if (success === void 0) { success = null; }
-                $.ajax({ url: System.String.concat(System.String.concat("devices/ClassList", System.Byte.format(eclass.classGroupCode, "X2").toUpperCase()), ".json"), success: function (data1, textStatus1, request1) {
-                    var $t;
-                    var _classes = Bridge.cast(((Bridge.referenceEquals(Bridge.getType(data1), String)) ? $.parseJSON(Bridge.cast(data1, String)) : data1), Array);
+            classGroupsSuccess: function (data, textStatus, request) {
+                var $t, $t1, $t2, $t3, $t4;
+                var _deviceInfo = ((Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data);
+                var profProps = System.Array.init(0, null);
+                $t = Bridge.getEnumerator(_deviceInfo.baseProfilePropertyList);
+                while ($t.moveNext()) {
+                    var property = $t.getCurrent();
+                    profProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property));
+                }
+                var objProps = System.Array.init(0, null);
+                $t1 = Bridge.getEnumerator(_deviceInfo.baseObjectPropertyList);
+                while ($t1.moveNext()) {
+                    var property1 = $t1.getCurrent();
+                    objProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property1));
+                }
+                WebMrbc.App.baseObjectPropertyList = objProps;
+
+                var classGroups = System.Array.init(0, null);
+                $t2 = Bridge.getEnumerator(_deviceInfo.classGroupList);
+                while ($t2.moveNext()) {
+                    var _item = $t2.getCurrent();
+                    var item = new WebMrbc.JsonClassGroupInfo(_item);
+                    classGroups.push(item);
                     var classes = System.Array.init(0, null);
-                    $t = Bridge.getEnumerator(_classes);
-                    while ($t.moveNext()) {
-                        var _item = $t.getCurrent();
-                        var item = new WebMrbc.JsonClassInfo(_item);
-                        classes.push(item);
-                        item.classGroup = eclass;
-                        if (item.classCode === 240) {
-                            WebMrbc.App.nodeProfileClass = item;
+                    $t3 = Bridge.getEnumerator(_item.classList);
+                    while ($t3.moveNext()) {
+                        var _cls = $t3.getCurrent();
+                        var cls = new WebMrbc.JsonClassInfo(_cls);
+                        cls.classGroup = item;
+                        classes.push(cls);
+                        var properties = System.Array.init(0, null);
+                        $t4 = Bridge.getEnumerator(_cls.propertyList);
+                        while ($t4.moveNext()) {
+                            var property2 = $t4.getCurrent();
+                            properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(property2));
+                        }
+                        if ((item.classGroupCode === 14) && (cls.classCode === 240)) {
+                            cls.properties = Bridge.cast(profProps.concat.apply(profProps, properties), Array);
+                            WebMrbc.App.nodeProfileClass = cls;
+                        } else {
+                            cls.properties = properties;
                         }
                     }
-                    eclass.classes = classes;
+                    item.classes = classes;
+                }
+                WebMrbc.App.classGroups = classGroups;
 
-                    if (!Bridge.staticEquals(success, null)) {
-                        success();
-                    }
-                }, error: WebMrbc.App.ajaxError });
-            },
-            updateProperties: function (eclass, success) {
-                if (success === void 0) { success = null; }
-                $.ajax({ url: System.String.concat(System.String.concat(System.String.concat("devices/PropertyList", System.Byte.format(eclass.classGroup.classGroupCode, "X2").toUpperCase()), System.Byte.format(eclass.classCode, "X2").toUpperCase()), ".json"), success: function (data, textStatus, request) {
-                    var $t;
-                    var _properties = Bridge.cast(((Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data), Array);
-                    var properties = System.Array.init(0, null);
-                    $t = Bridge.getEnumerator(_properties);
-                    while ($t.moveNext()) {
-                        var _item = $t.getCurrent();
-                        var item = new WebMrbc.JsonPropertyInfo.$ctor1(_item);
-                        properties.push(item);
-                    }
-                    eclass.properties = properties;
+                WebMrbc.Views.EObjectModalView.initClassGroups();
 
-                    if (!Bridge.staticEquals(success, null)) {
-                        success();
-                    }
-                }, error: function (data, textStatus, request) {
-                    WebMrbc.App.updateDefaultProperties(eclass, success);
-                } });
-            },
-            updateDefaultProperties: function (eclass, success) {
-                if (success === void 0) { success = null; }
-                $.ajax({ url: "devices/PropertyListBase.json", success: function (data, textStatus, request) {
-                    var $t;
-                    var _properties = Bridge.cast(((Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data), Array);
-                    var properties = System.Array.init(0, null);
-                    $t = Bridge.getEnumerator(_properties);
-                    while ($t.moveNext()) {
-                        var _item = $t.getCurrent();
-                        var item = new WebMrbc.JsonPropertyInfo.$ctor1(_item);
-                        properties.push(item);
-                    }
-                    eclass.properties = properties;
-
-                    if (!Bridge.staticEquals(success, null)) {
-                        success();
-                    }
-                }, error: WebMrbc.App.ajaxError });
+                WebMrbc.App.addEObjectFromBeginning();
             },
             ajaxError: function (request, textStatus, error) {
             },
@@ -988,20 +986,20 @@
             },
             getClass: function (classGroupCode, classCode) {
                 var t = System.Linq.Enumerable.from(WebMrbc.App.classGroups).firstOrDefault(function (cg) {
-                    return cg.classGroupCode === classGroupCode;
-                }, null);
+                        return cg.classGroupCode === classGroupCode;
+                    }, null);
                 if (t == null) {
                     return null;
                 }
                 return System.Linq.Enumerable.from(t.classes).firstOrDefault(function (c) {
-                    return c.classCode === classCode;
-                }, null);
+                        return c.classCode === classCode;
+                    }, null);
             },
             getProperties: function (type, properties) {
-                var pcs = System.Linq.Enumerable.from(properties).select($_.WebMrbc.App.f7);
+                var pcs = System.Linq.Enumerable.from(properties).select($asm.$.WebMrbc.App.f5);
                 var ps = System.Linq.Enumerable.from(type.properties).where(function (p) {
-                    return pcs.contains(p.propertyCode);
-                });
+                        return pcs.contains(p.propertyCode);
+                    });
                 return ps.toArray();
             },
             dumpXml: function (workspace, models) {
@@ -1043,10 +1041,10 @@
              * @return  {$}
              */
             ignoreEnterKey: function (el) {
-                return el.find("input[type=text]").keypress($_.WebMrbc.App.f8);
+                return el.find("input[type=text]").keypress($asm.$.WebMrbc.App.f6);
             },
             removeBackdropOnHidden: function (el) {
-                return el.on("hidden", $_.WebMrbc.App.f9);
+                return el.on("hidden", $asm.$.WebMrbc.App.f7);
             },
             reset: function () {
                 Blockly.mainWorkspace.clear();
@@ -1123,7 +1121,7 @@
                     }
 
                     if ((element.getElementsByTagName("block").length === 0) && (element.getAttribute("custom") == null)) {
-                        $(System.String.concat(System.String.concat("div.blocklyTreeRoot > div:nth-child(2) > div:nth-child(", i), ")[aria-level='1']")).hide();
+                        $("div.blocklyTreeRoot > div:nth-child(2) > div:nth-child(" + i + ")[aria-level='1']").hide();
                     }
                     i = (i + 1) | 0;
                 }
@@ -1132,9 +1130,7 @@
         $entryPoint: true
     });
 
-    var $_ = {};
-
-    Bridge.define("$AnonymousType$1", $_, {
+    Bridge.define("$AnonymousType$1", $asm, {
         $kind: "anonymous",
         ctor: function (cols, rows, useStyle, screenKeys, cursorBlink) {
             this.cols = cols;
@@ -1159,13 +1155,13 @@
             return this.cursorBlink;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$1)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$1)) {
                 return false;
             }
             return Bridge.equals(this.cols, o.cols) && Bridge.equals(this.rows, o.rows) && Bridge.equals(this.useStyle, o.useStyle) && Bridge.equals(this.screenKeys, o.screenKeys) && Bridge.equals(this.cursorBlink, o.cursorBlink);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320272310, this.cols, this.rows, this.useStyle, this.screenKeys, this.cursorBlink]);
+            var h = Bridge.addHash([7550196186, this.cols, this.rows, this.useStyle, this.screenKeys, this.cursorBlink]);
             return h;
         },
         toJSON: function () {
@@ -1179,7 +1175,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$2", $_, {
+    Bridge.define("$AnonymousType$2", $asm, {
         $kind: "anonymous",
         ctor: function (toolbox, collapse, comments, disable, maxBlocks, trashcan, horizontalLayout, toolboxPosition, css, rtl, scrollbars, sounds, oneBasedIndex, zoom) {
             this.toolbox = toolbox;
@@ -1240,13 +1236,13 @@
             return this.zoom;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$2)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$2)) {
                 return false;
             }
             return Bridge.equals(this.toolbox, o.toolbox) && Bridge.equals(this.collapse, o.collapse) && Bridge.equals(this.comments, o.comments) && Bridge.equals(this.disable, o.disable) && Bridge.equals(this.maxBlocks, o.maxBlocks) && Bridge.equals(this.trashcan, o.trashcan) && Bridge.equals(this.horizontalLayout, o.horizontalLayout) && Bridge.equals(this.toolboxPosition, o.toolboxPosition) && Bridge.equals(this.css, o.css) && Bridge.equals(this.rtl, o.rtl) && Bridge.equals(this.scrollbars, o.scrollbars) && Bridge.equals(this.sounds, o.sounds) && Bridge.equals(this.oneBasedIndex, o.oneBasedIndex) && Bridge.equals(this.zoom, o.zoom);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320337846, this.toolbox, this.collapse, this.comments, this.disable, this.maxBlocks, this.trashcan, this.horizontalLayout, this.toolboxPosition, this.css, this.rtl, this.scrollbars, this.sounds, this.oneBasedIndex, this.zoom]);
+            var h = Bridge.addHash([7550196187, this.toolbox, this.collapse, this.comments, this.disable, this.maxBlocks, this.trashcan, this.horizontalLayout, this.toolboxPosition, this.css, this.rtl, this.scrollbars, this.sounds, this.oneBasedIndex, this.zoom]);
             return h;
         },
         toJSON: function () {
@@ -1269,7 +1265,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$3", $_, {
+    Bridge.define("$AnonymousType$3", $asm, {
         $kind: "anonymous",
         ctor: function (controls, wheel, startScale, maxcale, minScale) {
             this.controls = controls;
@@ -1294,13 +1290,13 @@
             return this.minScale;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$3)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$3)) {
                 return false;
             }
             return Bridge.equals(this.controls, o.controls) && Bridge.equals(this.wheel, o.wheel) && Bridge.equals(this.startScale, o.startScale) && Bridge.equals(this.maxcale, o.maxcale) && Bridge.equals(this.minScale, o.minScale);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320403382, this.controls, this.wheel, this.startScale, this.maxcale, this.minScale]);
+            var h = Bridge.addHash([7550196188, this.controls, this.wheel, this.startScale, this.maxcale, this.minScale]);
             return h;
         },
         toJSON: function () {
@@ -1314,9 +1310,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.App", $_);
+    Bridge.ns("WebMrbc.App", $asm.$);
 
-    Bridge.apply($_.WebMrbc.App, {
+    Bridge.apply($asm.$.WebMrbc.App, {
         f1: function (data) {
             if (WebMrbc.App.module != null && WebMrbc.App.module.stdin != null) {
                 WebMrbc.App.module.stdin(data);
@@ -1334,18 +1330,10 @@
         f4: function () {
             WebMrbc.App.initClassGroups($("#eobject-modal").get(0));
         },
-        f5: function () {
-            WebMrbc.App.addEObjectFromBeginning();
-        },
-        f6: function () {
-            if (WebMrbc.App.nodeProfileClass != null) {
-                WebMrbc.App.updateProperties(WebMrbc.App.nodeProfileClass, $_.WebMrbc.App.f5);
-            }
-        },
-        f7: function (pc) {
+        f5: function (pc) {
             return parseInt(pc, 16);
         },
-        f8: function (e) {
+        f6: function (e) {
             if (e == null) {
                 e = Bridge.cast(window["Event"], jQuery.Event);
             }
@@ -1355,7 +1343,7 @@
                 return true;
             }
         },
-        f9: function () {
+        f7: function () {
             $(".modal-backdrop").remove();
         }
     });
@@ -1369,7 +1357,14 @@
             this.p = p;
         },
         toString: function () {
-            return System.String.format("({0} {1})", this.p.sym2name(this.name), this.arg);
+            return System.String.format("({0} {1})", this.p.WebMrbc$IMrbParser$sym2name(this.name), this.arg);
+        },
+        to_ruby: function (cond) {
+            cond.write(this.p.WebMrbc$IMrbParser$sym2name(this.name));
+            if (this.arg != null) {
+                cond.write(" = ");
+                this.arg.to_ruby(cond);
+            }
         }
     });
 
@@ -1462,7 +1457,7 @@
                 html.find("a.modify-button").click(Bridge.fn.bind(this, function (e) {
                     e.preventDefault();
                     this.m_ClassWorkspace = eobject;
-                    this.m_ClassWorkspace.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, $_.WebMrbc.ClassSelectorView.f1));
+                    this.m_ClassWorkspace.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, $asm.$.WebMrbc.ClassSelectorView.f1));
                 }));
                 var removeButton = html.find("a.remove-button");
                 removeButton.click(Bridge.fn.bind(this, function (e) {
@@ -1474,7 +1469,7 @@
                     removeButton.hide();
                 }
                 var img = html.find("img");
-                img.on("dragstart", $_.WebMrbc.ClassSelectorView.f2);
+                img.on("dragstart", $asm.$.WebMrbc.ClassSelectorView.f2);
             }));
         },
         selectItem: function (model) {
@@ -1520,9 +1515,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.ClassSelectorView", $_);
+    Bridge.ns("WebMrbc.ClassSelectorView", $asm.$);
 
-    Bridge.apply($_.WebMrbc.ClassSelectorView, {
+    Bridge.apply($asm.$.WebMrbc.ClassSelectorView, {
         f1: function (ok) {
             this.render();
         },
@@ -1534,8 +1529,20 @@
     Bridge.define("WebMrbc.CodeGenerator", {
         statics: {
             getClassIdentifier: function (ci) {
+                var $t;
                 var cls = ci;
-                var result = ci.type.type;
+                var result = "";
+                var up = true;
+                $t = Bridge.getEnumerator(ci.identifier.toLowerCase());
+                while ($t.moveNext()) {
+                    var c = $t.getCurrent();
+                    if (c === 95) {
+                        up = true;
+                        continue;
+                    }
+                    result = System.String.concat(result, (up ? String.fromCharCode(c).toUpperCase() : String.fromCharCode(c)));
+                    up = false;
+                }
 
                 if (!new RegExp("^[A-Za-z_][A-Za-z0-9_]+$").test(result)) {
                     result = System.String.format("ecn_cls{0:X2}{1:X2}_t", cls.type.classGroup.classGroupCode, cls.type.classCode);
@@ -1625,7 +1632,7 @@
                 }
 
                 if (System.String.startsWith(name, "0x")) {
-                    return System.String.concat(System.String.concat("eobj_", name.substr(2, ((name.length - 2) | 0))), "_data");
+                    return System.String.concat("eobj_", name.substr(2, ((name.length - 2) | 0)), "_data");
                 }
 
                 return System.String.concat(name.toLowerCase(), "_data");
@@ -1732,7 +1739,7 @@
                             if (System.String.endsWith(clsName, "_t")) {
                                 clsName = clsName.substr(0, ((clsName.length - 2) | 0));
                             }
-                            return System.String.concat(System.String.concat(System.String.concat(clsName, "_"), WebMrbc.CodeGenerator.getPropertyIdentifier(epi)), "_set");
+                            return System.String.concat(clsName, "_", WebMrbc.CodeGenerator.getPropertyIdentifier(epi), "_set");
                         }
                         return "ecn_data_prop_set";
                 }
@@ -1750,12 +1757,12 @@
             getInitialValue$1: function (body, emi, description, valRng, indent, recursive) {
                 var $t;
                 var pluse = "";
-                body.appendLine(System.String.concat(System.String.concat(indent, "# "), description));
+                body.appendLine(System.String.concat(indent, "# ", description));
                 if (recursive) {
                     body.append(indent);
                     pluse = " +";
                 } else {
-                    body.append(System.String.concat(System.String.concat(indent, WebMrbc.CodeGenerator.getFieldIdentifier(emi)), " = "));
+                    body.append(System.String.concat(indent, WebMrbc.CodeGenerator.getFieldIdentifier(emi), " = "));
                 }
 
                 if (Bridge.referenceEquals(emi.type, "manufacturer_code_t")) {
@@ -1776,7 +1783,7 @@
                 if (emi.primitive) {
                     var count = emi.arrayCount;
                     if (count === 0) {
-                        body.appendLine(System.String.concat(System.String.concat(System.String.concat("\"", WebMrbc.CodeGenerator.getInitialValue(valRng, emi)), "\""), pluse));
+                        body.appendLine(System.String.concat("\"", WebMrbc.CodeGenerator.getInitialValue(valRng, emi), "\"", pluse));
                     } else {
                         body.append("\"");
                         for (var i = 0; i < count; i = (i + 1) | 0) {
@@ -1802,9 +1809,7 @@
                 var valueRange = WebMrbc.ValueRange.parse(valRng, pi);
                 var init = System.String.concat("0000000000000000", valueRange.getInitailValue());
 
-                var temp = System.Array.init(((4 * pi.size) | 0), function (){
-                    return new System.Char();
-                });
+                var temp = System.Array.init(((4 * pi.size) | 0), 0);
                 for (var i = 0, j = (init.length - ((2 * pi.size) | 0)) | 0; i < temp.length; i = (i + 1) | 0, j = (j + 1) | 0) {
                     if ((i % 4) === 0) {
                         temp[Bridge.identity(i, (i = (i + 1) | 0))] = 92;
@@ -1838,7 +1843,7 @@
         _ClassInfo: null,
         _PropertyInfos: null,
         ctor: function (cls) {
-            this.$initialize();        var $t;
+            this.$initialize();            var $t;
 
             this._ClassInfo = cls;
             $t = Bridge.getEnumerator(cls.properties);
@@ -1944,7 +1949,7 @@
             // As a default initial behavior, pop up an alert when webgl context is lost. To make your
             // application robust, you may want to override this behavior before shipping!
             // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-            this.canvas.addEventListener("webglcontextlost", $_.WebMrbc.EmModule.f1, false);
+            this.canvas.addEventListener("webglcontextlost", $asm.$.WebMrbc.EmModule.f1, false);
             this.setStatus = Bridge.fn.bind(this, this._setStatus);
         },
         print: function (arg) {
@@ -1999,7 +2004,7 @@
         },
         _setStatus: function (text) {
             if (this._last == null) {
-                this._last = new $_.$AnonymousType$4(System.Int64((new Date()).getTime()).mul(10000), "");
+                this._last = new $asm.$AnonymousType$4(System.Int64((new Date()).getTime()).mul(10000), "");
             }
             if (Bridge.referenceEquals(text, this._text)) {
                 return;
@@ -2031,7 +2036,7 @@
         },
         monitorRunDependencies: function (left) {
             this.totalDependencies = Math.max(this.totalDependencies, left);
-            this.setStatus((left !== 0) ? System.String.concat(System.String.concat(System.String.concat(System.String.concat("Preparing... (", (((this.totalDependencies - left) | 0))), "/"), this.totalDependencies), ")") : "All downloads complete.");
+            this.setStatus((left !== 0) ? "Preparing... (" + (((this.totalDependencies - left) | 0)) + "/" + this.totalDependencies + ")" : "All downloads complete.");
         },
         UTF8StringToArray: function (str) {
             var len = this.lengthBytesUTF8(str);
@@ -2044,7 +2049,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$4", $_, {
+    Bridge.define("$AnonymousType$4", $asm, {
         $kind: "anonymous",
         ctor: function (time, text) {
             this.time = time;
@@ -2057,13 +2062,13 @@
             return this.text;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$4)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$4)) {
                 return false;
             }
             return Bridge.equals(this.time, o.time) && Bridge.equals(this.text, o.text);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320468918, this.time, this.text]);
+            var h = Bridge.addHash([7550196189, this.time, this.text]);
             return h;
         },
         toJSON: function () {
@@ -2074,9 +2079,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.EmModule", $_);
+    Bridge.ns("WebMrbc.EmModule", $asm.$);
 
-    Bridge.apply($_.WebMrbc.EmModule, {
+    Bridge.apply($asm.$.WebMrbc.EmModule, {
         f1: function (e) {
             window.alert("WebGL context lost. You will need to reload the page.");
             e.preventDefault();
@@ -2084,6 +2089,26 @@
     });
 
     Bridge.define("WebMrbc.EObjectModalView", {
+        statics: {
+            initProperty: function (div, p) {
+                var label = document.createElement("label");
+                label.setAttribute("class", "btn btn-default");
+
+                var input = document.createElement("input");
+                input.setAttribute("type", "checkbox");
+                input.setAttribute("autocomplete", "off");
+
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(p.description));
+                label.setAttribute("data-ecnl-epc", p.propertyCode.toString());
+
+                div.appendChild(label);
+
+                if ((p.required.length > 0) && (!Bridge.referenceEquals(p.required[0], "NONE"))) {
+                    ($(label)).button('toggle');
+                }
+            }
+        },
         el: null,
         model: null,
         target: null,
@@ -2115,7 +2140,7 @@
             $("#eobject_instanceCode").val(this.model.instanceCode.toString());
             this.setAttribute(this.model.attribute);
 
-            this.setClassGroup(cg, Bridge.fn.bind(this, $_.WebMrbc.EObjectModalView.f1));
+            this.setClassGroup(cg, Bridge.fn.bind(this, $asm.$.WebMrbc.EObjectModalView.f1));
         },
         render: function () {
             this.el.modal({ backdrop: "static", show: true });
@@ -2175,20 +2200,10 @@
             caret.setAttribute("class", "caret");
             button.get(0).appendChild(caret);
 
-            if (cg.classes != null) {
-                this.initClasss(cg);
-                if (!Bridge.staticEquals(success, null)) {
-                    success();
-                }
-                return;
+            this.initClasss(cg);
+            if (!Bridge.staticEquals(success, null)) {
+                success();
             }
-
-            WebMrbc.App.updateClass(cg, Bridge.fn.bind(this, function () {
-                this.initClasss(cg);
-                if (!Bridge.staticEquals(success, null)) {
-                    success();
-                }
-            }));
         },
         setClass: function (c, success) {
             if (success === void 0) { success = null; }
@@ -2207,20 +2222,10 @@
             caret.setAttribute("class", "caret");
             button.get(0).appendChild(caret);
 
-            if (c.properties != null) {
-                this.initProperties(c);
-                if (!Bridge.staticEquals(success, null)) {
-                    success();
-                }
-                return;
+            this.initProperties(c);
+            if (!Bridge.staticEquals(success, null)) {
+                success();
             }
-
-            WebMrbc.App.updateProperties(c, Bridge.fn.bind(this, function () {
-                this.initProperties(c);
-                if (!Bridge.staticEquals(success, null)) {
-                    success();
-                }
-            }));
         },
         initClassGroups: function () {
             var $t;
@@ -2265,30 +2270,23 @@
             }
         },
         initProperties: function (c) {
-            var $t;
+            var $t, $t1;
             var div = $("#eobject_properties").get(0);
 
             div.innerHTML = "";
 
-            $t = Bridge.getEnumerator(c.properties);
-            while ($t.moveNext()) {
-                var p = $t.getCurrent();
-                var label = document.createElement("label");
-                label.setAttribute("class", "btn btn-default");
-
-                var input = document.createElement("input");
-                input.setAttribute("type", "checkbox");
-                input.setAttribute("autocomplete", "off");
-
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(p.description));
-                label.setAttribute("data-ecnl-epc", p.propertyCode.toString());
-
-                div.appendChild(label);
-
-                if ((p.required.length > 0) && (!Bridge.referenceEquals(p.required[0], "NONE"))) {
-                    ($(label)).button('toggle');
+            if (c.classGroup.classGroupCode !== 14 || c.classCode !== 240) {
+                $t = Bridge.getEnumerator(WebMrbc.App.baseObjectPropertyList);
+                while ($t.moveNext()) {
+                    var p = $t.getCurrent();
+                    WebMrbc.EObjectModalView.initProperty(div, p);
                 }
+            }
+
+            $t1 = Bridge.getEnumerator(c.properties);
+            while ($t1.moveNext()) {
+                var p1 = $t1.getCurrent();
+                WebMrbc.EObjectModalView.initProperty(div, p1);
             }
         },
         updateProperties: function () {
@@ -2341,7 +2339,7 @@
             this.model.instanceCode = (parseInt(($(sender)).val())) & 255;
         },
         onOk: function (ele) {
-            var $t, $t1;
+            var $t, $t1, $t2;
             if ((Bridge.referenceEquals(this.model.attribute, "device")) && (Bridge.referenceEquals(this.model.type, WebMrbc.App.nodeProfileClass))) {
                 return;
             }
@@ -2372,17 +2370,32 @@
 
                 var epc = parseInt(sepc);
                 var prop = null;
-                $t1 = Bridge.getEnumerator(this.model.type.properties);
-                while ($t1.moveNext()) {
-                    var p = $t1.getCurrent();
-                    if (p.propertyCode !== epc) {
-                        continue;
+                if (this.model.type.classGroup.classGroupCode !== 14 || this.model.type.classCode !== 240) {
+                    $t1 = Bridge.getEnumerator(WebMrbc.App.baseObjectPropertyList);
+                    while ($t1.moveNext()) {
+                        var p = $t1.getCurrent();
+                        if (p.propertyCode !== epc) {
+                            continue;
+                        }
+                        prop = p;
+                        break;
                     }
-                    prop = p;
-                    break;
                 }
                 if (prop != null) {
                     this.target.properties.push(prop);
+                } else {
+                    $t2 = Bridge.getEnumerator(this.model.type.properties);
+                    while ($t2.moveNext()) {
+                        var p1 = $t2.getCurrent();
+                        if (p1.propertyCode !== epc) {
+                            continue;
+                        }
+                        prop = p1;
+                        break;
+                    }
+                    if (prop != null) {
+                        this.target.properties.push(prop);
+                    }
                 }
             }
 
@@ -2399,9 +2412,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.EObjectModalView", $_);
+    Bridge.ns("WebMrbc.EObjectModalView", $asm.$);
 
-    Bridge.apply($_.WebMrbc.EObjectModalView, {
+    Bridge.apply($asm.$.WebMrbc.EObjectModalView, {
         f1: function () {
             var c = this.model.type;
             if ((Bridge.referenceEquals(this.model.attribute, "device")) && (Bridge.referenceEquals(this.model.type, WebMrbc.App.nodeProfileClass))) {
@@ -2440,6 +2453,35 @@
                 str = System.String.concat(str, (System.String.format("{0} ", p1)));
             }
             return System.String.concat(str, ")");
+        },
+        to_ruby: function (cond) {
+            var $t, $t1;
+            var i = (((this.pre.getCount() + (this.rest != null ? 1 : 0)) | 0) + this.post.getCount()) | 0;
+            $t = Bridge.getEnumerator(this.pre);
+            while ($t.moveNext()) {
+                var p = $t.getCurrent();
+                p.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            if (this.rest != null) {
+                this.rest.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            $t1 = Bridge.getEnumerator(this.post);
+            while ($t1.moveNext()) {
+                var p1 = $t1.getCurrent();
+                p1.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
         }
     });
 
@@ -2788,6 +2830,11 @@
     Bridge.define("WebMrbc.hash_node.kv_t", {
         key: null,
         value: null,
+        ctor: function (key, value) {
+            this.$initialize();
+            this.key = key;
+            this.value = value;
+        },
         toString: function () {
             return System.String.format("({0} . {1})", this.key, this.value);
         }
@@ -2845,6 +2892,10 @@
         }
     });
 
+    Bridge.define("WebMrbc.IMrbParser", {
+        $kind: "interface"
+    });
+
     Bridge.define("WebMrbc.JsonClassGroupInfo", {
         classGroupCode: 0,
         description: null,
@@ -2862,8 +2913,6 @@
         classCode: 0,
         description: null,
         name: null,
-        define: null,
-        type: null,
         classGroup: null,
         properties: null,
         ctor: function (p) {
@@ -2871,8 +2920,6 @@
             this.classCode = p.classCode;
             this.description = p.description;
             this.name = p.name;
-            this.define = p.define;
-            this.type = p.type;
             this.classGroup = p.classGroup;
             this.properties = p.properties;
         }
@@ -2976,6 +3023,28 @@
         }
     });
 
+    Bridge.define("WebMrbc.locals_node", {
+        symList: null,
+        cdr: null,
+        config: {
+            init: function () {
+                this.symList = new (System.Collections.Generic.List$1(WebMrbc.mrb_sym))();
+            }
+        },
+        ctor: function (cdr) {
+            this.$initialize();
+            this.cdr = cdr;
+        },
+        push: function (sym) {
+            this.symList.add(sym);
+        }
+    });
+
+    Bridge.define("WebMrbc.LocalVars", {
+        inherits: [System.Collections.Generic.Dictionary$2(String,String)],
+        chain: null
+    });
+
     Bridge.define("WebMrbc.Logic", {
         statics: {
             HUE: 210
@@ -2994,7 +3063,7 @@
             this.$initialize();
             this.el = $("#main-menu");
 
-            $("#filename").keypress($_.WebMrbc.MainMenuView.f1);
+            $("#filename").keypress($asm.$.WebMrbc.MainMenuView.f1);
 
             // HACK: if don't do below, can't open submenu on Chromium on Raspberry Pi
             $(".dropdown-toggle").dropdown();
@@ -3004,7 +3073,7 @@
 
             var args = "--help";
             if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat(System.String.concat("$ mrbc ", args), "\r\n"));
+                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
             }
             WebMrbc.App.module.arguments = args.split(" ");
             mrbc(WebMrbc.App.module);
@@ -3015,7 +3084,7 @@
 
             var args = "--version";
             if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat(System.String.concat("$ mrbc ", args), "\r\n"));
+                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
             }
             WebMrbc.App.module.arguments = args.split(" ");
             mrbc(WebMrbc.App.module);
@@ -3024,11 +3093,11 @@
         onCompileToC: function () {
             WebMrbc.App.module = WebMrbc.App.initModule();
             WebMrbc.App.module.preRun.push(WebMrbc.App.preRun);
-            WebMrbc.App.module.postRun.push($_.WebMrbc.MainMenuView.f2);
+            WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f2);
 
             var args = "-Bmain_rb_code -o build/main_rb.c src/main.rb";
             if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat(System.String.concat("$ mrbc ", args), "\r\n"));
+                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
             }
             WebMrbc.App.module.arguments = args.split(" ");
             mrbc(WebMrbc.App.module);
@@ -3037,11 +3106,11 @@
         onCompileToBin: function () {
             WebMrbc.App.module = WebMrbc.App.initModule();
             WebMrbc.App.module.preRun.push(WebMrbc.App.preRun);
-            WebMrbc.App.module.postRun.push($_.WebMrbc.MainMenuView.f3);
+            WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f3);
 
             var args = "-o build/main_rb.bin src/main.rb";
             if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat(System.String.concat("$ mrbc ", args), "\r\n"));
+                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
             }
             WebMrbc.App.module.arguments = args.split(" ");
             mrbc(WebMrbc.App.module);
@@ -3080,13 +3149,6 @@
         },
         onLoadLocal: function () {
         },
-        /**
-         * @instance
-         * @public
-         * @this WebMrbc.MainMenuView
-         * @memberof WebMrbc.MainMenuView
-         * @return  {void}
-         */
         onSave: function () {
             WebMrbc.Views.ClassSelectorView.getCurrent().WebMrbc$IClassWorkspace$loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
 
@@ -3094,7 +3156,7 @@
             var i = 1;
             WebMrbc.Collections.ClassWorkspaces.each(function (e) {
                 var xml = Blockly.Xml.workspaceToDom(e.WebMrbc$IClassWorkspace$getWorkspace());
-                zip.file(System.String.concat(System.String.concat("ClassWorkspace", i), ".xml"), xml.outerHTML);
+                zip.file("ClassWorkspace" + i + ".xml", xml.outerHTML);
                 i = (i + 1) | 0;
             });
             var blob = zip.generate({ type: "blob" });
@@ -3106,15 +3168,9 @@
         },
         onPreference: function () {
         },
-        onSignout: function () {
-        },
-        onSignin: function () {
-        },
-        onUsername: function () {
-        },
         load: function (info) {
             if (info.error != null) {
-                window["errorMessage"].call(null, goog.getMsg(Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_ERROR, new $_.$AnonymousType$5(info.filename, info.error)));
+                window["errorMessage"].call(null, goog.getMsg(Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_ERROR, new $asm.$AnonymousType$5(info.filename, info.error)));
             } else {
                 clearMessages();
 
@@ -3151,7 +3207,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$5", $_, {
+    Bridge.define("$AnonymousType$5", $asm, {
         $kind: "anonymous",
         ctor: function (filename, error) {
             this.filename = filename;
@@ -3164,13 +3220,13 @@
             return this.error;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$5)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$5)) {
                 return false;
             }
             return Bridge.equals(this.filename, o.filename) && Bridge.equals(this.error, o.error);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320534454, this.filename, this.error]);
+            var h = Bridge.addHash([7550196190, this.filename, this.error]);
             return h;
         },
         toJSON: function () {
@@ -3181,9 +3237,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.MainMenuView", $_);
+    Bridge.ns("WebMrbc.MainMenuView", $asm.$);
 
-    Bridge.apply($_.WebMrbc.MainMenuView, {
+    Bridge.apply($asm.$.WebMrbc.MainMenuView, {
         f1: function (e) {
             if (e == null) {
                 e = window["event"];
@@ -3226,6 +3282,7 @@
     Bridge.define("WebMrbc.masgn_node.mlhs_t", {
         pre: null,
         rest: null,
+        rest_empty: false,
         post: null,
         config: {
             init: function () {
@@ -3248,6 +3305,35 @@
                 str = System.String.concat(str, (System.String.format("{0} ", p1)));
             }
             return System.String.concat(str, ")");
+        },
+        to_ruby: function (cond) {
+            var $t, $t1;
+            var i = (((this.pre.getCount() + (this.rest != null ? 1 : 0)) | 0) + this.post.getCount()) | 0;
+            $t = Bridge.getEnumerator(this.pre);
+            while ($t.moveNext()) {
+                var p = $t.getCurrent();
+                p.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            if (this.rest != null) {
+                this.rest.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            $t1 = Bridge.getEnumerator(this.post);
+            while ($t1.moveNext()) {
+                var p1 = $t1.getCurrent();
+                p1.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
         }
     });
 
@@ -3674,6 +3760,23 @@
         },
         claer_doc: function () {
             this.doc.clear();
+        },
+        to_ruby: function (cond) {
+            var $t;
+            cond.write_line(System.String.concat("<<", WebMrbc.MrbParser.uTF8ArrayToString(this.term, 0)));
+            $t = Bridge.getEnumerator(this.doc);
+            while ($t.moveNext()) {
+                var d = $t.getCurrent();
+                if (Bridge.is(d, WebMrbc.begin_node)) {
+                    cond.write("#{");
+                    d.to_ruby(cond);
+                    cond.write("}");
+                } else {
+                    d.to_ruby(cond);
+                }
+            }
+            cond.write_line();
+            cond.write_line(WebMrbc.MrbParser.uTF8ArrayToString(this.term, 0));
         }
     });
 
@@ -3695,6 +3798,140 @@
                 str = System.String.concat(str, (System.String.format("{0}, ", c)));
             }
             return System.String.format("{0} {1})", this.exc_var, this.body);
+        },
+        to_ruby: function (cond) {
+            var $t;
+            cond.increment_nest();
+            cond.write("rescue");
+            var i = this.handle_classes.getCount();
+            if (i > 0) {
+                cond.write(" ");
+            }
+            $t = Bridge.getEnumerator(this.handle_classes);
+            while ($t.moveNext()) {
+                var c = $t.getCurrent();
+                c.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            if (this.exc_var != null) {
+                cond.write(" => ");
+                this.exc_var.to_ruby(cond);
+            }
+            cond.decrement_nest();
+            cond.write_line();
+            cond.increment_indent();
+            this.body.to_ruby(cond);
+            cond.decrement_indent();
+        }
+    });
+
+    Bridge.define("WebMrbc.ruby_code_cond", {
+        first: false,
+        space: false,
+        _code: null,
+        nodes: null,
+        config: {
+            properties: {
+                newline_str: null,
+                indent_str: null,
+                indent: null,
+                nest: 0,
+                filename: null,
+                lineno: 0,
+                column: 0
+            },
+            init: function () {
+                this._code = new System.Text.StringBuilder();
+                this.nodes = new (System.Collections.Generic.List$1(WebMrbc.node))();
+            }
+        },
+        ctor: function (filename, indent_str) {
+            if (indent_str === void 0) { indent_str = "  "; }
+
+            this.$initialize();
+            this.setfilename(filename);
+            this.setlineno(1);
+            this.setcolumn(0);
+            this.setindent_str(indent_str);
+            this.setindent("");
+            this.setnewline_str("\r\n");
+            this.first = true;
+            this.space = false;
+        },
+        increment_indent: function () {
+            this.setindent(System.String.concat(this.getindent(), this.getindent_str()));
+            if (!this.first) {
+                this.new_line();
+                this.first = true;
+                this.space = false;
+            }
+        },
+        new_line: function () {
+            this._code.append(this.getnewline_str());
+            this.setlineno((this.getlineno() + 1) | 0);
+            this.setcolumn(0);
+        },
+        write_code: function (code) {
+            this._code.append(code);
+            this.setcolumn((this.getcolumn() + code.length) | 0);
+        },
+        decrement_indent: function () {
+            this.setindent(this.getindent().substr(0, ((this.getindent().length - this.getindent_str().length) | 0)));
+            if (!this.first) {
+                this.new_line();
+                this.first = true;
+                this.space = false;
+            }
+        },
+        increment_nest: function () {
+            this.setnest((this.getnest() + 1) | 0);
+        },
+        decrement_nest: function () {
+            this.setnest((this.getnest() - 1) | 0);
+            System.Diagnostics.Debug.assert(this.getnest() >= 0);
+        },
+        write: function (code) {
+            if (this.first) {
+                this.first = false;
+                this.write_code(this.getindent());
+            }
+            this.write_code(code);
+            this.space = System.String.endsWith(code, " ");
+        },
+        write_line: function (code) {
+            if (code === void 0) { code = null; }
+            if (this.getnest() !== 0 && !this.first && !this.space) {
+                this.write_code(" ");
+                this.space = true;
+            }
+            if (code != null) {
+                if (this.first) {
+                    this.first = false;
+                    this.write_code(this.getindent());
+                }
+                this.write_code(code);
+                this.space = System.String.endsWith(code, " ");
+            }
+            if (this.getnest() === 0) {
+                this.new_line();
+                this.space = false;
+                this.first = true;
+            }
+        },
+        separate_line: function () {
+            if (!this.first) {
+                this.new_line();
+                this.first = true;
+            }
+        },
+        add_node: function (node) {
+            this.nodes.add(node);
+        },
+        toString: function () {
+            return this._code.toString();
         }
     });
 
@@ -4228,7 +4465,6 @@
                         ok = false;
                         break;
                     }
-
                     bitFlds.push(bit.getInRangeValue(System.Int64(val64)));
                 }
 
@@ -4287,8 +4523,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write_line(System.String.format("alias {0} {1}", this.getp().WebMrbc$IMrbParser$sym2name(this._new), this.getp().WebMrbc$IMrbParser$sym2name(this._old)));
+        },
         toString: function () {
-            return System.String.format("(:alias {0} {1})", this.getp().sym2name(this.getnew()), this.getp().sym2name(this.getold()));
+            return System.String.format("(:alias {0} {1})", this.getp().WebMrbc$IMrbParser$sym2name(this.getnew()), this.getp().WebMrbc$IMrbParser$sym2name(this.getold()));
         }
     });
 
@@ -4369,25 +4608,30 @@
             return this._b;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicOperationBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_operation");
 
-            var field = $("<field>");
-            field.attr("name", "OP");
-            field.text("AND");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "OP");
+            field.appendChild(document.createTextNode("AND"));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "A");
-            value.append(this._a.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "A");
+            value.appendChild(this._a.to_xml());
+            block.appendChild(value);
 
-            value = $("<value>");
-            value.attr("name", "B");
-            value.append(this._b.to_xml());
-            block.append(value);
+            value = document.createElement("value");
+            value.setAttribute("name", "B");
+            value.appendChild(this._b.to_xml());
+            block.appendChild(value);
 
             return block;
+        },
+        to_rb: function (cond) {
+            this._a.to_ruby(cond);
+            cond.write(" && ");
+            this._b.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:and {0} {1})", this.geta(), this.getb());
@@ -4408,8 +4652,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:arg . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:arg . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -4421,35 +4668,57 @@
                 this._array = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
-        ctor: function (p, a) {
+        $ctor1: function (p, a) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_ARRAY);
             WebMrbc.node.dump_recur(WebMrbc.node, this._array, a);
+        },
+        ctor: function (p, a) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_ARRAY);
+            this._array.addRange(a);
         },
         getarray: function () {
             return this._array;
         },
         to_xml: function () {
             var $t;
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ListsCreateWithBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "lists_create_with");
 
-            var mutation = $("<mutation>");
-            mutation.attr("items", this._array.getCount().toString());
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("items", this._array.getCount().toString());
+            block.appendChild(mutation);
 
             var i = 0;
             $t = Bridge.getEnumerator(this._array);
             while ($t.moveNext()) {
                 var item = $t.getCurrent();
-                var value = $("<value>");
-                value.attr("name", System.String.format("ADD{0}", i));
-                value.append(this._array.getItem(i).to_xml());
-                block.append(value);
+                var value = document.createElement("value");
+                value.setAttribute("name", System.String.format("ADD{0}", i));
+                value.appendChild(this._array.getItem(i).to_xml());
+                block.appendChild(value);
                 i = (i + 1) | 0;
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            var $t;
+            cond.increment_nest();
+            cond.write("[");
+            var i = this._array.getCount();
+            $t = Bridge.getEnumerator(this._array);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                item.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            cond.write("]");
+            cond.decrement_nest();
         },
         toString: function () {
             var $t;
@@ -4457,7 +4726,7 @@
             $t = Bridge.getEnumerator(this.getarray());
             while ($t.moveNext()) {
                 var n = $t.getCurrent();
-                str = System.String.concat(str, (System.String.format("{0} ", n.getcar())));
+                str = System.String.concat(str, (System.String.format("{0} ", n)));
             }
             return System.String.concat(str, ")");
         }
@@ -4480,38 +4749,46 @@
             return this._rhs;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesSetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_set");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
             switch (System.Nullable.getValue(Bridge.cast(this._lhs.getcar(), System.Int32))) {
                 case WebMrbc.node_type.NODE_GVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(this._lhs, WebMrbc.gvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.gvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_CVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(this._lhs, WebMrbc.cvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.cvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_IVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(this._lhs, WebMrbc.ivar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.ivar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_LVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(this._lhs, WebMrbc.lvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.lvar_node).getname())));
                     break;
                 default: 
                     // TODO: list[0] = ...？
-                    field.append(this._lhs.to_xml());
+                    field.appendChild(this._lhs.to_xml());
                     break;
             }
-            block.append(field);
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "VALUE");
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "VALUE");
+            block.appendChild(value);
 
-            value.append(this._rhs.to_xml());
+            value.appendChild(this._rhs.to_xml());
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            this._lhs.to_ruby(cond);
+            cond.write(" = ");
+            this._rhs.to_ruby(cond);
+            cond.decrement_nest();
+            cond.write_line();
         },
         toString: function () {
             return System.String.format("(:asgn {0} {1})", this.getlhs(), this.getrhs());
@@ -4532,6 +4809,9 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write(this.getn().toString());
+        },
         toString: function () {
             return System.String.format("(:backref . {0})", this.getn());
         }
@@ -4540,18 +4820,22 @@
     Bridge.define("WebMrbc.begin_node", {
         inherits: [WebMrbc.node],
         _progs: null,
+        _parentheses: false,
         config: {
             init: function () {
                 this._progs = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
-        $ctor1: function (p, body) {
+        $ctor1: function (p, body, parentheses) {
+            if (parentheses === void 0) { parentheses = false; }
+
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_BEGIN);
             while (body != null) {
                 this._progs.add(body);
                 body = Bridge.cast(body.getcdr(), WebMrbc.node);
             }
+            this._parentheses = parentheses;
         },
         ctor: function (p, progs) {
             this.$initialize();
@@ -4574,18 +4858,40 @@
             var b = this._progs.getItem(0).to_xml();
             var p = b;
             for (var i = 1; i < this._progs.getCount(); i = (i + 1) | 0) {
-                var n = $("<next>");
+                var n = document.createElement("next");
                 var q = this._progs.getItem(i).to_xml();
-                n.append(q);
-                p.append(n);
+                n.appendChild(q);
+                p.appendChild(n);
                 p = q;
             }
 
             return b;
         },
+        to_rb: function (cond) {
+            var $t;
+            var i = this.getprogs().getCount();
+            $t = Bridge.getEnumerator(this.getprogs());
+            while ($t.moveNext()) {
+                var v = $t.getCurrent();
+                var prn = this._parentheses || (Bridge.is(v, WebMrbc.dot2_node));
+                if (prn) {
+                    cond.increment_nest();
+                    cond.write("(");
+                }
+                v.to_ruby(cond);
+                if (prn) {
+                    cond.write(")");
+                    cond.decrement_nest();
+                }
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.separate_line();
+                }
+            }
+        },
         toString: function () {
             var $t;
-            var str = System.String.format("(:begin ", null);
+            var str = "(:begin ";
             $t = Bridge.getEnumerator(this.getprogs());
             while ($t.moveNext()) {
                 var v = $t.getCurrent();
@@ -4754,6 +5060,10 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write("&");
+            this._a.to_ruby(cond);
+        },
         toString: function () {
             return System.String.format("(:block_arg . {0})", this.geta());
         }
@@ -4761,28 +5071,35 @@
 
     Bridge.define("WebMrbc.block_node", {
         inherits: [WebMrbc.node],
+        _local_variables: null,
         _mandatory_args: null,
         _optional_args: null,
+        _rest: 0,
+        _post_mandatory_args: null,
+        _blk: 0,
         _body: null,
+        _brace: false,
         config: {
             init: function () {
-                this._mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.mrb_sym))();
+                this._local_variables = new (System.Collections.Generic.List$1(WebMrbc.mrb_sym))();
+                this._mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.node))();
                 this._optional_args = new (System.Collections.Generic.List$1(WebMrbc.args_t))();
+                this._post_mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
-        ctor: function (p, a, b) {
+        $ctor1: function (p, args, body, brace) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_BLOCK);
-            var t = Bridge.cast(p.locals_node(), WebMrbc.node);
-            if (t != null) {
-                var n = t;
+            this._local_variables.addRange(p.WebMrbc$IMrbParser$locals_node());
+            if (args != null) {
+                var n = args;
 
-                while (n != null) {
-                    this._mandatory_args.add(System.Nullable.getValue(Bridge.cast(n.getcar(), System.Int32)));
-                    n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    WebMrbc.node.dump_recur(WebMrbc.node, this._mandatory_args, Bridge.cast(n.getcar(), WebMrbc.node));
                 }
-                if (a != null) {
-                    var n2 = Bridge.cast(a.getcar(), WebMrbc.node);
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    var n2 = Bridge.cast(n.getcar(), WebMrbc.node);
 
                     while (n2 != null) {
                         var arg = new WebMrbc.args_t(p);
@@ -4792,8 +5109,36 @@
                         n2 = Bridge.cast(n2.getcdr(), WebMrbc.node);
                     }
                 }
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    this._rest = System.Nullable.getValue(Bridge.cast(n.getcar(), System.Int32));
+                }
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    WebMrbc.node.dump_recur(WebMrbc.node, this._post_mandatory_args, Bridge.cast(n.getcar(), WebMrbc.node));
+                }
+                if (n.getcdr() != null) {
+                    this._blk = System.Nullable.getValue(Bridge.cast(n.getcdr(), System.Int32));
+                }
             }
-            this._body = b;
+            this._body = body;
+            if (Bridge.is(this._body, WebMrbc.ensure_node)) {
+                Bridge.cast(this._body, WebMrbc.ensure_node).def = true;
+            }
+            this._brace = brace;
+        },
+        ctor: function (p, args, body, brace) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_BLOCK);
+            this._mandatory_args.addRange(args);
+            this._body = body;
+            if (Bridge.is(this._body, WebMrbc.ensure_node)) {
+                Bridge.cast(this._body, WebMrbc.ensure_node).def = true;
+            }
+            this._brace = brace;
+        },
+        getlocal_variables: function () {
+            return this._local_variables;
         },
         getmandatory_args: function () {
             return this._mandatory_args;
@@ -4801,11 +5146,84 @@
         getoptional_args: function () {
             return this._optional_args;
         },
+        getrest: function () {
+            return this._rest;
+        },
+        getpost_mandatory_args: function () {
+            return this._post_mandatory_args;
+        },
+        getblk: function () {
+            return this._blk;
+        },
         getbody: function () {
             return this._body;
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t, $t1, $t2;
+            var beg, end;
+            if (this._brace) {
+                beg = " {";
+                end = "}";
+            } else {
+                beg = " do";
+                end = "end";
+            }
+
+            cond.increment_nest();
+            cond.write(beg);
+            var i = (((((((this._mandatory_args.getCount() + this._optional_args.getCount()) | 0) + (this._rest !== 0 ? 1 : 0)) | 0) + this._post_mandatory_args.getCount()) | 0) + (this._blk !== 0 ? 1 : 0)) | 0;
+            if (i > 0) {
+                cond.write(" |");
+                $t = Bridge.getEnumerator(this._mandatory_args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                $t1 = Bridge.getEnumerator(this._optional_args);
+                while ($t1.moveNext()) {
+                    var a1 = $t1.getCurrent();
+                    a1.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                if (this._rest !== 0) {
+                    cond.write("*");
+                    if (this._rest !== -1) {
+                        cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._rest));
+                    }
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                    $t2 = Bridge.getEnumerator(this._post_mandatory_args);
+                    while ($t2.moveNext()) {
+                        var a2 = $t2.getCurrent();
+                        a2.to_ruby(cond);
+                        i = (i - 1) | 0;
+                        if (i > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                }
+                if (this._blk !== 0) {
+                    cond.write(System.String.concat("&", this.getp().WebMrbc$IMrbParser$sym2name(this._blk)));
+                }
+                cond.write("|");
+            }
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line(end);
         },
         toString: function () {
             var $t, $t1;
@@ -4813,7 +5231,7 @@
             $t = Bridge.getEnumerator(this.getmandatory_args());
             while ($t.moveNext()) {
                 var n = $t.getCurrent();
-                str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(n))));
+                str = System.String.concat(str, (System.String.format("{0}, ", n)));
             }
             $t1 = Bridge.getEnumerator(this.getoptional_args());
             while ($t1.moveNext()) {
@@ -4855,15 +5273,26 @@
             return this._retval;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsFlowStatementsBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_flow_statements");
 
-            var field = $("<field>");
-            field.attr("name", "FLOW");
-            field.text("BREAK");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "FLOW");
+            field.appendChild(document.createTextNode("BREAK"));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            if (this._retval != null) {
+                cond.write("break ");
+                this._retval.to_ruby(cond);
+                cond.write_line();
+            } else {
+                cond.write_line("break");
+            }
+            cond.decrement_nest();
         },
         toString: function () {
             return System.String.format("(:break . {0})", this.getretval());
@@ -4882,7 +5311,7 @@
                 this._args = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
-        $ctor1: function (p, a, b, c, pass) {
+        $ctor2: function (p, a, b, c, pass) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, pass !== 0 ? WebMrbc.node_type.NODE_CALL : WebMrbc.node_type.NODE_SCALL);
             this._pass = pass;
@@ -4898,12 +5327,27 @@
             }
         },
         ctor: function (p, a, b, args, block) {
+            if (args === void 0) { args = null; }
+            if (block === void 0) { block = null; }
+
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CALL);
             this._obj = a;
             this._method = b;
-            this._args.addRange(args);
+            if (args != null) {
+                this._args.addRange(args);
+            }
             this._block = block;
+        },
+        $ctor1: function (p, a, b, arg) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CALL);
+            this._obj = a;
+            this._method = b;
+            if (arg != null) {
+                this._args.add(arg);
+            }
+            this._pass = 1;
         },
         getobj: function () {
             return this._obj;
@@ -4920,13 +5364,13 @@
         add_block: function (b) {
             if (b != null) {
                 if (this._block != null) {
-                    this.getp().yyError("both block arg and actual block given");
+                    this.getp().WebMrbc$IMrbParser$yyError("both block arg and actual block given");
                 }
                 this._block = b;
             }
         },
         to_xml: function () {
-            var method = this.getp().sym2name(this._method);
+            var method = this.getp().WebMrbc$IMrbParser$sym2name(this._method);
             switch (method) {
                 case "==": 
                     return this.logic_compare("EQ");
@@ -4946,52 +5390,207 @@
         },
         procedures_callreturn: function (method) {
             var $t;
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ProceduresCallreturnBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = $("<mutation>");
-            mutation.attr("name", method);
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("name", method);
+            block.appendChild(mutation);
 
             var i = 0;
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = $("<arg>");
+                var arg = document.createElement("arg");
                 // TODO: 引数名を持ってくkる
-                arg.attr("name", i.toString());
-                arg.append(a.to_xml());
-                block.append(arg);
+                arg.setAttribute("name", i.toString());
+                arg.appendChild(a.to_xml());
+                block.appendChild(arg);
                 i = (i + 1) | 0;
             }
 
             return block;
         },
         logic_compare: function (op) {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicCompareBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_compare");
 
-            var field = $("<field>");
-            field.attr("name", "OP");
-            field.text(op);
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "OP");
+            field.appendChild(document.createTextNode(op));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "A");
-            value.append(this._obj.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "A");
+            value.appendChild(this._obj.to_xml());
+            block.appendChild(value);
 
             // argsは１つ
-            value = $("<value>");
-            value.attr("name", "B");
-            value.append(this.getargs().getItem(0).to_xml());
-            block.append(value);
+            value = document.createElement("value");
+            value.setAttribute("name", "B");
+            value.appendChild(this.getargs().getItem(0).to_xml());
+            block.appendChild(value);
 
             return block;
         },
+        isArray: function (_obj) {
+            var cnst = Bridge.as(_obj, WebMrbc.const_node);
+            return (cnst != null) && (Bridge.referenceEquals(this.getp().WebMrbc$IMrbParser$sym2name(cnst.getname()), "Array"));
+        },
+        to_rb: function (cond) {
+            var $t, $t1, $t2, $t3, $t4, $t5, $t6;
+            var blk_arg = Bridge.as(this._block, WebMrbc.block_arg_node);
+            var blk = this._block;
+            if (blk_arg != null) {
+                blk = null;
+            }
+            var m = this.getp().WebMrbc$IMrbParser$sym2name(this._method);
+            var i = (this._args.getCount() + (blk_arg != null ? 1 : 0)) | 0;
+            if (this._pass === 1) {
+                cond.increment_nest();
+                switch (m) {
+                    case "!": 
+                    case "~": 
+                        cond.write(m);
+                        this._obj.to_ruby(cond);
+                        $t = Bridge.getEnumerator(this._args);
+                        while ($t.moveNext()) {
+                            var a = $t.getCurrent();
+                            a.to_ruby(cond);
+                            i = (i - 1) | 0;
+                            if (i > 0) {
+                                cond.write(", ");
+                            }
+                        }
+                        if (blk_arg != null) {
+                            blk_arg.to_ruby(cond);
+                        }
+                        break;
+                    case "+@": 
+                    case "-@": 
+                        cond.write(m.substr(0, 1));
+                        this._obj.to_ruby(cond);
+                        $t1 = Bridge.getEnumerator(this._args);
+                        while ($t1.moveNext()) {
+                            var a1 = $t1.getCurrent();
+                            a1.to_ruby(cond);
+                            i = (i - 1) | 0;
+                            if (i > 0) {
+                                cond.write(", ");
+                            }
+                        }
+                        if (blk_arg != null) {
+                            blk_arg.to_ruby(cond);
+                        }
+                        break;
+                    default: 
+                        this._obj.to_ruby(cond);
+                        cond.write(System.String.concat(" ", m, " "));
+                        $t2 = Bridge.getEnumerator(this._args);
+                        while ($t2.moveNext()) {
+                            var a2 = $t2.getCurrent();
+                            a2.to_ruby(cond);
+                            i = (i - 1) | 0;
+                            if (i > 0) {
+                                cond.write(", ");
+                            }
+                        }
+                        if (blk_arg != null) {
+                            blk_arg.to_ruby(cond);
+                        }
+                        break;
+                }
+                cond.decrement_nest();
+            } else {
+                var call_op = this._pass === WebMrbc.MrbTokens.tCOLON2 ? "::" : ".";
+                switch (m) {
+                    case "[]": 
+                        cond.increment_nest();
+                        this._obj.to_ruby(cond);
+                        if (this.isArray(this._obj)) {
+                            cond.write(System.String.concat(call_op, "[]"));
+                            cond.write("(");
+                            $t3 = Bridge.getEnumerator(this._args);
+                            while ($t3.moveNext()) {
+                                var a3 = $t3.getCurrent();
+                                a3.to_ruby(cond);
+                                i = (i - 1) | 0;
+                                if (i > 0) {
+                                    cond.write(", ");
+                                }
+                            }
+                            cond.write(")");
+                        } else if (i === 0) {
+                            cond.write("[]");
+                        } else {
+                            cond.write("[");
+                            $t4 = Bridge.getEnumerator(this._args);
+                            while ($t4.moveNext()) {
+                                var a4 = $t4.getCurrent();
+                                a4.to_ruby(cond);
+                                i = (i - 1) | 0;
+                                if (i > 0) {
+                                    cond.write(", ");
+                                }
+                            }
+                            cond.write("]");
+                        }
+                        cond.decrement_nest();
+                        break;
+                    case "[]=": 
+                        cond.increment_nest();
+                        this._obj.to_ruby(cond);
+                        cond.write(".[]=");
+                        cond.write("(");
+                        $t5 = Bridge.getEnumerator(this._args);
+                        while ($t5.moveNext()) {
+                            var a5 = $t5.getCurrent();
+                            a5.to_ruby(cond);
+                            i = (i - 1) | 0;
+                            if (i > 0) {
+                                cond.write(", ");
+                            }
+                        }
+                        if (blk_arg != null) {
+                            blk_arg.to_ruby(cond);
+                        }
+                        cond.write(")");
+                        cond.decrement_nest();
+                        break;
+                    default: 
+                        cond.increment_nest();
+                        this._obj.to_ruby(cond);
+                        if (i === 0) {
+                            cond.write(System.String.concat(call_op, m));
+                        } else {
+                            cond.write(System.String.concat(call_op, m, "("));
+                            $t6 = Bridge.getEnumerator(this._args);
+                            while ($t6.moveNext()) {
+                                var a6 = $t6.getCurrent();
+                                a6.to_ruby(cond);
+                                i = (i - 1) | 0;
+                                if (i > 0) {
+                                    cond.write(", ");
+                                }
+                            }
+                            if (blk_arg != null) {
+                                blk_arg.to_ruby(cond);
+                            }
+                            cond.write(")");
+                        }
+                        cond.decrement_nest();
+                        break;
+                }
+            }
+            if (blk != null) {
+                blk.to_ruby(cond);
+            } else if (cond.getnest() === 0) {
+                cond.write_line();
+            }
+        },
         toString: function () {
             var $t;
-            var str = System.String.format("(:call {0} {1} ", this.getobj(), this.getp().sym2name(this.getmethod()));
+            var str = System.String.format("(:call {0} {1} ", this.getobj(), this.getp().WebMrbc$IMrbParser$sym2name(this.getmethod()));
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var v = $t.getCurrent();
@@ -5030,7 +5629,7 @@
                 this._when = new (System.Collections.Generic.List$1(WebMrbc.case_node.when_t))();
             }
         },
-        ctor: function (p, a, b) {
+        $ctor1: function (p, a, b) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CASE);
             this._arg = a;
@@ -5042,6 +5641,12 @@
                 b = Bridge.cast(b.getcdr(), WebMrbc.node);
             }
         },
+        ctor: function (p, a, b) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CASE);
+            this._arg = a;
+            this._when.addRange(b);
+        },
         getarg: function () {
             return this._arg;
         },
@@ -5050,8 +5655,8 @@
         },
         to_xml: function () {
             var $t, $t1, $t2;
-            var block = $("<block>");
-            block.attr("type", WebMrbc.SwitchCaseNumberBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "switch_case_number");
 
             var c = 0, d = 0;
             var default_node = null;
@@ -5066,10 +5671,10 @@
                 }
             }
 
-            var mutation = $("<mutation>");
-            mutation.attr("case", c.toString());
-            mutation.attr("default", d.toString());
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("case", c.toString());
+            mutation.setAttribute("default", d.toString());
+            block.appendChild(mutation);
 
             var i = 0;
             $t1 = Bridge.getEnumerator(this._when);
@@ -5079,19 +5684,19 @@
                     continue;
                 }
 
-                var field = $("<field>");
-                field.attr("name", System.String.concat("CONST", i));
+                var field = document.createElement("field");
+                field.setAttribute("name", "CONST" + i);
                 // TODO:whenの値が複数の場合
-                field.text(WebMrbc.MrbParser.uTF8ArrayToString(Bridge.cast(w1.value.getItem(0), WebMrbc.int_node).getnum(), 0));
-                block.append(field);
+                field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(Bridge.cast(w1.value.getItem(0), WebMrbc.int_node).getnum(), 0)));
+                block.appendChild(field);
                 i = (i + 1) | 0;
             }
 
-            var value = $("<value>");
-            value.attr("name", "SWITCH");
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "SWITCH");
+            block.appendChild(value);
 
-            value.append(this._arg.to_xml());
+            value.appendChild(this._arg.to_xml());
 
             $t2 = Bridge.getEnumerator(this._when);
             while ($t2.moveNext()) {
@@ -5100,20 +5705,56 @@
                     continue;
                 }
 
-                var statement = $("<statement>");
-                statement.attr("name", System.String.concat("DO", i));
-                statement.append(w2.body.to_xml());
-                block.append(statement);
+                var statement = document.createElement("statement");
+                statement.setAttribute("name", "DO" + i);
+                statement.appendChild(w2.body.to_xml());
+                block.appendChild(statement);
             }
 
             if (default_node != null) {
-                var statement1 = $("<statement>");
-                statement1.attr("name", "DEFAULT");
-                statement1.append(default_node.body.to_xml());
-                block.append(statement1);
+                var statement1 = document.createElement("statement");
+                statement1.setAttribute("name", "DEFAULT");
+                statement1.appendChild(default_node.body.to_xml());
+                block.appendChild(statement1);
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            var $t, $t1;
+            cond.increment_nest();
+            cond.write("case ");
+            if (this._arg != null) {
+                this._arg.to_ruby(cond);
+            }
+            cond.decrement_nest();
+            cond.separate_line();
+            $t = Bridge.getEnumerator(this._when);
+            while ($t.moveNext()) {
+                var w = $t.getCurrent();
+                cond.increment_nest();
+                var count = w.value.getCount();
+                if (count !== 0) {
+                    cond.write("when ");
+                    $t1 = Bridge.getEnumerator(w.value);
+                    while ($t1.moveNext()) {
+                        var v = $t1.getCurrent();
+                        v.to_ruby(cond);
+                        count = (count - 1) | 0;
+                        if (count > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                } else {
+                    cond.write("else");
+                }
+                cond.decrement_nest();
+
+                cond.increment_indent();
+                w.body.to_ruby(cond);
+                cond.decrement_indent();
+            }
+            cond.write_line("end");
         },
         toString: function () {
             var $t;
@@ -5133,6 +5774,7 @@
         _type: null,
         _name: 0,
         _super: null,
+        _arg: 0,
         _body: null,
         ctor: function (p, c, s, b) {
             this.$initialize();
@@ -5140,7 +5782,7 @@
             if (Bridge.is(c.getcar(), System.Int32)) {
                 var type = System.Nullable.getValue(Bridge.cast(c.getcar(), System.Int32));
                 if (type === 0) {
-                    this._prefix = ":";
+                    this._prefix = "";
                     this._name = System.Nullable.getValue(Bridge.cast(c.getcdr(), System.Int32));
                 } else if (type === 1) {
                     this._prefix = "::";
@@ -5151,7 +5793,9 @@
                 this._type = Bridge.cast(c.getcar(), WebMrbc.node);
                 this._name = System.Nullable.getValue(Bridge.cast(c.getcdr(), System.Int32));
             }
-            this._super = Bridge.cast(p.locals_node(), WebMrbc.node);
+            this._super = s;
+            var a = p.WebMrbc$IMrbParser$locals_node();
+            this._arg = (a.getCount() === 0) ? 0 : a.getItem(0);
             this._body = b;
         },
         getprefix: function () {
@@ -5168,25 +5812,45 @@
         },
         to_xml: function () {
             // TODO:クラス？
-            var block = $("<class>");
-            block.attr("name", this.getp().sym2name(this._name));
+            var block = document.createElement("class");
+            block.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._name));
 
             if (this._super != null) {
-                var field = $("<field>");
-                field.attr("name", "SUPER");
-                field.append(this._super.to_xml());
-                block.append(field);
+                var field = document.createElement("field");
+                field.setAttribute("name", "SUPER");
+                field.appendChild(this._super.to_xml());
+                block.appendChild(field);
             }
 
-            var statement = $("<statement>");
-            statement.attr("name", "BODY");
-            statement.append(this._body.to_xml());
-            block.append(statement);
+            var statement = document.createElement("statement");
+            statement.setAttribute("name", "BODY");
+            statement.appendChild(this._body.to_xml());
+            block.appendChild(statement);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write("class ");
+            if (this._type != null) {
+                this._type.to_ruby(cond);
+            }
+            if (this._prefix != null) {
+                cond.write(this._prefix);
+            }
+            cond.write(System.String.concat(this.getp().WebMrbc$IMrbParser$sym2name(this._name), " "));
+            if (this._super != null) {
+                cond.write("< ");
+                if (this._super != null) {
+                    this._super.to_ruby(cond);
+                }
+            }
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
+        },
         toString: function () {
-            return System.String.format("(:class {0}{1} {2} {3})", this.getprefix(), this.getp().sym2name(this.getname()), this.getsuper(), this.getbody());
+            return System.String.format("(:class {0}{1} {2} {3})", this.getprefix(), this.getp().WebMrbc$IMrbParser$sym2name(this.getname()), this.getsuper(), this.getbody());
         }
     });
 
@@ -5252,7 +5916,7 @@
             var $t;
             var prefix = identifier;
             var max = 0;
-            var n = new RegExp(System.String.concat(System.String.concat("^", prefix), "([0-9]+)$"));
+            var n = new RegExp(System.String.concat("^", prefix, "([0-9]+)$"));
             $t = Bridge.getEnumerator(this.list);
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
@@ -5262,7 +5926,7 @@
                 }
                 break;
             }
-            return System.String.concat(System.String.concat("", prefix), (((max + 1) | 0)));
+            return System.String.concat("", prefix, (((max + 1) | 0)));
         },
         findWhere: function (p) {
             var $t;
@@ -5303,14 +5967,18 @@
         },
         to_xml: function () {
             // TODO:？？？
-            var block = $("<class>");
-            block.attr("const", this.getp().sym2name(Bridge.cast(this._b, WebMrbc.const_node).getname()));
-            block.attr("name", this.getp().sym2name(this._c));
+            var block = document.createElement("class");
+            block.setAttribute("const", this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._b, WebMrbc.const_node).getname()));
+            block.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._c));
 
             return block;
         },
+        to_rb: function (cond) {
+            this._b.to_ruby(cond);
+            cond.write(System.String.concat("::", this.getp().WebMrbc$IMrbParser$sym2name(this._c)));
+        },
         toString: function () {
-            return System.String.format("(:colon2 {0} {1})", this.getb(), this.getp().sym2name(this.getc()));
+            return System.String.format("(:colon2 {0} {1})", this.getb(), this.getp().WebMrbc$IMrbParser$sym2name(this.getc()));
         }
     });
 
@@ -5328,8 +5996,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write(System.String.concat("::", this.getp().WebMrbc$IMrbParser$sym2name(this._c)));
+        },
         toString: function () {
-            return System.String.format("(:colon3 . {0})", this.getp().sym2name(this.getc()));
+            return System.String.format("(:colon3 . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getc()));
         }
     });
 
@@ -5363,7 +6034,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ColourPickerBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$6("%1", [new $_.$AnonymousType$7("field_colour", "COLOUR", "#ff0000")], "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_PICKER_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6("%1", [new $asm.$AnonymousType$7("field_colour", "COLOUR", "#ff0000")], "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_PICKER_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             // Colour block is trivial.  Use tooltip of parent block if it exists.
@@ -5374,7 +6045,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$6", $_, {
+    Bridge.define("$AnonymousType$6", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, output, colour, helpUrl) {
             this.message0 = message0;
@@ -5399,13 +6070,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$6)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$6)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320599990, this.message0, this.args0, this.output, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550196191, this.message0, this.args0, this.output, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -5419,7 +6090,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$7", $_, {
+    Bridge.define("$AnonymousType$7", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, colour) {
             this.type = type;
@@ -5436,13 +6107,13 @@
             return this.colour;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$7)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$7)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.colour, o.colour);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320665526, this.type, this.name, this.colour]);
+            var h = Bridge.addHash([7550196192, this.type, this.name, this.colour]);
             return h;
         },
         toJSON: function () {
@@ -5464,11 +6135,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ColourRandomBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$8(Blockly.Msg.COLOUR_RANDOM_TITLE, "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_RANDOM_TOOLTIP, Blockly.Msg.COLOUR_RANDOM_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.COLOUR_RANDOM_TITLE, "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_RANDOM_TOOLTIP, Blockly.Msg.COLOUR_RANDOM_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$8", $_, {
+    Bridge.define("$AnonymousType$8", $asm, {
         $kind: "anonymous",
         ctor: function (message0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -5493,13 +6164,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$8)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$8)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320731062, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550196193, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -5545,18 +6216,21 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:const . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:const . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -5599,7 +6273,7 @@
             }
             var legal = false;
             // Is the block nested in a loop?
-            var block = Bridge.cast(this, WebMrbc.Block);
+            var block = this;
             do {
                 if (this.LOOP_TYPES.indexOf(block.type) !== -1) {
                     legal = true;
@@ -5631,7 +6305,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsForBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$9(Blockly.Msg.CONTROLS_FOR_TITLE, [new $_.$AnonymousType$10("field_variable", "VAR", null), new $_.$AnonymousType$11("input_value", "FROM", "Number", "RIGHT"), new $_.$AnonymousType$11("input_value", "TO", "Number", "RIGHT"), new $_.$AnonymousType$11("input_value", "BY", "Number", "RIGHT")], true, null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOR_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$9(Blockly.Msg.CONTROLS_FOR_TITLE, [new $asm.$AnonymousType$10("field_variable", "VAR", null), new $asm.$AnonymousType$11("input_value", "FROM", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "TO", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "BY", "Number", "RIGHT")], true, null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOR_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOR_INPUT_DO);
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
@@ -5656,7 +6330,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$9", $_, {
+    Bridge.define("$AnonymousType$9", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, previousStatement, nextStatement, colour, helpUrl) {
             this.message0 = message0;
@@ -5689,13 +6363,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$9)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$9)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([6320796598, this.message0, this.args0, this.inputsInline, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550196194, this.message0, this.args0, this.inputsInline, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -5711,7 +6385,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$10", $_, {
+    Bridge.define("$AnonymousType$10", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, variable) {
             this.type = type;
@@ -5728,13 +6402,13 @@
             return this.variable;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$10)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$10)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7125578678, this.type, this.name, this.variable]);
+            var h = Bridge.addHash([7550208474, this.type, this.name, this.variable]);
             return h;
         },
         toJSON: function () {
@@ -5746,7 +6420,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$11", $_, {
+    Bridge.define("$AnonymousType$11", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check, align) {
             this.type = type;
@@ -5767,13 +6441,13 @@
             return this.align;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$11)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$11)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check) && Bridge.equals(this.align, o.align);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7142355894, this.type, this.name, this.check, this.align]);
+            var h = Bridge.addHash([7550208730, this.type, this.name, this.check, this.align]);
             return h;
         },
         toJSON: function () {
@@ -5796,7 +6470,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsForEachBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$12(Blockly.Msg.CONTROLS_FOREACH_TITLE, [new $_.$AnonymousType$10("field_variable", "VAR", null), new $_.$AnonymousType$13("input_value", "LIST", "Array")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOREACH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.CONTROLS_FOREACH_TITLE, [new $asm.$AnonymousType$10("field_variable", "VAR", null), new $asm.$AnonymousType$13("input_value", "LIST", "Array")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOREACH_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOREACH_INPUT_DO);
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
@@ -5821,7 +6495,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$12", $_, {
+    Bridge.define("$AnonymousType$12", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, previousStatement, nextStatement, colour, helpUrl) {
             this.message0 = message0;
@@ -5850,13 +6524,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$12)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$12)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7159133110, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550208986, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -5871,7 +6545,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$13", $_, {
+    Bridge.define("$AnonymousType$13", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check) {
             this.type = type;
@@ -5888,13 +6562,13 @@
             return this.check;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$13)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$13)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7175910326, this.type, this.name, this.check]);
+            var h = Bridge.addHash([7550209242, this.type, this.name, this.check]);
             return h;
         },
         toJSON: function () {
@@ -6004,8 +6678,8 @@
             this.updateShape_();
             // Reconnect any child blocks.
             for (var i = 1; i <= this.elseifCount_; i = (i + 1) | 0) {
-                Blockly.Mutator.reconnect(valueConnections[i], this, System.String.concat("IF", i));
-                Blockly.Mutator.reconnect(statementConnections[i], this, System.String.concat("DO", i));
+                Blockly.Mutator.reconnect(valueConnections[i], this, "IF" + i);
+                Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
             }
             Blockly.Mutator.reconnect(elseStatementConnection, this, "ELSE");
         },
@@ -6016,8 +6690,8 @@
                 switch (clauseBlock.type) {
                     case WebMrbc.ControlsIfElseIfBlock.type_name: 
                         {
-                            var inputIf = this.getInput(System.String.concat("IF", i));
-                            var inputDo = this.getInput(System.String.concat("DO", i));
+                            var inputIf = this.getInput("IF" + i);
+                            var inputDo = this.getInput("DO" + i);
                             Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).valueConnection_ = (inputIf != null) ? inputIf.connection.targetConnection : null;
                             Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
                             i = (i + 1) | 0;
@@ -6041,15 +6715,15 @@
                 this.removeInput("ELSE");
             }
             var i = 1;
-            while (this.getInput(System.String.concat("IF", i)) != null) {
-                this.removeInput(System.String.concat("IF", i));
-                this.removeInput(System.String.concat("DO", i));
+            while (this.getInput("IF" + i) != null) {
+                this.removeInput("IF" + i);
+                this.removeInput("DO" + i);
                 i = (i + 1) | 0;
             }
             // Rebuild block.
             for (i = 1; i <= this.elseifCount_; i = (i + 1) | 0) {
-                this.appendValueInput(System.String.concat("IF", i)).setCheck("Boolean").appendField(Blockly.Msg.CONTROLS_IF_MSG_ELSEIF);
-                this.appendStatementInput(System.String.concat("DO", i)).appendField(Blockly.Msg.CONTROLS_IF_MSG_THEN);
+                this.appendValueInput("IF" + i).setCheck("Boolean").appendField(Blockly.Msg.CONTROLS_IF_MSG_ELSEIF);
+                this.appendStatementInput("DO" + i).appendField(Blockly.Msg.CONTROLS_IF_MSG_THEN);
             }
             if (this.elseCount_ !== 0) {
                 this.appendStatementInput("ELSE").appendField(Blockly.Msg.CONTROLS_IF_MSG_ELSE);
@@ -6125,12 +6799,12 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsRepeatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $_.$AnonymousType$15("field_number", "TIMES", 10, 0, 1)], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $asm.$AnonymousType$15("field_number", "TIMES", 10, 0, 1)], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
         }
     });
 
-    Bridge.define("$AnonymousType$14", $_, {
+    Bridge.define("$AnonymousType$14", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -6163,13 +6837,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$14)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$14)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7192687542, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550209498, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -6185,7 +6859,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$15", $_, {
+    Bridge.define("$AnonymousType$15", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, value, min, precision) {
             this.type = type;
@@ -6210,13 +6884,13 @@
             return this.precision;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$15)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$15)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.value, o.value) && Bridge.equals(this.min, o.min) && Bridge.equals(this.precision, o.precision);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7209464758, this.type, this.name, this.value, this.min, this.precision]);
+            var h = Bridge.addHash([7550209754, this.type, this.name, this.value, this.min, this.precision]);
             return h;
         },
         toJSON: function () {
@@ -6240,7 +6914,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsRepeatExtBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $_.$AnonymousType$13("input_value", "TIMES", "Number")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, [new $asm.$AnonymousType$13("input_value", "TIMES", "Number")], null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
         }
     });
@@ -6286,11 +6960,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.CreateEsvGetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3", [new $_.$AnonymousType$17("field_dropdown", "TYPE", [["読み出し要求", "esv_get"], ["通知要求", "esv_inf_req"]]), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3", [new $asm.$AnonymousType$17("field_dropdown", "TYPE", [["読み出し要求", "esv_get"], ["通知要求", "esv_inf_req"]]), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$16", $_, {
+    Bridge.define("$AnonymousType$16", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -6319,13 +6993,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$16)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$16)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7226241974, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550210010, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -6340,7 +7014,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$17", $_, {
+    Bridge.define("$AnonymousType$17", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, options) {
             this.type = type;
@@ -6357,13 +7031,13 @@
             return this.options;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$17)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$17)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.options, o.options);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7243019190, this.type, this.name, this.options]);
+            var h = Bridge.addHash([7550210266, this.type, this.name, this.options]);
             return h;
         },
         toJSON: function () {
@@ -6375,7 +7049,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$18", $_, {
+    Bridge.define("$AnonymousType$18", $asm, {
         $kind: "anonymous",
         ctor: function (type) {
             this.type = type;
@@ -6384,13 +7058,13 @@
             return this.type;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$18)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$18)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7259796406, this.type]);
+            var h = Bridge.addHash([7550210522, this.type]);
             return h;
         },
         toJSON: function () {
@@ -6410,7 +7084,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.CreateEsvSetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", [new $_.$AnonymousType$17("field_dropdown", "TYPE", [["書き込み要求（応答不要）", "esv_set_i"], ["書き込み要求（応答要）", "esv_set_c"], ["書き込み・読み出し要求", "esv_set_get"], ["通知（応答要）", "esv_infc"]]), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT"), new $_.$AnonymousType$11("input_value", "EDT", "String", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", [new $asm.$AnonymousType$17("field_dropdown", "TYPE", [["書き込み要求（応答不要）", "esv_set_i"], ["書き込み要求（応答要）", "esv_set_c"], ["書き込み・読み出し要求", "esv_set_get"], ["通知（応答要）", "esv_infc"]]), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "EDT", "String", "RIGHT")], "EData", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -6426,18 +7100,21 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:cvar . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:cvar . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -6545,7 +7222,7 @@
                 itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.DataCreateJoinItemBlock) : null;
             }
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                var connection = this.getInput(System.String.concat("ADD", i)).connection.targetConnection;
+                var connection = this.getInput("ADD" + i).connection.targetConnection;
                 if (connection != null && System.Array.indexOfT(connections, connection) === -1) {
                     connection.disconnect();
                 }
@@ -6553,14 +7230,14 @@
             this.itemCount_ = connections.length;
             this.updateShape_();
             for (var i1 = 0; i1 < this.itemCount_; i1 = (i1 + 1) | 0) {
-                Blockly.Mutator.reconnect(connections[i1], this, System.String.concat("ADD", i1));
+                Blockly.Mutator.reconnect(connections[i1], this, "ADD" + i1);
             }
         },
         saveConnections: function (containerBlock) {
             var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.DataCreateJoinItemBlock);
             var i = 0;
             while (itemBlock != null) {
-                var input = this.getInput(System.String.concat("ADD", i));
+                var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
                 itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.DataCreateJoinItemBlock) : null;
@@ -6574,15 +7251,15 @@
             }
             var i;
             for (i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                if (this.getInput(System.String.concat("ADD", i)) == null) {
-                    var input = this.appendValueInput(System.String.concat("ADD", i));
+                if (this.getInput("ADD" + i) == null) {
+                    var input = this.appendValueInput("ADD" + i);
                     if (i === 0) {
                         input.appendField("データを作ります");
                     }
                 }
             }
-            while (this.getInput(System.String.concat("ADD", i)) != null) {
-                this.removeInput(System.String.concat("ADD", i));
+            while (this.getInput("ADD" + i) != null) {
+                this.removeInput("ADD" + i);
                 i = (i + 1) | 0;
             }
         }
@@ -6606,22 +7283,11 @@
                 this._post_mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.arg_node))();
             }
         },
-        ctor: function (p, m, a, b) {
+        $ctor1: function (p, m, a, b) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_DEF);
             this._name = m;
-            {
-                var n2 = Bridge.cast(p.locals_node(), WebMrbc.node);
-
-                if (n2 != null && (n2.getcar() != null || n2.getcdr() != null)) {
-                    while (n2 != null) {
-                        if (System.Nullable.getValue(Bridge.cast(n2.getcar(), System.Int32)) !== 0) {
-                            this._local_variables.add(System.Nullable.getValue(Bridge.cast(n2.getcar(), System.Int32)));
-                        }
-                        n2 = Bridge.cast(n2.getcdr(), WebMrbc.node);
-                    }
-                }
-            }
+            this._local_variables.addRange(p.WebMrbc$IMrbParser$locals_node());
             if (a != null) {
                 var n = a;
 
@@ -6630,14 +7296,14 @@
                 }
                 n = Bridge.cast(n.getcdr(), WebMrbc.node);
                 if (n.getcar() != null) {
-                    var n21 = Bridge.cast(n.getcar(), WebMrbc.node);
+                    var n2 = Bridge.cast(n.getcar(), WebMrbc.node);
 
-                    while (n21 != null) {
+                    while (n2 != null) {
                         var arg = new WebMrbc.args_t(p);
-                        arg.name = System.Nullable.getValue(Bridge.cast(Bridge.cast(n21.getcar(), WebMrbc.node).getcar(), System.Int32));
-                        arg.arg = Bridge.cast(Bridge.cast(n21.getcar(), WebMrbc.node).getcdr(), WebMrbc.node);
+                        arg.name = System.Nullable.getValue(Bridge.cast(Bridge.cast(n2.getcar(), WebMrbc.node).getcar(), System.Int32));
+                        arg.arg = Bridge.cast(Bridge.cast(n2.getcar(), WebMrbc.node).getcdr(), WebMrbc.node);
                         this._optional_args.add(arg);
-                        n21 = Bridge.cast(n21.getcdr(), WebMrbc.node);
+                        n2 = Bridge.cast(n2.getcdr(), WebMrbc.node);
                     }
                 }
                 n = Bridge.cast(n.getcdr(), WebMrbc.node);
@@ -6652,6 +7318,16 @@
                     this._blk = System.Nullable.getValue(Bridge.cast(n.getcdr(), System.Int32));
                 }
             }
+            this._body = b;
+            if (Bridge.is(this._body, WebMrbc.ensure_node)) {
+                Bridge.cast(this._body, WebMrbc.ensure_node).def = true;
+            }
+        },
+        ctor: function (p, m, a, b) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_DEF);
+            this._name = m;
+            this._mandatory_args.addRange(a);
             this._body = b;
         },
         getname: function () {
@@ -6679,31 +7355,85 @@
             return this._body;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ProceduresDefreturnBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "procedures_defreturn");
 
-            var field = $("<field>");
-            field.attr("name", "NAME");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "NAME");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             var bxml;
             if (this._body != null && ((bxml = this._body.to_xml())) != null) {
-                var statement = $("<statement>");
-                statement.attr("name", "STACK");
-                statement.append(bxml);
-                block.append(statement);
+                var statement = document.createElement("statement");
+                statement.setAttribute("name", "STACK");
+                statement.appendChild(bxml);
+                block.appendChild(statement);
             }
 
             return block;
         },
+        to_rb: function (cond) {
+            var $t, $t1, $t2;
+            cond.increment_nest();
+            cond.write(System.String.concat("def ", this.getp().WebMrbc$IMrbParser$sym2name(this._name), "("));
+            var i = (((((((this._mandatory_args.getCount() + this._optional_args.getCount()) | 0) + (this._rest !== 0 ? 1 : 0)) | 0) + this._post_mandatory_args.getCount()) | 0) + (this._blk !== 0 ? 1 : 0)) | 0;
+            if (i > 0) {
+                $t = Bridge.getEnumerator(this._mandatory_args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                $t1 = Bridge.getEnumerator(this._optional_args);
+                while ($t1.moveNext()) {
+                    var a1 = $t1.getCurrent();
+                    a1.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                if (this._rest !== 0) {
+                    cond.write("*");
+                    if (this._rest !== -1) {
+                        cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._rest));
+                    }
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                    $t2 = Bridge.getEnumerator(this._post_mandatory_args);
+                    while ($t2.moveNext()) {
+                        var a2 = $t2.getCurrent();
+                        a2.to_ruby(cond);
+                        i = (i - 1) | 0;
+                        if (i > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                }
+                if (this._blk !== 0) {
+                    cond.write(System.String.concat("&", this.getp().WebMrbc$IMrbParser$sym2name(this._blk)));
+                }
+            }
+            cond.write(")");
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
+        },
         toString: function () {
             var $t, $t1, $t2, $t3;
-            var str = System.String.format("(:def {0} ", this.getp().sym2name(this.getname()));
+            var str = System.String.format("(:def {0} ", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
             $t = Bridge.getEnumerator(this.getlocal_variables());
             while ($t.moveNext()) {
                 var n = $t.getCurrent();
-                str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(n))));
+                str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(n))));
             }
             str = System.String.concat(str, (System.String.format(" (", null)));
             $t1 = Bridge.getEnumerator(this.getmandatory_args());
@@ -6716,13 +7446,13 @@
                 var n2 = $t2.getCurrent();
                 str = System.String.concat(str, (System.String.format("{0}, ", n2)));
             }
-            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(this.getrest()))));
+            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(this.getrest()))));
             $t3 = Bridge.getEnumerator(this.getpost_mandatory_args());
             while ($t3.moveNext()) {
                 var n3 = $t3.getCurrent();
                 str = System.String.concat(str, (System.String.format("{0}, ", n3)));
             }
-            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(this.getblk()))));
+            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(this.getblk()))));
             return System.String.concat(str, System.String.format(" . {0}))", this.getbody()));
         }
     });
@@ -6807,6 +7537,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            this._a.to_ruby(cond);
+            cond.write("..");
+            this._b.to_ruby(cond);
+        },
         toString: function () {
             return System.String.format("(:dot2 {0} {1})", this.geta(), this.getb());
         }
@@ -6830,6 +7565,11 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            this._a.to_ruby(cond);
+            cond.write("...");
+            this._b.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:dot3 {0} {1})", this.geta(), this.getb());
@@ -6865,6 +7605,16 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            var $t;
+            $t = Bridge.getEnumerator(this._a);
+            while ($t.moveNext()) {
+                var i = $t.getCurrent();
+                i.to_ruby(cond);
+            }
+            cond.write(WebMrbc.MrbParser.uTF8ArrayToString(this._opt, 0));
+            cond.write(WebMrbc.MrbParser.uTF8ArrayToString(this._tail, 0));
+        },
         toString: function () {
             var $t;
             var str = System.String.format("(:dregx . ", null);
@@ -6896,6 +7646,26 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            var $t;
+            cond.increment_nest();
+            cond.write("\"");
+            $t = Bridge.getEnumerator(this._a);
+            while ($t.moveNext()) {
+                var i = $t.getCurrent();
+                var s = Bridge.as(i, WebMrbc.str_node);
+                if (s != null) {
+                    var str = WebMrbc.MrbParser.uTF8ArrayToString(s.getstr(), 0);
+                    cond.write(System.String.replaceAll(str, "\"", "\\\""));
+                } else {
+                    cond.write("#{");
+                    i.to_ruby(cond);
+                    cond.write("}");
+                }
+            }
+            cond.write("\"");
+            cond.decrement_nest();
+        },
         toString: function () {
             var $t;
             var str = System.String.format("(:dstr . ", null);
@@ -6914,13 +7684,17 @@
         ctor: function (p, a) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_DSYM);
-            this._a = p.new_dstr(a);
+            this._a = new WebMrbc.dstr_node(p, a);
         },
         geta: function () {
             return this._a.geta();
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            cond.write(":");
+            this._a.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:dsym . {0})", this.geta());
@@ -6945,6 +7719,14 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t;
+            $t = Bridge.getEnumerator(this._a);
+            while ($t.moveNext()) {
+                var i = $t.getCurrent();
+                i.to_ruby(cond);
+            }
         },
         toString: function () {
             var $t;
@@ -7066,11 +7848,15 @@
         inherits: [WebMrbc.node],
         _body: null,
         _ensure: null,
+        def: false,
         ctor: function (p, a, b) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_ENSURE);
             this._body = a;
             this._ensure = b;
+            if (Bridge.is(this._body, WebMrbc.rescue_node)) {
+                Bridge.cast(this._body, WebMrbc.rescue_node).ensure = true;
+            }
         },
         getbody: function () {
             return this._body;
@@ -7080,6 +7866,21 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            if (!this.def) {
+                cond.write_line("begin");
+                cond.increment_indent();
+            }
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("ensure");
+            cond.increment_indent();
+            this._ensure.to_ruby(cond);
+            if (!this.def) {
+                cond.decrement_indent();
+                cond.write_line("end");
+            }
         },
         toString: function () {
             return System.String.format("(:ensure {0} {1})", this.getbody(), this.getensure());
@@ -7092,6 +7893,11 @@
             type_name: "eproperty_fixlen"
         },
         propertyInfo: null,
+        workspace_: null,
+        identifier_: null,
+        description_: null,
+        property_code_: 0,
+        property_size_: 0,
         cases_: null,
         defaultCount_: 0,
         userGetter_: false,
@@ -7104,9 +7910,9 @@
         init: function () {
             this.setHelpUrl("http://www.example.com/");
             this.setColour(230);
-            this.appendDummyInput("PROPERTY").appendField(new Blockly.FieldTextInput("onoff_prop"), "IDENTIFIER").appendField("動作状態", "DESCRIPTION").appendField("EPC:").appendField("80", "PROPERTY_CODE").appendField("Size:").appendField("1", "PROPERTY_SIZE").appendField("byte");
+            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
             this.setMutator(new Blockly.Mutator([WebMrbc.EPropertyFixLenConstBlock.type_name, WebMrbc.EPropertyFixLenRangeBlock.type_name, WebMrbc.EPropertyFixLenDefaultBlock.type_name]));
-            this.setTooltip(Bridge.fn.bind(this, $_.WebMrbc.EPropertyFixLenBlock.f1));
+            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.EPropertyFixLenBlock.f1));
             this.cases_ = System.Array.init(0, null);
             this.defaultCount_ = 0;
             this.userGetter_ = true;
@@ -7145,6 +7951,10 @@
             if (this.userGetter_) {
                 container.setAttribute("user_getter", "1");
             }
+            container.setAttribute("property_code", System.Int32.format(this.property_code_, "X2"));
+            container.setAttribute("identifier", this.identifier_);
+            container.setAttribute("description", this.description_);
+            container.setAttribute("property_size", this.property_size_.toString());
             return container;
         },
         /**
@@ -7177,6 +7987,13 @@
             }
             this.defaultCount_ = parseInt(xmlElement.getAttribute("default"), 10) || 0;
             this.userGetter_ = parseInt(xmlElement.getAttribute("user_getter"), 10) || 0 !== 0;
+            this.property_code_ = parseInt(xmlElement.getAttribute("property_code"), 16) || 0;
+            if (this.workspace_ != null) {
+                this.initPropertyInfo(this.workspace_);
+            }
+            this.identifier_ = xmlElement.getAttribute("identifier");
+            this.description_ = xmlElement.getAttribute("description");
+            this.property_size_ = parseInt(xmlElement.getAttribute("property_size"), 10) || 0;
             this.updateSetter_();
             this.updateGetter_(this.userGetter_);
         },
@@ -7196,15 +8013,15 @@
             var connection = containerBlock.getInput("STACK").connection;
             for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 var caseBlock;
-                var description = this.getFieldValue(System.String.concat("CASE_DESCRIPTION", i));
-                var value = this.getFieldValue(System.String.concat("CASE_VALUE", i));
+                var description = this.getFieldValue("CASE_DESCRIPTION" + i);
+                var value = this.getFieldValue("CASE_VALUE" + i);
                 if (value != null) {
                     caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenConstBlock.type_name);
                     caseBlock.setFieldValue(description, "DESCRIPTION");
                     caseBlock.setFieldValue(value, "CONST");
                 } else {
-                    var min = this.getFieldValue(System.String.concat("CASE_MIN", i));
-                    var max = this.getFieldValue(System.String.concat("CASE_MAX", i));
+                    var min = this.getFieldValue("CASE_MIN" + i);
+                    var max = this.getFieldValue("CASE_MAX" + i);
                     if ((min != null) && (max != null)) {
                         caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenRangeBlock.type_name);
                         caseBlock.setFieldValue(description, "DESCRIPTION");
@@ -7276,7 +8093,7 @@
             this.updateSetter_();
             // Reconnect any child blocks.
             for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
-                Blockly.Mutator.reconnect(statementConnections[i], this, System.String.concat("SET", i));
+                Blockly.Mutator.reconnect(statementConnections[i], this, "SET" + i);
             }
             Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_SET");
             var userGetter_ = containerBlock.getFieldValue("USER_GETTER");
@@ -7328,14 +8145,14 @@
                 switch (clauseBlock.type) {
                     case WebMrbc.EPropertyFixLenConstBlock.type_name: 
                         {
-                            var inputSet = this.getInput(System.String.concat("SET", i));
+                            var inputSet = this.getInput("SET" + i);
                             Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenConstBlock).statementConnection_ = (inputSet != null) ? inputSet.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
                         break;
                     case WebMrbc.EPropertyFixLenRangeBlock.type_name: 
                         {
-                            var inputSet1 = this.getInput(System.String.concat("SET", i));
+                            var inputSet1 = this.getInput("SET" + i);
                             Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenRangeBlock).statementConnection_ = (inputSet1 != null) ? inputSet1.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
@@ -7374,9 +8191,9 @@
                 this.removeInput("DEFAULT_SET");
             }
             var i = 0;
-            while (this.getInput(System.String.concat("CASE", i)) != null) {
-                this.removeInput(System.String.concat("CASE", i));
-                this.removeInput(System.String.concat("SET", i));
+            while (this.getInput("CASE" + i) != null) {
+                this.removeInput("CASE" + i);
+                this.removeInput("SET" + i);
                 i = (i + 1) | 0;
             }
             // Rebuild block.
@@ -7386,16 +8203,16 @@
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
                 if (c.item3 == null) {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField("設定値が").appendField(c.item1, System.String.concat("CASE_DESCRIPTION", i)).appendField(c.item2, System.String.concat("CASE_VALUE", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_VALUE" + i).appendField("の");
                 } else {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField("設定値が").appendField(c.item1, System.String.concat("CASE_DESCRIPTION", i)).appendField(c.item2, System.String.concat("CASE_MIN", i)).appendField("から").appendField(c.item3, System.String.concat("CASE_MAX", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_MIN" + i).appendField("から").appendField(c.item3, "CASE_MAX" + i).appendField("の");
                 }
                 if (getLabel != null) {
-                    this.moveInputBefore(System.String.concat("CASE", i), "GET_LABEL");
+                    this.moveInputBefore("CASE" + i, "GET_LABEL");
                 }
-                this.appendStatementInput(System.String.concat("SET", i)).appendField("とき");
+                this.appendStatementInput("SET" + i).appendField("とき");
                 if (getLabel != null) {
-                    this.moveInputBefore(System.String.concat("SET", i), "GET_LABEL");
+                    this.moveInputBefore("SET" + i, "GET_LABEL");
                 }
                 i = (i + 1) | 0;
             }
@@ -7432,44 +8249,33 @@
         initPropertyInfo: function (workspace) {
             var $t;
             var c = workspace.eobject;
-            var epc = parseInt(this.getFieldValue("PROPERTY_CODE"), 16);
             $t = Bridge.getEnumerator(c.properties);
             while ($t.moveNext()) {
-                var item = $t.getCurrent();
-                if (item.propertyCode !== epc) {
+                var pi = $t.getCurrent();
+                if (pi.propertyCode !== this.property_code_) {
                     continue;
                 }
 
-                this.setPropertyInfo(item);
+                this.propertyInfo = pi;
+                this.identifier_ = WebMrbc.CodeGenerator.getPropertyIdentifier(pi);
+                this.description_ = pi.description;
+                this.property_size_ = pi.size;
                 break;
             }
         },
-        setPropertyInfo: function (pi) {
-            this.propertyInfo = pi;
-
-            this.setFieldValue(WebMrbc.CodeGenerator.getPropertyIdentifier(pi), "IDENTIFIER");
-            this.setFieldValue(pi.description, "DESCRIPTION");
-            this.setFieldValue(System.Byte.format(pi.propertyCode, "X2"), "PROPERTY_CODE");
-            this.setFieldValue(pi.size.toString(), "PROPERTY_SIZE");
-        },
         onCreate: function (workspace, cre) {
+            this.workspace_ = workspace;
+
             if (this.propertyInfo == null) {
                 this.initPropertyInfo(workspace);
             }
+
+            this.setFieldValue(System.Int32.format(this.property_code_, "X2"), "PROPERTY_CODE");
+            this.setFieldValue(this.identifier_, "IDENTIFIER");
+            this.setFieldValue(this.description_, "DESCRIPTION");
+            this.setFieldValue(this.property_size_.toString(), "PROPERTY_SIZE");
         },
         onChange: function (workspace, chg) {
-            if (!Bridge.referenceEquals(chg.element, "field")) {
-                return;
-            }
-
-            switch (chg.name) {
-                case "IDENTIFIER": 
-                    this.propertyInfo.identifier = this.getFieldValue("IDENTIFIER");
-                    break;
-                case "PROPERTY_CODE": 
-                    this.initPropertyInfo(workspace);
-                    break;
-            }
         },
         onDelete: function (workspace, del) {
         },
@@ -7477,9 +8283,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.EPropertyFixLenBlock", $_);
+    Bridge.ns("WebMrbc.EPropertyFixLenBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.EPropertyFixLenBlock, {
+    Bridge.apply($asm.$.WebMrbc.EPropertyFixLenBlock, {
         f1: function () {
             if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
                 return "条件に合うブロックを実行";
@@ -7584,7 +8390,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EPropertyVarLenBlock.type_name);
         },
         init: function () {
-            this.appendDummyInput("PROPERTY").appendField(new Blockly.FieldTextInput("onoff_prop"), "IDENTIFIER").appendField("動作状態", "DESCRIPTION").appendField("EPC:").appendField("80", "PROPERTY_CODE").appendField("Size:").appendField("1", "PROPERTY_SIZE").appendField("byte");
+            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
             this.appendStatementInput("SET").setCheck("EPropertySetHandler").appendField("設定");
             this.appendValueInput("SET_RET").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField("設定に使用したバイト数");
             this.appendStatementInput("GET").setCheck("EPropertyGetHandler").appendField("取得");
@@ -7595,14 +8401,13 @@
 
             this.getField("PROPERTY_CODE").EDITABLE = true;
         },
-        initPropertyInfo: function (workspace) {
+        initPropertyInfo: function (workspace, property_code) {
             var $t;
             var c = workspace.eobject;
-            var epc = parseInt(this.getFieldValue("PROPERTY_CODE"), 16);
             $t = Bridge.getEnumerator(c.properties);
             while ($t.moveNext()) {
                 var item = $t.getCurrent();
-                if (item.propertyCode !== epc) {
+                if (item.propertyCode !== property_code) {
                     continue;
                 }
 
@@ -7620,7 +8425,7 @@
         },
         onCreate: function (workspace, cre) {
             if (this.propertyInfo == null) {
-                this.initPropertyInfo(workspace);
+                this.initPropertyInfo(workspace, parseInt(this.getFieldValue("PROPERTY_CODE").toString(), 16));
             }
         },
         onChange: function (workspace, chg) {
@@ -7630,10 +8435,10 @@
 
             switch (chg.name) {
                 case "IDENTIFIER": 
-                    this.propertyInfo.identifier = this.getFieldValue("IDENTIFIER");
+                    this.setFieldValue(chg.newValue.toString(), "IDENTIFIER");
                     break;
                 case "PROPERTY_CODE": 
-                    this.initPropertyInfo(workspace);
+                    this.initPropertyInfo(workspace, parseInt(chg.newValue.toString(), 16));
                     break;
             }
         },
@@ -7653,11 +8458,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvAddEdtBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 に %2 %3 として %4 %5 を追加", [new $_.$AnonymousType$19("field_variable", "ESV", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "EPC", "Number"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "EDT", "String")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 %3 として %4 %5 を追加", [new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EPC", "Number"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EDT", "String")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$19", $_, {
+    Bridge.define("$AnonymousType$19", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, variable) {
             this.type = type;
@@ -7674,13 +8479,13 @@
             return this.variable;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$19)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$19)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7276573622, this.type, this.name, this.variable]);
+            var h = Bridge.addHash([7550210778, this.type, this.name, this.variable]);
             return h;
         },
         toJSON: function () {
@@ -7702,7 +8507,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvAddEpcBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 に %2 %3 を追加", [new $_.$AnonymousType$19("field_variable", "ESV", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "EPC", "Number")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 %3 を追加", [new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EPC", "Number")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -7716,7 +8521,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvGetEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 のサービスコード", [new $_.$AnonymousType$19("field_variable", "ESV", "item")], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 のサービスコード", [new $asm.$AnonymousType$19("field_variable", "ESV", "item")], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -7730,11 +8535,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvIterateBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 にある要素で繰り返し %2 %3", [new $_.$AnonymousType$19("field_variable", "ESV", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$20("input_statement", "DO")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 にある要素で繰り返し %2 %3", [new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$20("input_statement", "DO")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$20", $_, {
+    Bridge.define("$AnonymousType$20", $asm, {
         $kind: "anonymous",
         ctor: function (type, name) {
             this.type = type;
@@ -7747,13 +8552,13 @@
             return this.name;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$20)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$20)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7125644214, this.type, this.name]);
+            var h = Bridge.addHash([7550208475, this.type, this.name]);
             return h;
         },
         toJSON: function () {
@@ -7774,7 +8579,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvIteratorBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1", [new $_.$AnonymousType$17("field_dropdown", "ITEM", [["プロパティコード", "epc"], ["プロパティ値", "edt"], ["要素の番号", "state"]])], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1", [new $asm.$AnonymousType$17("field_dropdown", "ITEM", [["プロパティコード", "epc"], ["プロパティ値", "edt"], ["要素の番号", "state"]])], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -7790,15 +8595,18 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FALSE);
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicBooleanBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_boolean");
 
-            var field = $("<field>");
-            field.attr("name", "BOOL");
-            field.text("FALSE");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "BOOL");
+            field.appendChild(document.createTextNode("FALSE"));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.write("false");
         },
         toString: function () {
             return System.String.format("(:false)", null);
@@ -7826,10 +8634,10 @@
                 this._args = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
-        ctor: function (p, b, c) {
+        $ctor1: function (p, b, c) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FCALL);
-            var n = p.new_self();
+            var n = new WebMrbc.self_node(p);
             n.NODE_LINENO(c);
             this.NODE_LINENO(c);
 
@@ -7841,6 +8649,19 @@
                     this._block = Bridge.cast(c.getcdr(), WebMrbc.node);
                 }
             }
+        },
+        ctor: function (p, b, args, block) {
+            if (args === void 0) { args = null; }
+            if (block === void 0) { block = null; }
+
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FCALL);
+            this._self = new WebMrbc.self_node(p);
+            this._method = b;
+            if (args != null) {
+                this._args.addRange(args);
+            }
+            this._block = block;
         },
         getself: function () {
             return this._self;
@@ -7857,43 +8678,210 @@
         add_block: function (b) {
             if (b != null) {
                 if (this._block != null) {
-                    this.getp().yyError("both block arg and actual block given");
+                    this.getp().WebMrbc$IMrbParser$yyError("both block arg and actual block given");
                 }
                 this._block = b;
             }
         },
         to_xml: function () {
             var $t;
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ProceduresCallreturnBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = $("<mutation>");
-            mutation.attr("name", this.getp().sym2name(this._method));
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._method));
+            block.appendChild(mutation);
 
             var i = 0;
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = $("<arg>");
+                var arg = document.createElement("arg");
                 // TODO: 引数名を持ってくkる
-                arg.attr("name", i.toString());
-                arg.append(a.to_xml());
-                block.append(arg);
+                arg.setAttribute("name", i.toString());
+                arg.appendChild(a.to_xml());
+                block.appendChild(arg);
                 i = (i + 1) | 0;
             }
 
             return block;
         },
+        to_rb: function (cond) {
+            var $t, $t1;
+            cond.increment_nest();
+            var blk_arg = Bridge.as(this._block, WebMrbc.block_arg_node);
+            var blk = this._block;
+            if (blk_arg != null) {
+                blk = null;
+            }
+            var m = this.getp().WebMrbc$IMrbParser$sym2name(this._method);
+            var i = (this._args.getCount() + (blk_arg != null ? 1 : 0)) | 0;
+            switch (m) {
+                case "include": 
+                case "raise": 
+                    cond.write(System.String.concat(m, " "));
+                    $t = Bridge.getEnumerator(this._args);
+                    while ($t.moveNext()) {
+                        var a = $t.getCurrent();
+                        a.to_ruby(cond);
+                        i = (i - 1) | 0;
+                        if (i > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                    if (blk_arg != null) {
+                        blk_arg.to_ruby(cond);
+                    }
+                    break;
+                default: 
+                    if (i === 0) {
+                        cond.write(m);
+                    } else {
+                        cond.write(System.String.concat(m, "("));
+                        $t1 = Bridge.getEnumerator(this._args);
+                        while ($t1.moveNext()) {
+                            var a1 = $t1.getCurrent();
+                            a1.to_ruby(cond);
+                            i = (i - 1) | 0;
+                            if (i > 0) {
+                                cond.write(", ");
+                            }
+                        }
+                        if (blk_arg != null) {
+                            blk_arg.to_ruby(cond);
+                        }
+                        cond.write(")");
+                    }
+                    break;
+            }
+            cond.decrement_nest();
+            if (blk != null) {
+                blk.to_ruby(cond);
+            } else if (cond.getnest() === 0) {
+                cond.write_line();
+            }
+        },
         toString: function () {
             var $t;
-            var str = System.String.format("(:fcall {0} {1} ", this.getself(), this.getp().sym2name(this.getmethod()));
+            var str = System.String.format("(:fcall {0} {1} ", this.getself(), this.getp().WebMrbc$IMrbParser$sym2name(this.getmethod()));
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var v = $t.getCurrent();
                 str = System.String.concat(str, (System.String.concat(v.toString(), " ")));
             }
             return System.String.concat(str, System.String.format("{0})", this.getblock()));
+        }
+    });
+
+    Bridge.define("WebMrbc.str_node", {
+        inherits: [WebMrbc.node,WebMrbc.IEvaluatable],
+        _str: null,
+        _len: 0,
+        config: {
+            alias: [
+            "evaluate", "WebMrbc$IEvaluatable$evaluate"
+            ]
+        },
+        ctor: function (p, s, len) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_STR);
+            this._str = WebMrbc.MrbParser.strndup(s, 0, len);
+            this._len = len;
+        },
+        $ctor1: function (p, s) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_STR);
+            this._str = WebMrbc.MrbParser.uTF8StringToArray(s);
+            this._len = this._str.length;
+        },
+        getstr: function () {
+            return this._str;
+        },
+        getlen: function () {
+            return this._len;
+        },
+        to_xml: function () {
+            var block = document.createElement("block");
+            block.setAttribute("type", "text");
+
+            var field = document.createElement("field");
+            field.setAttribute("name", "TEXT");
+            field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0)));
+            block.appendChild(field);
+
+            return block;
+        },
+        to_rb: function (cond) {
+            var esc = { };
+            var str = WebMrbc.MrbParser.uTF8ArrayToStringEsc(this._str, 0, esc);
+            if (esc.v) {
+                cond.write(System.String.concat("\"", System.String.replaceAll(str, "\"", "\\\""), "\""));
+            } else {
+                cond.write(System.String.concat("'", System.String.replaceAll(str, "'", "\\'"), "'"));
+            }
+        },
+        toString: function () {
+            return System.String.format("(:str . ('{0}' . {1}))", this.getstr(), this.getlen());
+        },
+        to_s: function () {
+            return WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0);
+        },
+        evaluate: function (method, args) {
+            var s = this.to_s();
+
+            switch (method) {
+                case "<=>": 
+                    {
+                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
+                            break;
+                        }
+                        var c = WebMrbc.MrbParser.uTF8StringToArray(System.String.compare(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()).toString());
+                        return new WebMrbc.int_node.ctor(this.getp(), c, 10);
+                    }
+                case "==": 
+                    {
+                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
+                            break;
+                        }
+                        if (System.String.compare(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()) === 0) {
+                            return new WebMrbc.true_node(this.getp());
+                        } else {
+                            return new WebMrbc.true_node(this.getp());
+                        }
+                    }
+                case "+": 
+                    {
+                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
+                            break;
+                        }
+                        var t = WebMrbc.MrbParser.uTF8StringToArray(System.String.concat(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()));
+                        return new WebMrbc.str_node.ctor(this.getp(), t, ((t.length - 1) | 0));
+                    }
+                case "*": 
+                    {
+                        var a;
+                        if (args.getCount() !== 1) {
+                            break;
+                        }
+                        if (Bridge.is(args.getItem(0), WebMrbc.int_node)) {
+                            a = System.Int64.clip32(Bridge.cast(args.getItem(0), WebMrbc.int_node).to_i());
+                        } else {
+                            if (Bridge.is(args.getItem(0), WebMrbc.float_node)) {
+                                a = Bridge.Int.clip32(Bridge.cast(args.getItem(0), WebMrbc.float_node).to_f());
+                            } else {
+                                break;
+                            }
+                        }
+                        var sb = new System.Text.StringBuilder();
+                        for (var i = 0; i < a; i = (i + 1) | 0) {
+                            sb.append(a);
+                        }
+                        var t1 = WebMrbc.MrbParser.uTF8StringToArray(sb.toString());
+                        return new WebMrbc.str_node.ctor(this.getp(), t1, ((t1.length - 1) | 0));
+                    }
+            }
+
+            return null;
         }
     });
 
@@ -7910,19 +8898,27 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FLOAT);
             this._s = WebMrbc.MrbParser.strdup(s, 0);
         },
+        $ctor1: function (p, f) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FLOAT);
+            this._s = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format(f, 'G'));
+        },
         getnum: function () {
             return this._s;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.MathNumberBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "math_number");
 
-            var field = $("<field>");
-            field.attr("name", "NUM");
-            field.text(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "NUM");
+            field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.write(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0));
         },
         toString: function () {
             return System.String.format("(:float . {0})", this.getnum());
@@ -7946,27 +8942,27 @@
                     case "+": 
                         {
                             var c = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a + System.Int64.toNumber(b)), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c);
+                            return new WebMrbc.float_node.ctor(this.getp(), c);
                         }
                     case "-": 
                         {
                             var c1 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a - System.Int64.toNumber(b)), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c1);
+                            return new WebMrbc.float_node.ctor(this.getp(), c1);
                         }
                     case "*": 
                         {
                             var c2 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a * System.Int64.toNumber(b)), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c2);
+                            return new WebMrbc.float_node.ctor(this.getp(), c2);
                         }
                     case "/": 
                         {
                             var c3 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a / System.Int64.toNumber(b)), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c3);
+                            return new WebMrbc.float_node.ctor(this.getp(), c3);
                         }
                     case "%": 
                         {
                             var c4 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a % System.Int64.toNumber(b)), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c4);
+                            return new WebMrbc.float_node.ctor(this.getp(), c4);
                         }
                     case "==": 
                         {
@@ -7984,27 +8980,27 @@
                     case "+": 
                         {
                             var c5 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a + b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c5);
+                            return new WebMrbc.float_node.ctor(this.getp(), c5);
                         }
                     case "-": 
                         {
                             var c6 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a - b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c6);
+                            return new WebMrbc.float_node.ctor(this.getp(), c6);
                         }
                     case "*": 
                         {
                             var c7 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a * b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c7);
+                            return new WebMrbc.float_node.ctor(this.getp(), c7);
                         }
                     case "/": 
                         {
                             var c8 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a / b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c8);
+                            return new WebMrbc.float_node.ctor(this.getp(), c8);
                         }
                     case "%": 
                         {
                             var c9 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a % b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c9);
+                            return new WebMrbc.float_node.ctor(this.getp(), c9);
                         }
                     case "==": 
                         {
@@ -8060,43 +9056,56 @@
             return this._do;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsForEachBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_forEach");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
             // TODO:var？
             var pre = this.getvar().pre.getItem(0);
             switch (System.Nullable.getValue(Bridge.cast(pre.getcar(), System.Int32))) {
                 case WebMrbc.node_type.NODE_GVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(pre, WebMrbc.gvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.gvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_CVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(pre, WebMrbc.cvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.cvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_IVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(pre, WebMrbc.ivar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.ivar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_LVAR: 
-                    field.text(this.getp().sym2name(Bridge.cast(pre, WebMrbc.lvar_node).getname()));
+                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.lvar_node).getname())));
                     break;
                 default: 
                     // TODO: ？
                     throw new System.NotImplementedException();
             }
-            block.append(field);
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "LIST");
-            value.append(this._in.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "LIST");
+            value.appendChild(this._in.to_xml());
+            block.appendChild(value);
 
-            var statement = $("<statement>");
-            statement.attr("name", "DO");
-            statement.append(this._do.to_xml());
-            block.append(statement);
+            var statement = document.createElement("statement");
+            statement.setAttribute("name", "DO");
+            statement.appendChild(this._do.to_xml());
+            block.appendChild(statement);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            cond.write("for ");
+            this._var.to_ruby(cond);
+            cond.write(" in ");
+            this._in.to_ruby(cond);
+            cond.write(" do");
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._do.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
         },
         toString: function () {
             return System.String.format("(:for {0} {1} {2})", this.getvar(), this.getin(), this.getdo());
@@ -8115,18 +9124,21 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:gvar . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:gvar . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -8138,22 +9150,50 @@
                 this._kvs = new (System.Collections.Generic.List$1(WebMrbc.hash_node.kv_t))();
             }
         },
-        ctor: function (p, a) {
+        $ctor1: function (p, a) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_HASH);
             while (a != null) {
-                var kv = new WebMrbc.hash_node.kv_t();
-                kv.key = Bridge.cast(Bridge.cast(a.getcar(), WebMrbc.node).getcar(), WebMrbc.node);
-                kv.value = Bridge.cast(Bridge.cast(a.getcar(), WebMrbc.node).getcdr(), WebMrbc.node);
+                var kv = new WebMrbc.hash_node.kv_t(Bridge.cast(Bridge.cast(a.getcar(), WebMrbc.node).getcar(), WebMrbc.node), Bridge.cast(Bridge.cast(a.getcar(), WebMrbc.node).getcdr(), WebMrbc.node));
                 this._kvs.add(kv);
                 a = Bridge.cast(a.getcdr(), WebMrbc.node);
             }
+        },
+        ctor: function (p, items) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_HASH);
+            this._kvs.addRange(items);
         },
         getkvs: function () {
             return this._kvs;
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t;
+            if (cond.getnest() !== 0) {
+                cond.write("{");
+            } else {
+                cond.write_line("{");
+            }
+            var i = this._kvs.getCount();
+            $t = Bridge.getEnumerator(this._kvs);
+            while ($t.moveNext()) {
+                var kv = $t.getCurrent();
+                kv.key.to_ruby(cond);
+                cond.write(" => ");
+                kv.value.to_ruby(cond);
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+            if (cond.getnest() !== 0) {
+                cond.write("}");
+            } else {
+                cond.write_line("}");
+            }
         },
         toString: function () {
             var $t;
@@ -8179,15 +9219,18 @@
             return this._info;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.TextBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "text");
 
-            var field = $("<field>");
-            field.attr("name", "TEXT");
-            field.text(this.getinfo().getString());
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "TEXT");
+            field.appendChild(document.createTextNode(this.getinfo().getString()));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            this._info.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:heredoc . {0})", this.getinfo());
@@ -8428,12 +9471,14 @@
         _cond: null,
         _then: null,
         _else: null,
-        ctor: function (p, a, b, c) {
+        _inline: false,
+        ctor: function (p, cond, then, $else, inline) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_IF);
-            this._cond = a;
-            this._then = b;
-            this._else = c;
+            this._cond = cond;
+            this._then = then;
+            this._else = $else;
+            this._inline = inline;
         },
         getcond: function () {
             return this._cond;
@@ -8454,38 +9499,86 @@
                 _elsif.add({ item1: c._cond, item2: c._then });
             }
 
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsIfBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_if");
 
-            var mutation = $("<mutation>");
-            mutation.attr("elseif", _elsif.getCount().toString());
-            mutation.attr("else", _else != null ? "1" : "0");
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("elseif", _elsif.getCount().toString());
+            mutation.setAttribute("else", _else != null ? "1" : "0");
+            block.appendChild(mutation);
 
             var i = 0;
             $t = Bridge.getEnumerator(_elsif);
             while ($t.moveNext()) {
                 var e = $t.getCurrent();
-                var value = $("<value>");
-                value.attr("name", System.String.format("IF{0}", i));
-                value.append(e.item1.to_xml());
-                block.append(value);
+                var value = document.createElement("value");
+                value.setAttribute("name", System.String.format("IF{0}", i));
+                value.appendChild(e.item1.to_xml());
+                block.appendChild(value);
 
-                var statement = $("<statement>");
-                statement.attr("name", System.String.format("DO{0}", i));
-                statement.append(e.item2.to_xml());
-                block.append(statement);
+                var statement = document.createElement("statement");
+                statement.setAttribute("name", System.String.format("DO{0}", i));
+                statement.appendChild(e.item2.to_xml());
+                block.appendChild(statement);
                 i = (i + 1) | 0;
             }
 
             if (_else != null) {
-                var statement1 = $("<statement>");
-                statement1.attr("name", "ELSE");
-                statement1.append(_else.to_xml());
-                block.append(statement1);
+                var statement1 = document.createElement("statement");
+                statement1.setAttribute("name", "ELSE");
+                statement1.appendChild(_else.to_xml());
+                block.appendChild(statement1);
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            var $t;
+            if (this._inline) {
+                cond.increment_nest();
+                cond.write("(");
+                this._cond.to_ruby(cond);
+                cond.write(" ? ");
+                this._then.to_ruby(cond);
+                cond.write(" : ");
+                this._else.to_ruby(cond);
+                cond.decrement_nest();
+            } else {
+                var _elsif = new (System.Collections.Generic.List$1(Object))();
+                var _else = this._else;
+
+                for (var c = Bridge.as(_else, WebMrbc.if_node); c != null; _else = c._else, c = Bridge.as(_else, WebMrbc.if_node)) {
+                    _elsif.add({ item1: c._cond, item2: c._then });
+                }
+
+                cond.increment_nest();
+                cond.write("if ");
+                this._cond.to_ruby(cond);
+                cond.decrement_nest();
+                cond.increment_indent();
+                this._then.to_ruby(cond);
+                cond.decrement_indent();
+                $t = Bridge.getEnumerator(_elsif);
+                while ($t.moveNext()) {
+                    var e = $t.getCurrent();
+                    cond.increment_nest();
+                    cond.write("elsif ");
+                    e.item1.to_ruby(cond);
+                    cond.decrement_nest();
+                    cond.write_line();
+                    cond.increment_indent();
+                    e.item2.to_ruby(cond);
+                    cond.decrement_indent();
+                }
+
+                if (_else != null) {
+                    cond.write_line("else");
+                    cond.increment_indent();
+                    _else.to_ruby(cond);
+                    cond.decrement_indent();
+                }
+                cond.write_line("end");
+            }
         },
         toString: function () {
             return System.String.format("(:if {0} {1} {2})", this.getcond(), this.getthen(), this.getelse());
@@ -8551,6 +9644,12 @@
             this._s = WebMrbc.MrbParser.strdup(s, 0);
             this._base = base;
         },
+        $ctor1: function (p, i) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_INT);
+            this._s = WebMrbc.MrbParser.uTF8StringToArray(i.toString());
+            this._base = 10;
+        },
         getnum: function () {
             return this._s;
         },
@@ -8558,15 +9657,31 @@
             return this._base;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.MathNumberBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "math_number");
 
-            var field = $("<field>");
-            field.attr("name", "NUM");
-            field.text(this.getString());
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "NUM");
+            field.appendChild(document.createTextNode(this.getString()));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            switch (this._base) {
+                case 2: 
+                    cond.write(System.String.concat("0b", WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
+                    break;
+                case 8: 
+                    cond.write(System.String.concat("0o", WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
+                    break;
+                case 16: 
+                    cond.write(System.String.concat("0x", WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
+                    break;
+                default: 
+                    cond.write(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0));
+                    break;
+            }
         },
         toString: function () {
             var num = this.getString();
@@ -8611,27 +9726,27 @@
                     case "+": 
                         {
                             var c = WebMrbc.MrbParser.uTF8StringToArray((a.add(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c, 10);
                         }
                     case "-": 
                         {
                             var c1 = WebMrbc.MrbParser.uTF8StringToArray((a.sub(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c1, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c1, 10);
                         }
                     case "*": 
                         {
                             var c2 = WebMrbc.MrbParser.uTF8StringToArray((a.mul(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c2, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c2, 10);
                         }
                     case "/": 
                         {
                             var c3 = WebMrbc.MrbParser.uTF8StringToArray((a.div(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c3, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c3, 10);
                         }
                     case "%": 
                         {
                             var c4 = WebMrbc.MrbParser.uTF8StringToArray((a.mod(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c4, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c4, 10);
                         }
                     case "==": 
                         {
@@ -8644,27 +9759,27 @@
                     case "&": 
                         {
                             var c5 = WebMrbc.MrbParser.uTF8StringToArray((a.and(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c5, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c5, 10);
                         }
                     case "|": 
                         {
                             var c6 = WebMrbc.MrbParser.uTF8StringToArray((a.or(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c6, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c6, 10);
                         }
                     case "^": 
                         {
                             var c7 = WebMrbc.MrbParser.uTF8StringToArray((a.xor(b)).toString());
-                            return new WebMrbc.int_node(this.getp(), c7, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c7, 10);
                         }
                     case "<<": 
                         {
                             var c8 = WebMrbc.MrbParser.uTF8StringToArray((a.shl(System.Int64.clip32(b))).toString());
-                            return new WebMrbc.int_node(this.getp(), c8, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c8, 10);
                         }
                     case ">>": 
                         {
                             var c9 = WebMrbc.MrbParser.uTF8StringToArray((a.shr(System.Int64.clip32(b))).toString());
-                            return new WebMrbc.int_node(this.getp(), c9, 10);
+                            return new WebMrbc.int_node.ctor(this.getp(), c9, 10);
                         }
                 }
             } else if (Bridge.is(arg, WebMrbc.float_node)) {
@@ -8674,27 +9789,27 @@
                     case "+": 
                         {
                             var c10 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((System.Int64.toNumber(a) + b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c10);
+                            return new WebMrbc.float_node.ctor(this.getp(), c10);
                         }
                     case "-": 
                         {
                             var c11 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((System.Int64.toNumber(a) - b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c11);
+                            return new WebMrbc.float_node.ctor(this.getp(), c11);
                         }
                     case "*": 
                         {
                             var c12 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((System.Int64.toNumber(a) * b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c12);
+                            return new WebMrbc.float_node.ctor(this.getp(), c12);
                         }
                     case "/": 
                         {
                             var c13 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((a / b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c13);
+                            return new WebMrbc.float_node.ctor(this.getp(), c13);
                         }
                     case "%": 
                         {
                             var c14 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((System.Int64.toNumber(a) % b1), 'G'));
-                            return new WebMrbc.float_node(this.getp(), c14);
+                            return new WebMrbc.float_node.ctor(this.getp(), c14);
                         }
                     case "==": 
                         {
@@ -8723,18 +9838,21 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:ivar . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:ivar . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -8782,28 +9900,34 @@
 
     Bridge.define("WebMrbc.lambda_node", {
         inherits: [WebMrbc.node],
+        _local_variables: null,
         _mandatory_args: null,
         _optional_args: null,
+        _rest: 0,
+        _post_mandatory_args: null,
+        _blk: 0,
         _body: null,
         config: {
             init: function () {
-                this._mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.mrb_sym))();
+                this._local_variables = new (System.Collections.Generic.List$1(WebMrbc.mrb_sym))();
+                this._mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.node))();
                 this._optional_args = new (System.Collections.Generic.List$1(WebMrbc.args_t))();
+                this._post_mandatory_args = new (System.Collections.Generic.List$1(WebMrbc.node))();
             }
         },
         ctor: function (p, a, b) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_LAMBDA);
-            var t = Bridge.cast(p.locals_node(), WebMrbc.node);
-            if (t != null) {
-                var n = t;
+            this._local_variables.addRange(p.WebMrbc$IMrbParser$locals_node());
+            if (a != null) {
+                var n = a;
 
-                while (n != null) {
-                    this._mandatory_args.add(System.Nullable.getValue(Bridge.cast(n.getcar(), System.Int32)));
-                    n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    WebMrbc.node.dump_recur(WebMrbc.node, this._mandatory_args, Bridge.cast(n.getcar(), WebMrbc.node));
                 }
-                if (a != null) {
-                    var n2 = Bridge.cast(a.getcar(), WebMrbc.node);
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    var n2 = Bridge.cast(n.getcar(), WebMrbc.node);
 
                     while (n2 != null) {
                         var arg = new WebMrbc.args_t(p);
@@ -8813,8 +9937,25 @@
                         n2 = Bridge.cast(n2.getcdr(), WebMrbc.node);
                     }
                 }
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    this._rest = System.Nullable.getValue(Bridge.cast(n.getcar(), System.Int32));
+                }
+                n = Bridge.cast(n.getcdr(), WebMrbc.node);
+                if (n.getcar() != null) {
+                    WebMrbc.node.dump_recur(WebMrbc.node, this._post_mandatory_args, Bridge.cast(n.getcar(), WebMrbc.node));
+                }
+                if (n.getcdr() != null) {
+                    this._blk = System.Nullable.getValue(Bridge.cast(n.getcdr(), System.Int32));
+                }
             }
             this._body = b;
+            if (Bridge.is(this._body, WebMrbc.ensure_node)) {
+                Bridge.cast(this._body, WebMrbc.ensure_node).def = true;
+            }
+        },
+        getlocal_variables: function () {
+            return this._local_variables;
         },
         getmandatory_args: function () {
             return this._mandatory_args;
@@ -8822,11 +9963,75 @@
         getoptional_args: function () {
             return this._optional_args;
         },
+        getrest: function () {
+            return this._rest;
+        },
+        getpost_mandatory_args: function () {
+            return this._post_mandatory_args;
+        },
+        getblk: function () {
+            return this._blk;
+        },
         getbody: function () {
             return this._body;
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t, $t1, $t2;
+            cond.increment_nest();
+            cond.write("{");
+            var i = (((((((this._mandatory_args.getCount() + this._optional_args.getCount()) | 0) + (this._rest !== 0 ? 1 : 0)) | 0) + this._post_mandatory_args.getCount()) | 0) + (this._blk !== 0 ? 1 : 0)) | 0;
+            if (i > 0) {
+                cond.write(" |");
+                $t = Bridge.getEnumerator(this._mandatory_args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                $t1 = Bridge.getEnumerator(this._optional_args);
+                while ($t1.moveNext()) {
+                    var a1 = $t1.getCurrent();
+                    a1.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                if (this._rest !== 0) {
+                    cond.write("*");
+                    if (this._rest !== -1) {
+                        cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._rest));
+                    }
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                    $t2 = Bridge.getEnumerator(this._post_mandatory_args);
+                    while ($t2.moveNext()) {
+                        var a2 = $t2.getCurrent();
+                        a2.to_ruby(cond);
+                        i = (i - 1) | 0;
+                        if (i > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                }
+                if (this._blk !== 0) {
+                    cond.write(System.String.concat("&", this.getp().WebMrbc$IMrbParser$sym2name(this._blk)));
+                }
+                cond.write("|");
+            }
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("}");
         },
         toString: function () {
             var $t, $t1;
@@ -8876,7 +10081,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsCreateEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$8(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE, "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_CREATE_EMPTY_TOOLTIP, Blockly.Msg.LISTS_CREATE_EMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE, "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_CREATE_EMPTY_TOOLTIP, Blockly.Msg.LISTS_CREATE_EMPTY_HELPURL));
         }
     });
 
@@ -8930,7 +10135,7 @@
             }
             // Disconnect any children that don"t belong.
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                var connection = this.getInput(System.String.concat("ADD", i)).connection.targetConnection;
+                var connection = this.getInput("ADD" + i).connection.targetConnection;
                 if (connection != null && System.Array.indexOfT(connections, connection) === -1) {
                     connection.disconnect();
                 }
@@ -8939,14 +10144,14 @@
             this.updateShape_();
             // Reconnect any child blocks.
             for (var i1 = 0; i1 < this.itemCount_; i1 = (i1 + 1) | 0) {
-                Blockly.Mutator.reconnect(connections[i1], this, System.String.concat("ADD", i1));
+                Blockly.Mutator.reconnect(connections[i1], this, "ADD" + i1);
             }
         },
         saveConnections: function (containerBlock) {
             var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.ListsCreateWithItemBlock);
             var i = 0;
             while (itemBlock != null) {
-                var input = this.getInput(System.String.concat("ADD", i));
+                var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
                 itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.ListsCreateWithItemBlock) : null;
@@ -8961,16 +10166,16 @@
             // Add new inputs.
             var i;
             for (i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                if (this.getInput(System.String.concat("ADD", i)) == null) {
-                    var input = this.appendValueInput(System.String.concat("ADD", i));
+                if (this.getInput("ADD" + i) == null) {
+                    var input = this.appendValueInput("ADD" + i);
                     if (i === 0) {
                         input.appendField(Blockly.Msg.LISTS_CREATE_WITH_INPUT_WITH);
                     }
                 }
             }
             // Remove deleted inputs.
-            while (this.getInput(System.String.concat("ADD", i)) != null) {
-                this.removeInput(System.String.concat("ADD", i));
+            while (this.getInput("ADD" + i) != null) {
+                this.removeInput("ADD" + i);
                 i = (i + 1) | 0;
             }
         }
@@ -9029,7 +10234,7 @@
             this.WHERE_OPTIONS = [[Blockly.Msg.LISTS_GET_INDEX_FROM_START, "FROM_START"], [Blockly.Msg.LISTS_GET_INDEX_FROM_END, "FROM_END"], [Blockly.Msg.LISTS_GET_INDEX_FIRST, "FIRST"], [Blockly.Msg.LISTS_GET_INDEX_LAST, "LAST"], [Blockly.Msg.LISTS_GET_INDEX_RANDOM, "RANDOM"]];
             this.setHelpUrl(Blockly.Msg.LISTS_GET_INDEX_HELPURL);
             this.setColour(WebMrbc.Lists.HUE);
-            var modeMenu = new Blockly.FieldDropdown(MODE, Bridge.fn.bind(this, $_.WebMrbc.ListsGetIndexBlock.f1));
+            var modeMenu = new Blockly.FieldDropdown(MODE, Bridge.fn.bind(this, $asm.$.WebMrbc.ListsGetIndexBlock.f1));
             this.appendValueInput("VALUE").setCheck("Array").appendField(Blockly.Msg.LISTS_GET_INDEX_INPUT_IN_LIST);
             this.appendDummyInput().appendField(modeMenu, "MODE").appendField("", "SPACE");
             this.appendDummyInput("AT");
@@ -9045,7 +10250,7 @@
                 var mode = thisBlock.getFieldValue("MODE");
                 var where = thisBlock.getFieldValue("WHERE");
                 var tooltip = "";
-                switch (System.String.concat(System.String.concat(mode, " "), where)) {
+                switch (System.String.concat(mode, " ", where)) {
                     case "GET FROM_START": 
                     case "GET FROM_END": 
                         tooltip = Blockly.Msg.LISTS_GET_INDEX_TOOLTIP_GET_FROM;
@@ -9156,9 +10361,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.ListsGetIndexBlock", $_);
+    Bridge.ns("WebMrbc.ListsGetIndexBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.ListsGetIndexBlock, {
+    Bridge.apply($asm.$.WebMrbc.ListsGetIndexBlock, {
         f1: function (value) {
             var isStatement = (Bridge.referenceEquals(value, "REMOVE"));
             Bridge.cast(this.sourceBlock_, WebMrbc.ListsGetIndexBlock).updateStatement_(isStatement);
@@ -9209,18 +10414,18 @@
         updateAt_: function (n, isAt) {
             // Create or delete an input for the numeric index.
             // Destroy old "AT" and "ORDINAL" inputs.
-            this.removeInput(System.String.concat("AT", n));
-            this.removeInput(System.String.concat("ORDINAL", n), true);
+            this.removeInput("AT" + n);
+            this.removeInput("ORDINAL" + n, true);
             // Create either a value "AT" input or a dummy input.
             if (isAt) {
-                this.appendValueInput(System.String.concat("AT", n)).setCheck("Number");
+                this.appendValueInput("AT" + n).setCheck("Number");
                 if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
-                    this.appendDummyInput(System.String.concat("ORDINAL", n)).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                    this.appendDummyInput("ORDINAL" + n).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
                 }
             } else {
-                this.appendDummyInput(System.String.concat("AT", n));
+                this.appendDummyInput("AT" + n);
             }
-            var menu = new Blockly.FieldDropdown(this[System.String.concat("WHERE_OPTIONS_", n)], Bridge.fn.bind(this, function (value) {
+            var menu = new Blockly.FieldDropdown(this["WHERE_OPTIONS_" + n], Bridge.fn.bind(this, function (value) {
                 var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
                 // The "isAt" variable is available due to this function being a
                 // closure.
@@ -9229,12 +10434,12 @@
                     Bridge.cast(block, WebMrbc.ListsGetSublistBlock).updateAt_(n, newAt);
                     // This menu has been destroyed and replaced.
                     // Update the replacement.
-                    block.setFieldValue(value, System.String.concat("WHERE", n));
+                    block.setFieldValue(value, "WHERE" + n);
                     return null;
                 }
                 return undefined;
             }));
-            this.getInput(System.String.concat("AT", n)).appendField(menu, System.String.concat("WHERE", n));
+            this.getInput("AT" + n).appendField(menu, "WHERE" + n);
             if (n === 1) {
                 this.moveInputBefore("AT1", "AT2");
                 if (this.getInput("ORDINAL1") != null) {
@@ -9266,13 +10471,13 @@
             this.setInputsInline(true);
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
-            this.setTooltip(Bridge.fn.bind(this, $_.WebMrbc.ListsIndexOfBlock.f1));
+            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.ListsIndexOfBlock.f1));
         }
     });
 
-    Bridge.ns("WebMrbc.ListsIndexOfBlock", $_);
+    Bridge.ns("WebMrbc.ListsIndexOfBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.ListsIndexOfBlock, {
+    Bridge.apply($asm.$.WebMrbc.ListsIndexOfBlock, {
         f1: function () {
             return System.String.replaceAll(Blockly.Msg.LISTS_INDEX_OF_TOOLTIP, "%1", this.workspace.options.oneBasedIndex ? "0" : "-1");
         }
@@ -9288,11 +10493,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsIsEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.LISTS_ISEMPTY_TITLE, [new $_.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_ISEMPTY_TOOLTIP, Blockly.Msg.LISTS_ISEMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_ISEMPTY_TITLE, [new $asm.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_ISEMPTY_TOOLTIP, Blockly.Msg.LISTS_ISEMPTY_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$21", $_, {
+    Bridge.define("$AnonymousType$21", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check) {
             this.type = type;
@@ -9309,13 +10514,13 @@
             return this.check;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$21)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$21)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7142421430, this.type, this.name, this.check]);
+            var h = Bridge.addHash([7550208731, this.type, this.name, this.check]);
             return h;
         },
         toJSON: function () {
@@ -9337,7 +10542,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsLengthBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.LISTS_LENGTH_TITLE, [new $_.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_LENGTH_TOOLTIP, Blockly.Msg.LISTS_LENGTH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_LENGTH_TITLE, [new $asm.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_LENGTH_TOOLTIP, Blockly.Msg.LISTS_LENGTH_HELPURL));
         }
     });
 
@@ -9351,7 +10556,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsRepeatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.LISTS_REPEAT_TITLE, [new $_.$AnonymousType$20("input_value", "ITEM"), new $_.$AnonymousType$13("input_value", "NUM", "Number")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_REPEAT_TOOLTIP, Blockly.Msg.LISTS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_REPEAT_TITLE, [new $asm.$AnonymousType$20("input_value", "ITEM"), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_REPEAT_TOOLTIP, Blockly.Msg.LISTS_REPEAT_HELPURL));
         }
     });
 
@@ -9385,7 +10590,7 @@
                 var mode = thisBlock.getFieldValue("MODE");
                 var where = thisBlock.getFieldValue("WHERE");
                 var tooltip = "";
-                switch (System.String.concat(System.String.concat(mode, " "), where)) {
+                switch (System.String.concat(mode, " ", where)) {
                     case "SET FROM_START": 
                     case "SET FROM_END": 
                         tooltip = Blockly.Msg.LISTS_SET_INDEX_TOOLTIP_SET_FROM;
@@ -9475,7 +10680,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsSortBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.LISTS_SORT_TITLE, [new $_.$AnonymousType$17("field_dropdown", "TYPE", [[Blockly.Msg.LISTS_SORT_TYPE_NUMERIC, "NUMERIC"], [Blockly.Msg.LISTS_SORT_TYPE_TEXT, "TEXT"], [Blockly.Msg.LISTS_SORT_TYPE_IGNORECASE, "IGNORE_CASE"]]), new $_.$AnonymousType$17("field_dropdown", "DIRECTION", [[Blockly.Msg.LISTS_SORT_ORDER_ASCENDING, "1"], [Blockly.Msg.LISTS_SORT_ORDER_DESCENDING, "-1"]]), new $_.$AnonymousType$13("input_value", "LIST", "Array")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_SORT_TOOLTIP, Blockly.Msg.LISTS_SORT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_SORT_TITLE, [new $asm.$AnonymousType$17("field_dropdown", "TYPE", [[Blockly.Msg.LISTS_SORT_TYPE_NUMERIC, "NUMERIC"], [Blockly.Msg.LISTS_SORT_TYPE_TEXT, "TEXT"], [Blockly.Msg.LISTS_SORT_TYPE_IGNORECASE, "IGNORE_CASE"]]), new $asm.$AnonymousType$17("field_dropdown", "DIRECTION", [[Blockly.Msg.LISTS_SORT_ORDER_ASCENDING, "1"], [Blockly.Msg.LISTS_SORT_ORDER_DESCENDING, "-1"]]), new $asm.$AnonymousType$13("input_value", "LIST", "Array")], "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_SORT_TOOLTIP, Blockly.Msg.LISTS_SORT_HELPURL));
         }
     });
 
@@ -9539,6 +10744,8 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+        },
         toString: function () {
             return System.String.format("(:literal_delim)", null);
         }
@@ -9554,7 +10761,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicBooleanBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1", [new $_.$AnonymousType$17("field_dropdown", "BOOL", [[Blockly.Msg.LOGIC_BOOLEAN_TRUE, "TRUE"], [Blockly.Msg.LOGIC_BOOLEAN_FALSE, "FALSE"]])], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP, Blockly.Msg.LOGIC_BOOLEAN_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16("%1", [new $asm.$AnonymousType$17("field_dropdown", "BOOL", [[Blockly.Msg.LOGIC_BOOLEAN_TRUE, "TRUE"], [Blockly.Msg.LOGIC_BOOLEAN_FALSE, "FALSE"]])], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP, Blockly.Msg.LOGIC_BOOLEAN_HELPURL));
         }
     });
 
@@ -9630,7 +10837,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicNegateBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.LOGIC_NEGATE_TITLE, [new $_.$AnonymousType$13("input_value", "BOOL", "Boolean")], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NEGATE_TOOLTIP, Blockly.Msg.LOGIC_NEGATE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LOGIC_NEGATE_TITLE, [new $asm.$AnonymousType$13("input_value", "BOOL", "Boolean")], "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NEGATE_TOOLTIP, Blockly.Msg.LOGIC_NEGATE_HELPURL));
         }
     });
 
@@ -9644,11 +10851,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicNullBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$22(Blockly.Msg.LOGIC_NULL, null, WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NULL_TOOLTIP, Blockly.Msg.LOGIC_NULL_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$22(Blockly.Msg.LOGIC_NULL, null, WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NULL_TOOLTIP, Blockly.Msg.LOGIC_NULL_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$22", $_, {
+    Bridge.define("$AnonymousType$22", $asm, {
         $kind: "anonymous",
         ctor: function (message0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -9673,13 +10880,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$22)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$22)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7159198646, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550208987, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -9782,18 +10989,21 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(this.getp().sym2name(this._name));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._name));
+        },
         toString: function () {
-            return System.String.format("(:lvar . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:lvar . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
@@ -9816,6 +11026,7 @@
                     if (n2.getcar() != null) {
                         if (Bridge.is(n2.getcar(), System.Int32) && System.Nullable.getValue(Bridge.cast(n2.getcar(), System.Int32)) === -1) {
                             this._mlhs.rest = null; //(empty)?
+                            this._mlhs.rest_empty = true;
                         } else {
                             this._mlhs.rest = Bridge.cast(n2.getcar(), WebMrbc.node);
                         }
@@ -9839,8 +11050,57 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            this._mlhs.to_ruby(cond);
+            cond.write(" = ");
+            if (this._mrhs != null) {
+                this._mrhs.to_ruby(cond);
+            }
+        },
         toString: function () {
             return System.String.format("(:masgn {0} {1})", this.getmlhs(), this.getmrhs());
+        },
+        remove: function (args) {
+            var $t, $t1;
+            var m = false;
+            $t = Bridge.getEnumerator(this._mlhs.pre);
+            while ($t.moveNext()) {
+                var a = $t.getCurrent();
+                var arg = Bridge.as(a, WebMrbc.arg_node);
+                if (arg != null) {
+                    m = args.remove(arg.getname());
+                } else {
+                    var masgn = Bridge.as(a, WebMrbc.masgn_node);
+                    m = masgn.remove(args);
+                }
+                if (m) {
+                    return true;
+                }
+            }
+            if (this._mlhs.rest != null) {
+                var rest = Bridge.as(this._mlhs.rest, WebMrbc.arg_node);
+                if (rest != null) {
+                    m = args.remove(rest.getname());
+                    if (m) {
+                        return true;
+                    }
+                }
+            }
+            $t1 = Bridge.getEnumerator(this._mlhs.post);
+            while ($t1.moveNext()) {
+                var a1 = $t1.getCurrent();
+                var arg1 = Bridge.as(a1, WebMrbc.arg_node);
+                if (arg1 != null) {
+                    m = args.remove(arg1.getname());
+                } else {
+                    var masgn1 = Bridge.as(a1, WebMrbc.masgn_node);
+                    m = masgn1.remove(args);
+                }
+                if (m) {
+                    return true;
+                }
+            }
+            return m;
         }
     });
 
@@ -9854,7 +11114,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathArithmeticBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$23("%1 %2 %3", [new $_.$AnonymousType$13("input_value", "A", "Number"), new $_.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_ADDITION_SYMBOL, "ADD"], [Blockly.Msg.MATH_SUBTRACTION_SYMBOL, "MINUS"], [Blockly.Msg.MATH_MULTIPLICATION_SYMBOL, "MULTIPLY"], [Blockly.Msg.MATH_DIVISION_SYMBOL, "DIVIDE"], [Blockly.Msg.MATH_POWER_SYMBOL, "POWER"]]), new $_.$AnonymousType$13("input_value", "B", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ARITHMETIC_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$23("%1 %2 %3", [new $asm.$AnonymousType$13("input_value", "A", "Number"), new $asm.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_ADDITION_SYMBOL, "ADD"], [Blockly.Msg.MATH_SUBTRACTION_SYMBOL, "MINUS"], [Blockly.Msg.MATH_MULTIPLICATION_SYMBOL, "MULTIPLY"], [Blockly.Msg.MATH_DIVISION_SYMBOL, "DIVIDE"], [Blockly.Msg.MATH_POWER_SYMBOL, "POWER"]]), new $asm.$AnonymousType$13("input_value", "B", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ARITHMETIC_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -9876,7 +11136,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$23", $_, {
+    Bridge.define("$AnonymousType$23", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, output, colour, helpUrl) {
             this.message0 = message0;
@@ -9905,13 +11165,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$23)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$23)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7175975862, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550209243, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -9936,7 +11196,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathChangeBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$12(Blockly.Msg.MATH_CHANGE_TITLE, [new $_.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.MATH_CHANGE_TITLE_ITEM), new $_.$AnonymousType$13("input_value", "DELTA", "Number")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.MATH_CHANGE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.MATH_CHANGE_TITLE, [new $asm.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.MATH_CHANGE_TITLE_ITEM), new $asm.$AnonymousType$13("input_value", "DELTA", "Number")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.MATH_CHANGE_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -9955,7 +11215,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathConstantBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1", [new $_.$AnonymousType$17("field_dropdown", "CONSTANT", [["π", "PI"], ["e", "E"], ["φ", "GOLDEN_RATIO"], ["sqrt(2)", "SQRT2"], ["sqrt(½)", "SQRT1_2"], ["∞", "INFINITY"]])], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTANT_TOOLTIP, Blockly.Msg.MATH_CONSTANT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16("%1", [new $asm.$AnonymousType$17("field_dropdown", "CONSTANT", [["π", "PI"], ["e", "E"], ["φ", "GOLDEN_RATIO"], ["sqrt(2)", "SQRT2"], ["sqrt(½)", "SQRT1_2"], ["∞", "INFINITY"]])], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTANT_TOOLTIP, Blockly.Msg.MATH_CONSTANT_HELPURL));
         }
     });
 
@@ -9969,11 +11229,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathConstrainBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$24(Blockly.Msg.MATH_CONSTRAIN_TITLE, [new $_.$AnonymousType$13("input_value", "VALUE", "Number"), new $_.$AnonymousType$13("input_value", "LOW", "Number"), new $_.$AnonymousType$13("input_value", "HIGH", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTRAIN_TOOLTIP, Blockly.Msg.MATH_CONSTRAIN_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_CONSTRAIN_TITLE, [new $asm.$AnonymousType$13("input_value", "VALUE", "Number"), new $asm.$AnonymousType$13("input_value", "LOW", "Number"), new $asm.$AnonymousType$13("input_value", "HIGH", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTRAIN_TOOLTIP, Blockly.Msg.MATH_CONSTRAIN_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$24", $_, {
+    Bridge.define("$AnonymousType$24", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -10006,13 +11266,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$24)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$24)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7192753078, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550209499, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -10038,7 +11298,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathModuloBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$24(Blockly.Msg.MATH_MODULO_TITLE, [new $_.$AnonymousType$13("input_value", "DIVIDEND", "Number"), new $_.$AnonymousType$13("input_value", "DIVISOR", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_MODULO_TOOLTIP, Blockly.Msg.MATH_MODULO_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_MODULO_TITLE, [new $asm.$AnonymousType$13("input_value", "DIVIDEND", "Number"), new $asm.$AnonymousType$13("input_value", "DIVISOR", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_MODULO_TOOLTIP, Blockly.Msg.MATH_MODULO_HELPURL));
         }
     });
 
@@ -10079,7 +11339,7 @@
             var PROPERTIES = [[Blockly.Msg.MATH_IS_EVEN, "EVEN"], [Blockly.Msg.MATH_IS_ODD, "ODD"], [Blockly.Msg.MATH_IS_PRIME, "PRIME"], [Blockly.Msg.MATH_IS_WHOLE, "WHOLE"], [Blockly.Msg.MATH_IS_POSITIVE, "POSITIVE"], [Blockly.Msg.MATH_IS_NEGATIVE, "NEGATIVE"], [Blockly.Msg.MATH_IS_DIVISIBLE_BY, "DIVISIBLE_BY"]];
             this.setColour(WebMrbc.Math.HUE);
             this.appendValueInput("NUMBER_TO_CHECK").setCheck("Number");
-            var dropdown = new Blockly.FieldDropdown(PROPERTIES, Bridge.fn.bind(this, $_.WebMrbc.MathNumberPropertyBlock.f1));
+            var dropdown = new Blockly.FieldDropdown(PROPERTIES, Bridge.fn.bind(this, $asm.$.WebMrbc.MathNumberPropertyBlock.f1));
             this.appendDummyInput().appendField(dropdown, "PROPERTY");
             this.setInputsInline(true);
             this.setOutput(true, "Boolean");
@@ -10108,9 +11368,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.MathNumberPropertyBlock", $_);
+    Bridge.ns("WebMrbc.MathNumberPropertyBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.MathNumberPropertyBlock, {
+    Bridge.apply($asm.$.WebMrbc.MathNumberPropertyBlock, {
         f1: function (option) {
             var divisorInput = (Bridge.referenceEquals(option, "DIVISIBLE_BY"));
             Bridge.cast(this.sourceBlock_, WebMrbc.MathNumberPropertyBlock).updateShape_(divisorInput);
@@ -10188,7 +11448,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRandomFloatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$8(Blockly.Msg.MATH_RANDOM_FLOAT_TITLE_RANDOM, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_FLOAT_TOOLTIP, Blockly.Msg.MATH_RANDOM_FLOAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.MATH_RANDOM_FLOAT_TITLE_RANDOM, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_FLOAT_TOOLTIP, Blockly.Msg.MATH_RANDOM_FLOAT_HELPURL));
         }
     });
 
@@ -10202,7 +11462,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRandomIntBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$24(Blockly.Msg.MATH_RANDOM_INT_TITLE, [new $_.$AnonymousType$13("input_value", "FROM", "Number"), new $_.$AnonymousType$13("input_value", "TO", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_INT_TOOLTIP, Blockly.Msg.MATH_RANDOM_INT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_RANDOM_INT_TITLE, [new $asm.$AnonymousType$13("input_value", "FROM", "Number"), new $asm.$AnonymousType$13("input_value", "TO", "Number")], true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_INT_TOOLTIP, Blockly.Msg.MATH_RANDOM_INT_HELPURL));
         }
     });
 
@@ -10216,7 +11476,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRoundBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 %2", [new $_.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_ROUND_OPERATOR_ROUND, "ROUND"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDUP, "ROUNDUP"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDDOWN, "ROUNDDOWN"]]), new $_.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ROUND_TOOLTIP, Blockly.Msg.MATH_ROUND_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 %2", [new $asm.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_ROUND_OPERATOR_ROUND, "ROUND"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDUP, "ROUNDUP"], [Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDDOWN, "ROUNDDOWN"]]), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ROUND_TOOLTIP, Blockly.Msg.MATH_ROUND_HELPURL));
         }
     });
 
@@ -10230,7 +11490,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathSingleBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$6("%1 %2", [new $_.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_SINGLE_OP_ROOT, "ROOT"], [Blockly.Msg.MATH_SINGLE_OP_ABSOLUTE, "ABS"], ["-", "NEG"], ["ln", "LN"], ["log10", "LOG10"], ["e^", "EXP"], ["10^", "POW10"]]), new $_.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_SINGLE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6("%1 %2", [new $asm.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_SINGLE_OP_ROOT, "ROOT"], [Blockly.Msg.MATH_SINGLE_OP_ABSOLUTE, "ABS"], ["-", "NEG"], ["ln", "LN"], ["log10", "LOG10"], ["e^", "EXP"], ["10^", "POW10"]]), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_SINGLE_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -10265,7 +11525,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.MathTrigBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$6("%1 %2", [new $_.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_TRIG_SIN, "SIN"], [Blockly.Msg.MATH_TRIG_COS, "COS"], [Blockly.Msg.MATH_TRIG_TAN, "TAN"], [Blockly.Msg.MATH_TRIG_ASIN, "ASIN"], [Blockly.Msg.MATH_TRIG_ACOS, "ACOS"], [Blockly.Msg.MATH_TRIG_ATAN, "ATAN"]]), new $_.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_TRIG_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6("%1 %2", [new $asm.$AnonymousType$17("field_dropdown", "OP", [[Blockly.Msg.MATH_TRIG_SIN, "SIN"], [Blockly.Msg.MATH_TRIG_COS, "COS"], [Blockly.Msg.MATH_TRIG_TAN, "TAN"], [Blockly.Msg.MATH_TRIG_ASIN, "ASIN"], [Blockly.Msg.MATH_TRIG_ACOS, "ACOS"], [Blockly.Msg.MATH_TRIG_ATAN, "ATAN"]]), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_TRIG_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -10482,19 +11742,18 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_MODULE);
             if (Bridge.is(m.getcar(), System.Int32)) {
                 if (System.Nullable.getValue(Bridge.cast(m.getcar(), System.Int32)) === 0) {
-                    this._prefix = ":";
+                    this._prefix = "";
                     this._name = System.Nullable.getValue(Bridge.cast(m.getcdr(), System.Int32));
                 } else if (System.Nullable.getValue(Bridge.cast(m.getcar(), System.Int32)) === 1) {
                     this._prefix = "::";
                     this._name = System.Nullable.getValue(Bridge.cast(m.getcdr(), System.Int32));
                 }
-                this._type = m.getcar();
             } else {
                 this._prefix = "::";
-                this._type = m.getcar();
+                this._type = Bridge.cast(m.getcar(), WebMrbc.node);
                 this._name = System.Nullable.getValue(Bridge.cast(m.getcdr(), System.Int32));
             }
-            this._super = Bridge.cast(p.locals_node(), WebMrbc.node);
+            this._super = p.WebMrbc$IMrbParser$locals_node();
             this._body = b;
         },
         getprefix: function () {
@@ -10512,8 +11771,29 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            var $t;
+            cond.write(System.String.concat("module ", this.getp().WebMrbc$IMrbParser$sym2name(this._name), " "));
+            if (this._super != null) {
+                if (this._type != null) {
+                    this._type.to_ruby(cond);
+                }
+                $t = Bridge.getEnumerator(this._super);
+                while ($t.moveNext()) {
+                    var s = $t.getCurrent();
+                    if (this._prefix != null) {
+                        cond.write(System.String.concat(this._prefix, "::"));
+                    }
+                    cond.write(this.getp().WebMrbc$IMrbParser$sym2name(s));
+                }
+            }
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
+        },
         toString: function () {
-            return System.String.format("(:module {0}{1} {2})", this.getprefix(), this.getp().sym2name(this.getname()), this.getbody());
+            return System.String.format("(:module {0}{1} {2})", this.getprefix(), this.getp().WebMrbc$IMrbParser$sym2name(this.getname()), this.getbody());
         }
     });
 
@@ -10522,142 +11802,94 @@
      *
      * @public
      * @class WebMrbc.MrbParser
+     * @implements  WebMrbc.IMrbParser
      * @implements  WebMrbc.MrbParser.yyInput
      * @implements  WebMrbc.MrbParser.yyConsoleOut
      */
     Bridge.define("WebMrbc.MrbParser", {
-        inherits: [WebMrbc.MrbParser.yyInput,WebMrbc.MrbParser.yyConsoleOut],
+        inherits: [WebMrbc.IMrbParser,WebMrbc.MrbParser.yyInput,WebMrbc.MrbParser.yyConsoleOut],
         statics: {
             yyErrorCode: 256,
             /**
              * final state of parser.
              *
-             * @static
-             * @protected
-             * @memberof WebMrbc.MrbParser
-             * @constant
-             * @default 1
-             * @type number
+             * @instance
              */
             yyFinal: 1,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyLhs: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyLen: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyDefRed: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyDgoto: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yySindex: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyRindex: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyGindex: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyTable: null,
             /**
              * parser tables.
                Order is mandated by jay.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<number>
+             * @instance
              */
             yyCheck: null,
             /**
              * maps symbol value to printable name.
                see <pre><code>yyExpecting</code></pre>
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<string>
+             * @instance
              */
             yyNames: null,
             /**
              * printable rules for debugging.
              *
-             * @static
-             * @protected
-             * @readonly
-             * @memberof WebMrbc.MrbParser
-             * @type Array.<string>
+             * @instance
              */
             yyRule: null,
             MRB_PARSER_TOKBUF_MAX: 65536,
@@ -10681,7 +11913,7 @@
                     this.yyRule = ["$accept : program", "$$1 :", "program : $$1 top_compstmt", "top_compstmt : top_stmts opt_terms", "top_stmts : none", "top_stmts : top_stmt", "top_stmts : top_stmts terms top_stmt", "top_stmts : error top_stmt", "top_stmt : stmt", "$$2 :", "top_stmt : keyword_BEGIN $$2 '{' top_compstmt '}'", "bodystmt : compstmt opt_rescue opt_else opt_ensure", "compstmt : stmts opt_terms", "stmts : none", "stmts : stmt", "stmts : stmts terms stmt", "stmts : error stmt", "$$3 :", "stmt : keyword_alias fsym $$3 fsym", "stmt : keyword_undef undef_list", "stmt : stmt modifier_if expr_value", "stmt : stmt modifier_unless expr_value", "stmt : stmt modifier_while expr_value", "stmt : stmt modifier_until expr_value", "stmt : stmt modifier_rescue stmt", "stmt : keyword_END '{' compstmt '}'", "stmt : command_asgn", "stmt : mlhs '=' command_call", "stmt : lhs '=' mrhs", "stmt : mlhs '=' arg", "stmt : mlhs '=' mrhs", "stmt : expr", "command_asgn : lhs '=' command_rhs", "command_asgn : var_lhs tOP_ASGN command_rhs", "command_asgn : primary_value '[' opt_call_args rbracket tOP_ASGN command_rhs", "command_asgn : primary_value call_op tIDENTIFIER tOP_ASGN command_rhs", "command_asgn : primary_value call_op tCONSTANT tOP_ASGN command_rhs", "command_asgn : primary_value tCOLON2 tCONSTANT tOP_ASGN command_call", "command_asgn : primary_value tCOLON2 tIDENTIFIER tOP_ASGN command_rhs", "command_asgn : backref tOP_ASGN command_rhs", "command_rhs : command_call", "command_rhs : command_call modifier_rescue stmt", "command_rhs : command_asgn", "expr : command_call", "expr : expr keyword_and expr", "expr : expr keyword_or expr", "expr : keyword_not opt_nl expr", "expr : '!' command_call", "expr : arg", "expr_value : expr", "command_call : command", "command_call : block_command", "block_command : block_call", "block_command : block_call call_op2 operation2 command_args", "$$4 :", "cmd_brace_block : tLBRACE_ARG $$4 opt_block_param compstmt '}'", "command : operation command_args", "command : operation command_args cmd_brace_block", "command : primary_value call_op operation2 command_args", "command : primary_value call_op operation2 command_args cmd_brace_block", "command : primary_value tCOLON2 operation2 command_args", "command : primary_value tCOLON2 operation2 command_args cmd_brace_block", "command : keyword_super command_args", "command : keyword_yield command_args", "command : keyword_return call_args", "command : keyword_break call_args", "command : keyword_next call_args", "mlhs : mlhs_basic", "mlhs : tLPAREN mlhs_inner rparen", "mlhs_inner : mlhs_basic", "mlhs_inner : tLPAREN mlhs_inner rparen", "mlhs_basic : mlhs_list", "mlhs_basic : mlhs_list mlhs_item", "mlhs_basic : mlhs_list tSTAR mlhs_node", "mlhs_basic : mlhs_list tSTAR mlhs_node ',' mlhs_post", "mlhs_basic : mlhs_list tSTAR", "mlhs_basic : mlhs_list tSTAR ',' mlhs_post", "mlhs_basic : tSTAR mlhs_node", "mlhs_basic : tSTAR mlhs_node ',' mlhs_post", "mlhs_basic : tSTAR", "mlhs_basic : tSTAR ',' mlhs_post", "mlhs_item : mlhs_node", "mlhs_item : tLPAREN mlhs_inner rparen", "mlhs_list : mlhs_item ','", "mlhs_list : mlhs_list mlhs_item ','", "mlhs_post : mlhs_item", "mlhs_post : mlhs_list mlhs_item", "mlhs_node : variable", "mlhs_node : primary_value '[' opt_call_args rbracket", "mlhs_node : primary_value call_op tIDENTIFIER", "mlhs_node : primary_value tCOLON2 tIDENTIFIER", "mlhs_node : primary_value call_op tCONSTANT", "mlhs_node : primary_value tCOLON2 tCONSTANT", "mlhs_node : tCOLON3 tCONSTANT", "mlhs_node : backref", "lhs : variable", "lhs : primary_value '[' opt_call_args rbracket", "lhs : primary_value call_op tIDENTIFIER", "lhs : primary_value tCOLON2 tIDENTIFIER", "lhs : primary_value call_op tCONSTANT", "lhs : primary_value tCOLON2 tCONSTANT", "lhs : tCOLON3 tCONSTANT", "lhs : backref", "cname : tIDENTIFIER", "cname : tCONSTANT", "cpath : tCOLON3 cname", "cpath : cname", "cpath : primary_value tCOLON2 cname", "fname : tIDENTIFIER", "fname : tCONSTANT", "fname : tFID", "fname : op", "fname : reswords", "fsym : fname", "fsym : basic_symbol", "undef_list : fsym", "$$5 :", "undef_list : undef_list ',' $$5 fsym", "op : '|'", "op : '^'", "op : '&'", "op : tCMP", "op : tEQ", "op : tEQQ", "op : tMATCH", "op : tNMATCH", "op : '>'", "op : tGEQ", "op : '<'", "op : tLEQ", "op : tNEQ", "op : tLSHFT", "op : tRSHFT", "op : '+'", "op : '-'", "op : '*'", "op : tSTAR", "op : '/'", "op : '%'", "op : tPOW", "op : '!'", "op : '~'", "op : tUPLUS", "op : tUMINUS", "op : tAREF", "op : tASET", "op : '`'", "reswords : keyword__LINE__", "reswords : keyword__FILE__", "reswords : keyword__ENCODING__", "reswords : keyword_BEGIN", "reswords : keyword_END", "reswords : keyword_alias", "reswords : keyword_and", "reswords : keyword_begin", "reswords : keyword_break", "reswords : keyword_case", "reswords : keyword_class", "reswords : keyword_def", "reswords : keyword_do", "reswords : keyword_else", "reswords : keyword_elsif", "reswords : keyword_end", "reswords : keyword_ensure", "reswords : keyword_false", "reswords : keyword_for", "reswords : keyword_in", "reswords : keyword_module", "reswords : keyword_next", "reswords : keyword_nil", "reswords : keyword_not", "reswords : keyword_or", "reswords : keyword_redo", "reswords : keyword_rescue", "reswords : keyword_retry", "reswords : keyword_return", "reswords : keyword_self", "reswords : keyword_super", "reswords : keyword_then", "reswords : keyword_true", "reswords : keyword_undef", "reswords : keyword_when", "reswords : keyword_yield", "reswords : keyword_if", "reswords : keyword_unless", "reswords : keyword_while", "reswords : keyword_until", "arg : lhs '=' arg_rhs", "arg : var_lhs tOP_ASGN arg_rhs", "arg : primary_value '[' opt_call_args rbracket tOP_ASGN arg_rhs", "arg : primary_value call_op tIDENTIFIER tOP_ASGN arg_rhs", "arg : primary_value call_op tCONSTANT tOP_ASGN arg_rhs", "arg : primary_value tCOLON2 tIDENTIFIER tOP_ASGN arg_rhs", "arg : primary_value tCOLON2 tCONSTANT tOP_ASGN arg_rhs", "arg : tCOLON3 tCONSTANT tOP_ASGN arg_rhs", "arg : backref tOP_ASGN arg_rhs", "arg : arg tDOT2 arg", "arg : arg tDOT3 arg", "arg : arg '+' arg", "arg : arg '-' arg", "arg : arg '*' arg", "arg : arg '/' arg", "arg : arg '%' arg", "arg : arg tPOW arg", "arg : tUMINUS_NUM tINTEGER tPOW arg", "arg : tUMINUS_NUM tFLOAT tPOW arg", "arg : tUPLUS arg", "arg : tUMINUS arg", "arg : arg '|' arg", "arg : arg '^' arg", "arg : arg '&' arg", "arg : arg tCMP arg", "arg : arg '>' arg", "arg : arg tGEQ arg", "arg : arg '<' arg", "arg : arg tLEQ arg", "arg : arg tEQ arg", "arg : arg tEQQ arg", "arg : arg tNEQ arg", "arg : arg tMATCH arg", "arg : arg tNMATCH arg", "arg : '!' arg", "arg : '~' arg", "arg : arg tLSHFT arg", "arg : arg tRSHFT arg", "arg : arg tANDOP arg", "arg : arg tOROP arg", "arg : arg '?' arg opt_nl ':' arg", "arg : primary", "aref_args : none", "aref_args : args trailer", "aref_args : args comma assocs trailer", "aref_args : assocs trailer", "arg_rhs : arg", "arg_rhs : arg modifier_rescue arg", "paren_args : '(' opt_call_args rparen", "opt_paren_args : none", "opt_paren_args : paren_args", "opt_call_args : none", "opt_call_args : call_args", "opt_call_args : args ','", "opt_call_args : args comma assocs ','", "opt_call_args : assocs ','", "call_args : command", "call_args : args opt_block_arg", "call_args : assocs opt_block_arg", "call_args : args comma assocs opt_block_arg", "call_args : block_arg", "$$6 :", "command_args : $$6 call_args", "block_arg : tAMPER arg", "opt_block_arg : comma block_arg", "opt_block_arg : none", "comma : ','", "comma : ',' heredoc_bodies", "args : arg", "args : tSTAR arg", "args : args comma arg", "args : args comma tSTAR arg", "mrhs : args comma arg", "mrhs : args comma tSTAR arg", "mrhs : tSTAR arg", "primary : literal", "primary : string", "primary : xstring", "primary : regexp", "primary : heredoc", "primary : var_ref", "primary : backref", "primary : tFID", "$$7 :", "primary : keyword_begin $$7 bodystmt keyword_end", "$$8 :", "$$9 :", "primary : tLPAREN_ARG $$8 stmt $$9 rparen", "$$10 :", "primary : tLPAREN_ARG $$10 rparen", "primary : tLPAREN compstmt ')'", "primary : primary_value tCOLON2 tCONSTANT", "primary : tCOLON3 tCONSTANT", "primary : tLBRACK aref_args ']'", "primary : tLBRACE assoc_list '}'", "primary : keyword_return", "primary : keyword_yield opt_paren_args", "primary : keyword_not '(' expr rparen", "primary : keyword_not '(' rparen", "primary : operation brace_block", "primary : method_call", "primary : method_call brace_block", "$$11 :", "$$12 :", "primary : tLAMBDA $$11 f_larglist $$12 lambda_body", "primary : keyword_if expr_value then compstmt if_tail keyword_end", "primary : keyword_unless expr_value then compstmt opt_else keyword_end", "$$13 :", "$$14 :", "primary : keyword_while $$13 expr_value do $$14 compstmt keyword_end", "$$15 :", "$$16 :", "primary : keyword_until $$15 expr_value do $$16 compstmt keyword_end", "primary : keyword_case expr_value opt_terms case_body keyword_end", "primary : keyword_case opt_terms case_body keyword_end", "$$17 :", "$$18 :", "primary : keyword_for for_var keyword_in $$17 expr_value do $$18 compstmt keyword_end", "$$19 :", "primary : keyword_class cpath superclass $$19 bodystmt keyword_end", "$$20 :", "$$21 :", "primary : keyword_class tLSHFT expr $$20 term $$21 bodystmt keyword_end", "$$22 :", "primary : keyword_module cpath $$22 bodystmt keyword_end", "$$23 :", "$$24 :", "primary : keyword_def fname $$23 $$24 f_arglist bodystmt keyword_end", "$$25 :", "$$26 :", "primary : keyword_def singleton dot_or_colon $$25 fname $$26 f_arglist bodystmt keyword_end", "primary : keyword_break", "primary : keyword_next", "primary : keyword_redo", "primary : keyword_retry", "primary_value : primary", "then : term", "then : keyword_then", "then : term keyword_then", "do : term", "do : keyword_do_cond", "if_tail : opt_else", "if_tail : keyword_elsif expr_value then compstmt if_tail", "opt_else : none", "opt_else : keyword_else compstmt", "for_var : lhs", "for_var : mlhs", "f_marg : f_norm_arg", "f_marg : tLPAREN f_margs rparen", "f_marg_list : f_marg", "f_marg_list : f_marg_list ',' f_marg", "f_margs : f_marg_list", "f_margs : f_marg_list ',' tSTAR f_norm_arg", "f_margs : f_marg_list ',' tSTAR f_norm_arg ',' f_marg_list", "f_margs : f_marg_list ',' tSTAR", "f_margs : f_marg_list ',' tSTAR ',' f_marg_list", "f_margs : tSTAR f_norm_arg", "f_margs : tSTAR f_norm_arg ',' f_marg_list", "f_margs : tSTAR", "f_margs : tSTAR ',' f_marg_list", "block_param : f_arg ',' f_block_optarg ',' f_rest_arg opt_f_block_arg", "block_param : f_arg ',' f_block_optarg ',' f_rest_arg ',' f_arg opt_f_block_arg", "block_param : f_arg ',' f_block_optarg opt_f_block_arg", "block_param : f_arg ',' f_block_optarg ',' f_arg opt_f_block_arg", "block_param : f_arg ',' f_rest_arg opt_f_block_arg", "block_param : f_arg ','", "block_param : f_arg ',' f_rest_arg ',' f_arg opt_f_block_arg", "block_param : f_arg opt_f_block_arg", "block_param : f_block_optarg ',' f_rest_arg opt_f_block_arg", "block_param : f_block_optarg ',' f_rest_arg ',' f_arg opt_f_block_arg", "block_param : f_block_optarg opt_f_block_arg", "block_param : f_block_optarg ',' f_arg opt_f_block_arg", "block_param : f_rest_arg opt_f_block_arg", "block_param : f_rest_arg ',' f_arg opt_f_block_arg", "block_param : f_block_arg", "opt_block_param : none", "opt_block_param : block_param_def", "block_param_def : '|' opt_bv_decl '|'", "block_param_def : tOROP", "block_param_def : '|' block_param opt_bv_decl '|'", "opt_bv_decl : opt_nl", "opt_bv_decl : opt_nl ';' bv_decls opt_nl", "bv_decls : bvar", "bv_decls : bv_decls ',' bvar", "bvar : tIDENTIFIER", "bvar : f_bad_arg", "f_larglist : '(' f_args opt_bv_decl ')'", "f_larglist : f_args", "lambda_body : tLAMBEG compstmt '}'", "lambda_body : keyword_do_LAMBDA compstmt keyword_end", "$$27 :", "do_block : keyword_do_block $$27 opt_block_param compstmt keyword_end", "block_call : command do_block", "block_call : block_call call_op2 operation2 opt_paren_args", "block_call : block_call call_op2 operation2 opt_paren_args brace_block", "block_call : block_call call_op2 operation2 command_args do_block", "method_call : operation paren_args", "method_call : primary_value call_op operation2 opt_paren_args", "method_call : primary_value tCOLON2 operation2 paren_args", "method_call : primary_value tCOLON2 operation3", "method_call : primary_value call_op paren_args", "method_call : primary_value tCOLON2 paren_args", "method_call : keyword_super paren_args", "method_call : keyword_super", "method_call : primary_value '[' opt_call_args rbracket", "$$28 :", "brace_block : '{' $$28 opt_block_param compstmt '}'", "$$29 :", "brace_block : keyword_do $$29 opt_block_param compstmt keyword_end", "case_body : keyword_when args then compstmt cases", "cases : opt_else", "cases : case_body", "opt_rescue : keyword_rescue exc_list exc_var then compstmt opt_rescue", "opt_rescue : none", "exc_list : arg", "exc_list : mrhs", "exc_list : none", "exc_var : tASSOC lhs", "exc_var : none", "opt_ensure : keyword_ensure compstmt", "opt_ensure : none", "literal : numeric", "literal : symbol", "literal : words", "literal : symbols", "string : tCHAR", "string : tSTRING", "string : tSTRING_BEG tSTRING", "string : tSTRING_BEG string_rep tSTRING", "string_rep : string_interp", "string_rep : string_rep string_interp", "string_interp : tSTRING_MID", "$$30 :", "string_interp : tSTRING_PART $$30 compstmt '}'", "string_interp : tLITERAL_DELIM", "string_interp : tHD_LITERAL_DELIM heredoc_bodies", "xstring : tXSTRING_BEG tXSTRING", "xstring : tXSTRING_BEG string_rep tXSTRING", "regexp : tREGEXP_BEG tREGEXP", "regexp : tREGEXP_BEG string_rep tREGEXP", "heredoc : tHEREDOC_BEG", "heredoc_bodies : heredoc_body", "heredoc_bodies : heredoc_bodies heredoc_body", "heredoc_body : tHEREDOC_END", "heredoc_body : heredoc_string_rep tHEREDOC_END", "heredoc_string_rep : heredoc_string_interp", "heredoc_string_rep : heredoc_string_rep heredoc_string_interp", "heredoc_string_interp : tHD_STRING_MID", "$$31 :", "heredoc_string_interp : tHD_STRING_PART $$31 compstmt '}'", "words : tWORDS_BEG tSTRING", "words : tWORDS_BEG string_rep tSTRING", "symbol : basic_symbol", "symbol : tSYMBEG tSTRING_BEG string_rep tSTRING", "basic_symbol : tSYMBEG sym", "sym : fname", "sym : tIVAR", "sym : tGVAR", "sym : tCVAR", "sym : tSTRING", "sym : tSTRING_BEG tSTRING", "symbols : tSYMBOLS_BEG tSTRING", "symbols : tSYMBOLS_BEG string_rep tSTRING", "numeric : tINTEGER", "numeric : tFLOAT", "numeric : tUMINUS_NUM tINTEGER", "numeric : tUMINUS_NUM tFLOAT", "variable : tIDENTIFIER", "variable : tIVAR", "variable : tGVAR", "variable : tCVAR", "variable : tCONSTANT", "var_lhs : variable", "var_ref : variable", "var_ref : keyword_nil", "var_ref : keyword_self", "var_ref : keyword_true", "var_ref : keyword_false", "var_ref : keyword__FILE__", "var_ref : keyword__LINE__", "backref : tNTH_REF", "backref : tBACK_REF", "superclass :", "$$32 :", "superclass : '<' $$32 expr_value term", "f_arglist : '(' f_args rparen", "f_arglist : f_args term", "f_args : f_arg ',' f_optarg ',' f_rest_arg opt_f_block_arg", "f_args : f_arg ',' f_optarg ',' f_rest_arg ',' f_arg opt_f_block_arg", "f_args : f_arg ',' f_optarg opt_f_block_arg", "f_args : f_arg ',' f_optarg ',' f_arg opt_f_block_arg", "f_args : f_arg ',' f_rest_arg opt_f_block_arg", "f_args : f_arg ',' f_rest_arg ',' f_arg opt_f_block_arg", "f_args : f_arg opt_f_block_arg", "f_args : f_optarg ',' f_rest_arg opt_f_block_arg", "f_args : f_optarg ',' f_rest_arg ',' f_arg opt_f_block_arg", "f_args : f_optarg opt_f_block_arg", "f_args : f_optarg ',' f_arg opt_f_block_arg", "f_args : f_rest_arg opt_f_block_arg", "f_args : f_rest_arg ',' f_arg opt_f_block_arg", "f_args : f_block_arg", "f_args :", "f_bad_arg : tCONSTANT", "f_bad_arg : tIVAR", "f_bad_arg : tGVAR", "f_bad_arg : tCVAR", "f_norm_arg : f_bad_arg", "f_norm_arg : tIDENTIFIER", "f_arg_item : f_norm_arg", "f_arg_item : tLPAREN f_margs rparen", "f_arg : f_arg_item", "f_arg : f_arg ',' f_arg_item", "f_opt_asgn : tIDENTIFIER '='", "f_opt : f_opt_asgn arg", "f_block_opt : f_opt_asgn primary_value", "f_block_optarg : f_block_opt", "f_block_optarg : f_block_optarg ',' f_block_opt", "f_optarg : f_opt", "f_optarg : f_optarg ',' f_opt", "restarg_mark : '*'", "restarg_mark : tSTAR", "f_rest_arg : restarg_mark tIDENTIFIER", "f_rest_arg : restarg_mark", "blkarg_mark : '&'", "blkarg_mark : tAMPER", "f_block_arg : blkarg_mark tIDENTIFIER", "opt_f_block_arg : ',' f_block_arg", "opt_f_block_arg : none", "singleton : var_ref", "$$33 :", "singleton : '(' $$33 expr rparen", "assoc_list : none", "assoc_list : assocs trailer", "assocs : assoc", "assocs : assocs ',' assoc", "assoc : arg tASSOC arg", "assoc : tLABEL arg", "assoc : tLABEL_END arg", "assoc : tSTRING_BEG tLABEL_END arg", "assoc : tSTRING_BEG string_rep tLABEL_END arg", "operation : tIDENTIFIER", "operation : tCONSTANT", "operation : tFID", "operation2 : tIDENTIFIER", "operation2 : tCONSTANT", "operation2 : tFID", "operation2 : op", "operation3 : tIDENTIFIER", "operation3 : tFID", "operation3 : op", "dot_or_colon : '.'", "dot_or_colon : tCOLON2", "call_op : '.'", "call_op : tANDDOT", "call_op2 : call_op", "call_op2 : tCOLON2", "opt_terms :", "opt_terms : terms", "opt_nl :", "opt_nl : nl", "rparen : opt_nl ')'", "rbracket : opt_nl ']'", "trailer :", "trailer : nl", "trailer : comma", "term : ';'", "term : nl", "term : heredoc_body", "nl : '\\n'", "terms : term", "terms : terms term", "none :"];
                     this.begin = WebMrbc.MrbParser.uTF8StringToArray("begin");
                     this.end = WebMrbc.MrbParser.uTF8StringToArray("\n=end");
-                    this.wordlist = $_.WebMrbc.MrbParser.f1(new (System.Collections.Generic.Dictionary$2(String,WebMrbc.kwtable))());
+                    this.wordlist = $asm.$.WebMrbc.MrbParser.f1(new (System.Collections.Generic.Dictionary$2(String,WebMrbc.kwtable))());
                 }
             },
             /**
@@ -10808,14 +12040,19 @@
                     case 0: 
                         return "\\0";
                     default: 
-                        return System.String.format("\\\\x{0:X}", c);
+                        return System.String.format("\\x{0:X}", c);
                 }
             },
             uTF8ArrayToString: function (data, idx) {
+                var esc = { };
+                return WebMrbc.MrbParser.uTF8ArrayToStringEsc(data, idx, esc);
+            },
+            uTF8ArrayToStringEsc: function (data, idx, esc) {
                 var str = "";
                 var c = 0, t = 0, end = data.length;
                 var temp = System.Array.init(6, 0);
 
+                esc.v = false;
                 if (end > 0 && data[((end - 1) | 0)] === 0) {
                     end = (end - 1) | 0;
                 }
@@ -10830,6 +12067,7 @@
                             if (d >= 32 && d < 127) {
                                 str = System.String.concat(str, String.fromCharCode(d));
                             } else {
+                                esc.v = true;
                                 str = System.String.concat(str, (WebMrbc.MrbParser.escape(d)));
                             }
                             continue;
@@ -10844,6 +12082,7 @@
                         } else if ((d & 254) === 252) {
                             t = 6;
                         } else {
+                            esc.v = true;
                             str = System.String.concat(str, (WebMrbc.MrbParser.escape(d)));
                             continue;
                         }
@@ -10852,6 +12091,7 @@
                         // 表示不可ならエスケープ
                         if ((d & 192) !== 128) {
                             for (var j = 0; j < c; j = (j + 1) | 0) {
+                                esc.v = true;
                                 str = System.String.concat(str, (WebMrbc.MrbParser.escape(temp[j])));
                             }
                             t = 0;
@@ -10885,6 +12125,9 @@
                     }
                 }
 
+                if (c > 0) {
+                    esc.v = true;
+                }
                 for (var i1 = 0; i1 < c; i1 = (i1 + 1) | 0) {
                     str = System.String.concat(str, (WebMrbc.MrbParser.escape(temp[i1])));
                 }
@@ -11010,7 +12253,7 @@
                 }
                 return result.v;
             },
-            strtod: function (s, ofs, endptr) {
+            mrb_float_read: function (s, ofs, endptr) {
                 var result = { };
                 if (System.Double.tryParse(WebMrbc.MrbParser.uTF8ArrayToString(s.subarray(ofs, ((((s.length - ofs) | 0) + 1) | 0)), 0), null, result)) {
                     endptr.v = null;
@@ -11090,12 +12333,12 @@
                     if (Bridge.is(n, WebMrbc.int_node)) {
                         var a = Bridge.cast(n, WebMrbc.int_node).to_i();
                         var c = WebMrbc.MrbParser.uTF8StringToArray((a.neg()).toString());
-                        return new WebMrbc.int_node(p, c, 10);
+                        return new WebMrbc.int_node.ctor(p, c, 10);
                     }
                     if (Bridge.is(n, WebMrbc.float_node)) {
                         var a1 = Bridge.cast(n, WebMrbc.float_node).to_f();
                         var c1 = WebMrbc.MrbParser.uTF8StringToArray(System.Double.format((-a1), 'G'));
-                        return new WebMrbc.float_node(p, c1);
+                        return new WebMrbc.float_node.ctor(p, c1);
                     }
                     return n;
                 }
@@ -11127,7 +12370,7 @@
                     var eva = Bridge.as(obj, WebMrbc.IEvaluatable);
                     if (eva != null) {
                         var ret;
-                        if (((ret = eva.WebMrbc$IEvaluatable$evaluate(p.sym2name(call.getmethod()), args))) != null) {
+                        if (((ret = eva.WebMrbc$IEvaluatable$evaluate(p.WebMrbc$IMrbParser$sym2name(call.getmethod()), args))) != null) {
                             return ret;
                         }
                     }
@@ -11142,9 +12385,6 @@
            Set to <pre><code>null</code></pre> to suppress debugging messages.
          *
          * @instance
-         * @protected
-         * @memberof WebMrbc.MrbParser
-         * @type WebMrbc.MrbParser.yyDebugOut
          */
         yyDebug: null,
         yyConsole: null,
@@ -11154,17 +12394,11 @@
             of <pre><code>yyParse()</code></pre>.
          *
          * @instance
-         * @protected
-         * @memberof WebMrbc.MrbParser
-         * @type number
          */
         yyMax: 0,
         yyNest: 0,
         s: null,
         sp: 0,
-        filename: null,
-        lineno: 0,
-        column: 0,
         lstate: 0,
         lex_strterm: null,
         cond_stack: 0,
@@ -11193,6 +12427,20 @@
         errno: 0,
         syms: null,
         config: {
+            properties: {
+                lineno: 0,
+                column: 0
+            },
+            alias: [
+            "yyError", "WebMrbc$IMrbParser$yyError",
+            "getfilename", "WebMrbc$IMrbParser$getfilename",
+            "getlineno", "WebMrbc$IMrbParser$getlineno",
+            "setlineno", "WebMrbc$IMrbParser$setlineno",
+            "getcolumn", "WebMrbc$IMrbParser$getcolumn",
+            "setcolumn", "WebMrbc$IMrbParser$setcolumn",
+            "sym2name", "WebMrbc$IMrbParser$sym2name",
+            "locals_node", "WebMrbc$IMrbParser$locals_node"
+            ],
             init: function () {
                 this.buf = new Uint8Array(WebMrbc.MrbParser.MRB_PARSER_TOKBUF_SIZE);
                 this.filename_table = new (System.Collections.Generic.List$1(String))();
@@ -11202,6 +12450,13 @@
         ctor: function () {
             this.$initialize();
             this.yyConsole = this;
+        },
+        getfilename: function () {
+            if (this.current_filename_index < this.filename_table.getCount()) {
+                return this.filename_table.getItem(this.current_filename_index);
+            } else {
+                return "(null)";
+            }
         },
         getfilename_table_length: function () {
             return this.filename_table.getCount();
@@ -11236,7 +12491,7 @@
                 return;
             }
 
-            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): warning {3}\\r\\n", this.filename, this.lineno, this.column, System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): warning {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * (syntax) error message.
@@ -11262,7 +12517,7 @@
                 return;
             }
 
-            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): error {3}\\r\\n", this.filename, this.lineno, this.column, System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * computes list of expected tokens on error by tracing the tables.
@@ -11439,7 +12694,7 @@
                             {
                                 this.lstate = WebMrbc.mrb_lex_state_enum.EXPR_BEG;
                                 if (this.locals == null) {
-                                    this.locals = this.cons(null, null);
+                                    this.locals = new WebMrbc.locals_node(null);
                                 }
                             }
                             break;
@@ -11483,7 +12738,7 @@
                         case 10: 
                             {
                                 this.yyError("BEGIN not supported");
-                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node));
+                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.locals_node));
                                 yyVal = null;
                             }
                             break;
@@ -11683,7 +12938,7 @@
                             break;
                         case 55: 
                             {
-                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
+                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node), true);
                                 this.local_unnest();
                             }
                             break;
@@ -12326,7 +13581,7 @@
                             break;
                         case 227: 
                             {
-                                yyVal = this.new_if(WebMrbc.MrbParser.cond(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), WebMrbc.node)), Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((0 + yyTop) | 0)), WebMrbc.node));
+                                yyVal = this.new_if(WebMrbc.MrbParser.cond(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), WebMrbc.node)), Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((0 + yyTop) | 0)), WebMrbc.node), true);
                             }
                             break;
                         case 228: 
@@ -12528,7 +13783,7 @@
                             break;
                         case 276: 
                             {
-                                yyVal = null;
+                                yyVal = this.new_nil();
                             }
                             break;
                         case 277: 
@@ -12693,7 +13948,7 @@
                             {
                                 yyVal = this.new_class(Bridge.cast(yyVals.getItem(((-4 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), System.Int32)));
-                                this.local_resume(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node));
+                                this.local_resume(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.locals_node));
                             }
                             break;
                         case 307: 
@@ -12704,7 +13959,7 @@
                             break;
                         case 308: 
                             {
-                                yyVal = this.cons(this.local_switch(), (this.in_single));
+                                yyVal = this.cons(this.local_switch(), this.in_single);
                                 this.in_single = 0;
                             }
                             break;
@@ -12712,7 +13967,7 @@
                             {
                                 yyVal = this.new_sclass(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-7 + yyTop) | 0)), System.Int32)));
-                                this.local_resume(Bridge.cast(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node).getcar(), WebMrbc.node));
+                                this.local_resume(Bridge.cast(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node).getcar(), WebMrbc.locals_node));
                                 this.in_def = System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-4 + yyTop) | 0)), System.Int32));
                                 this.in_single = System.Nullable.getValue(Bridge.cast((Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node).getcdr()), System.Int32));
                             }
@@ -12729,7 +13984,7 @@
                             {
                                 yyVal = this.new_module(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-4 + yyTop) | 0)), System.Int32)));
-                                this.local_resume(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node));
+                                this.local_resume(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.locals_node));
                             }
                             break;
                         case 312: 
@@ -12748,7 +14003,7 @@
                             {
                                 yyVal = this.new_def(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), System.Int32)), Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-6 + yyTop) | 0)), System.Int32)));
-                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node));
+                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.locals_node));
                                 this.in_def = (this.in_def - 1) | 0;
                                 this.cmdarg_stack = System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-4 + yyTop) | 0)), System.Int32));
                             }
@@ -12771,7 +14026,7 @@
                             {
                                 yyVal = this.new_sdef(Bridge.cast(yyVals.getItem(((-7 + yyTop) | 0)), WebMrbc.node), System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-4 + yyTop) | 0)), System.Int32)), Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-8 + yyTop) | 0)), System.Int32)));
-                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.node));
+                                this.local_resume(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), WebMrbc.locals_node));
                                 this.in_single = (this.in_single - 1) | 0;
                                 this.cmdarg_stack = System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-5 + yyTop) | 0)), System.Int32));
                             }
@@ -13023,7 +14278,7 @@
                             break;
                         case 378: 
                             {
-                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
+                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node), false);
                                 this.local_unnest();
                             }
                             break;
@@ -13102,12 +14357,12 @@
                         case 392: 
                             {
                                 this.local_nest();
-                                yyVal = this.lineno;
+                                yyVal = this.getlineno();
                             }
                             break;
                         case 393: 
                             {
-                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
+                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node), true);
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), System.Int32)));
                                 this.local_unnest();
                             }
@@ -13115,12 +14370,12 @@
                         case 394: 
                             {
                                 this.local_nest();
-                                yyVal = this.lineno;
+                                yyVal = this.getlineno();
                             }
                             break;
                         case 395: 
                             {
-                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node));
+                                yyVal = this.new_block(Bridge.cast(yyVals.getItem(((-2 + yyTop) | 0)), WebMrbc.node), Bridge.cast(yyVals.getItem(((-1 + yyTop) | 0)), WebMrbc.node), false);
                                 Bridge.cast(yyVal, WebMrbc.node).SET_LINENO(System.Nullable.getValue(Bridge.cast(yyVals.getItem(((-3 + yyTop) | 0)), System.Int32)));
                                 this.local_unnest();
                             }
@@ -13371,15 +14626,15 @@
                             break;
                         case 465: 
                             {
-                                if (this.filename == null) {
-                                    this.filename = "(null)";
+                                if (this.getfilename() == null) {
+                                    this.mrb_parser_set_filename("(null)");
                                 }
-                                yyVal = this.new_str$1(this.filename, this.filename.length);
+                                yyVal = this.new_filename(this.getfilename());
                             }
                             break;
                         case 466: 
                             {
-                                yyVal = this.new_int$1(this.lineno.toString(), 10);
+                                yyVal = this.new_lineno(this.getlineno());
                             }
                             break;
                         case 469: 
@@ -13706,8 +14961,8 @@
                             break;
                         case 555: 
                             {
-                                this.lineno = (this.lineno + 1) | 0;
-                                this.column = 0;
+                                this.setlineno((this.getlineno() + 1) | 0);
+                                this.setcolumn(0);
                             }
                             break;
                         case 558: 
@@ -13751,7 +15006,7 @@
                 }
             }
         },
-    
+        
         yyDefault: function (first) {
             return first;
         },
@@ -13860,39 +15115,34 @@
         },
         local_switch: function () {
             var prev = this.locals;
-
-            this.locals = this.cons(null, null);
+            this.locals = new WebMrbc.locals_node(null);
             return prev;
         },
         local_resume: function (prev) {
             this.locals = prev;
         },
         local_nest: function () {
-            this.locals = this.cons(null, this.locals);
+            this.locals = new WebMrbc.locals_node(this.locals);
         },
         local_unnest: function () {
             if (this.locals != null) {
-                this.locals = Bridge.cast(this.locals.getcdr(), WebMrbc.node);
+                this.locals = this.locals.cdr;
             }
         },
         local_var_p: function (sym) {
             var l = this.locals;
 
             while (l != null) {
-                var n = l.getcar();
-                while (n != null) {
-                    if (Bridge.is(n, System.Int32) && System.Nullable.getValue(Bridge.cast(n, System.Int32)) === sym) {
-                        return true;
-                    }
-                    n = Bridge.cast(n, WebMrbc.node).getcdr();
+                if (l.symList.contains(sym)) {
+                    return true;
                 }
-                l = Bridge.cast(l.getcdr(), WebMrbc.node);
+                l = l.cdr;
             }
             return false;
         },
         local_add_f: function (sym) {
             if (this.locals != null) {
-                this.locals.setcar(this.push(Bridge.cast(this.locals.getcar(), WebMrbc.node), sym));
+                this.locals.push(sym);
             }
         },
         local_add: function (sym) {
@@ -13901,7 +15151,7 @@
             }
         },
         locals_node: function () {
-            return this.locals != null ? this.locals.getcar() : null;
+            return this.locals != null ? this.locals.symList : null;
         },
         new_scope: function (body) {
             return new WebMrbc.scope_node(this, body);
@@ -13933,8 +15183,9 @@
         new_alias: function (a, b) {
             return new WebMrbc.alias_node(this, a, b);
         },
-        new_if: function (a, b, c) {
-            return new WebMrbc.if_node(this, a, b, c);
+        new_if: function (a, b, c, inline) {
+            if (inline === void 0) { inline = false; }
+            return new WebMrbc.if_node(this, a, b, c, inline);
         },
         new_unless: function (a, b, c) {
             return new WebMrbc.unless_node(this, a, b, c);
@@ -13949,7 +15200,7 @@
             return new WebMrbc.for_node(this, v, o, b);
         },
         new_case: function (a, b) {
-            return new WebMrbc.case_node(this, a, b);
+            return new WebMrbc.case_node.$ctor1(this, a, b);
         },
         new_postexe: function (a) {
             return new WebMrbc.postexe_node(this, a);
@@ -13958,10 +15209,10 @@
             return new WebMrbc.self_node(this);
         },
         new_call: function (a, b, c, pass) {
-            return new WebMrbc.call_node.$ctor1(this, a, b, c, pass);
+            return new WebMrbc.call_node.$ctor2(this, a, b, c, pass);
         },
         new_fcall: function (b, c) {
-            return new WebMrbc.fcall_node(this, b, c);
+            return new WebMrbc.fcall_node.$ctor1(this, b, c);
         },
         new_super: function (c) {
             return new WebMrbc.super_node(this, c);
@@ -14006,13 +15257,13 @@
             return new WebMrbc.or_node(this, a, b);
         },
         new_array: function (a) {
-            return new WebMrbc.array_node(this, a);
+            return new WebMrbc.array_node.$ctor1(this, a);
         },
         new_splat: function (a) {
             return new WebMrbc.splat_node(this, a);
         },
         new_hash: function (a) {
-            return new WebMrbc.hash_node(this, a);
+            return new WebMrbc.hash_node.$ctor1(this, a);
         },
         new_sym: function (sym) {
             return new WebMrbc.sym_node(this, sym);
@@ -14059,7 +15310,7 @@
             return new WebMrbc.module_node(this, m, b);
         },
         new_def: function (m, a, b) {
-            return new WebMrbc.def_node(this, m, a, b);
+            return new WebMrbc.def_node.$ctor1(this, m, a, b);
         },
         new_sdef: function (o, m, a, b) {
             return new WebMrbc.sdef_node(this, o, m, a, b);
@@ -14078,8 +15329,8 @@
         new_block_arg: function (a) {
             return new WebMrbc.block_arg_node(this, a);
         },
-        new_block: function (a, b) {
-            return new WebMrbc.block_node(this, a, b);
+        new_block: function (a, b, brace) {
+            return new WebMrbc.block_node.$ctor1(this, a, b, brace);
         },
         new_lambda: function (a, b) {
             return new WebMrbc.lambda_node(this, a, b);
@@ -14094,16 +15345,16 @@
             return new WebMrbc.op_asgn_node(this, a, op, b);
         },
         new_int: function (s, _base) {
-            return new WebMrbc.int_node(this, s, _base);
+            return new WebMrbc.int_node.ctor(this, s, _base);
         },
         new_int$1: function (s, _base) {
             return this.new_int(WebMrbc.MrbParser.uTF8StringToArray(s), _base);
         },
         new_float: function (s) {
-            return new WebMrbc.float_node(this, s);
+            return new WebMrbc.float_node.ctor(this, s);
         },
         new_str: function (s, len) {
-            return new WebMrbc.str_node(this, s, len);
+            return new WebMrbc.str_node.ctor(this, s, len);
         },
         new_str$1: function (s, len) {
             return this.new_str(WebMrbc.MrbParser.uTF8StringToArray(s), len);
@@ -14145,6 +15396,13 @@
         },
         new_symbols: function (a) {
             return new WebMrbc.symbols_node(this, a);
+        },
+        new_filename: function (s) {
+            var str = WebMrbc.MrbParser.uTF8StringToArray(s);
+            return new WebMrbc.filename_node(this, str, str.length);
+        },
+        new_lineno: function (lineno) {
+            return new WebMrbc.lineno_node(this, lineno);
         },
         call_uni_op: function (recv, m) {
             return this.new_call(recv, this.intern_cstr(WebMrbc.MrbParser.uTF8StringToArray(m)), null, 1);
@@ -14284,7 +15542,7 @@
         },
         pushback: function (c) {
             if (c >= 0) {
-                this.column = (this.column - 1) | 0;
+                this.setcolumn((this.getcolumn() - 1) | 0);
             }
             this.pb = this.cons(c, this.pb);
         },
@@ -14333,7 +15591,7 @@
                     }
                 }
                 if (c >= 0) {
-                    this.column = (this.column + 1) | 0;
+                    this.setcolumn((this.getcolumn() + 1) | 0);
                 }
                 if (c === 13) {
                     c = this.nextc();
@@ -14377,6 +15635,9 @@
                 if (c0 === -1) {
                     return c0;
                 } /*  do not skip partial EOF */
+                if (c0 >= 0) {
+                    this.setcolumn((this.getcolumn() - 1) | 0);
+                }
                 list = this.push(list, c0);
             } while (Bridge.identity(n, (n = (n - 1) | 0)) !== 0);
             if (this.pb != null) {
@@ -14412,8 +15673,8 @@
                         return c !== 0;
                     }
                     if (c === 10) {
-                        this.lineno = (this.lineno + 1) | 0;
-                        this.column = 0;
+                        this.setlineno((this.getlineno() + 1) | 0);
+                        this.setcolumn(0);
                     }
                     if (c === s[p]) {
                         break;
@@ -14425,8 +15686,8 @@
 
                     while (Bridge.identity(len, (len = (len - 1) | 0)) !== 0) {
                         if (this.nextc() === 10) {
-                            this.lineno = (this.lineno + 1) | 0;
-                            this.column = 0;
+                            this.setlineno((this.getlineno() + 1) | 0);
+                            this.setcolumn(0);
                         }
                     }
                     return true;
@@ -14442,7 +15703,7 @@
                 this.tsiz = WebMrbc.MrbParser.MRB_PARSER_TOKBUF_SIZE;
             }
             this.tidx = 0;
-            return ((this.column - 1) | 0);
+            return ((this.getcolumn() - 1) | 0);
         },
         tokadd: function (c) {
             var utf8 = new Uint8Array(4);
@@ -14759,6 +16020,7 @@
             var beg = System.Nullable.getValue(Bridge.cast(Bridge.cast(Bridge.cast(this.lex_strterm.getcdr(), WebMrbc.node).getcdr(), WebMrbc.node).getcar(), System.Int32));
             var end = System.Nullable.getValue(Bridge.cast(Bridge.cast(Bridge.cast(this.lex_strterm.getcdr(), WebMrbc.node).getcdr(), WebMrbc.node).getcdr(), System.Int32));
             var hinf = (type & WebMrbc.mrb_string_type.STR_FUNC_HEREDOC) !== 0 ? this.parsing_heredoc_inf() : null;
+            var cmd_state = this.cmd_start;
 
             if (beg === 0) {
                 beg = -3;
@@ -14772,8 +16034,8 @@
                     var line_head;
                     this.tokadd(10);
                     this.tokfix();
-                    this.lineno = (this.lineno + 1) | 0;
-                    this.column = 0;
+                    this.setlineno((this.getlineno() + 1) | 0);
+                    this.setcolumn(0);
                     line_head = hinf.line_head;
                     hinf.line_head = true;
                     if (line_head) {
@@ -14790,8 +16052,9 @@
                         if ((((len - 1) | 0) === hinf.term_len) && (WebMrbc.MrbParser.strncmp(s, p, hinf.term, 0, ((len - 1) | 0)) === 0)) {
                             if (c < 0) {
                                 this.parsing_heredoc = null;
+                            } else {
+                                return WebMrbc.MrbTokens.tHEREDOC_END;
                             }
-                            return WebMrbc.MrbTokens.tHEREDOC_END;
                         }
                     }
                     if (c < 0) {
@@ -14816,8 +16079,8 @@
                         if (c === end || c === beg) {
                             this.tokadd(c);
                         } else if (c === 10) {
-                            this.lineno = (this.lineno + 1) | 0;
-                            this.column = 0;
+                            this.setlineno((this.getlineno() + 1) | 0);
+                            this.setcolumn(0);
                             if ((type & WebMrbc.mrb_string_type.STR_FUNC_ARRAY) !== 0) {
                                 this.tokadd(10);
                             }
@@ -14854,8 +16117,8 @@
                     } else {
                         if (c !== beg && c !== end) {
                             if (c === 10) {
-                                this.lineno = (this.lineno + 1) | 0;
-                                this.column = 0;
+                                this.setlineno((this.getlineno() + 1) | 0);
+                                this.setcolumn(0);
                             }
                             if (!(c === 92 || ((type & WebMrbc.mrb_string_type.STR_FUNC_ARRAY) !== 0 && this.ISSPACE(c)))) {
                                 this.tokadd(92);
@@ -14885,8 +16148,8 @@
                     if (this.toklen() === 0) {
                         do {
                             if (c === 10) {
-                                this.lineno = (this.lineno + 1) | 0;
-                                this.column = 0;
+                                this.setlineno((this.getlineno() + 1) | 0);
+                                this.setcolumn(0);
                                 this.heredoc_treat_nextline();
                                 if (this.parsing_heredoc != null) {
                                     return WebMrbc.MrbTokens.tHD_LITERAL_DELIM;
@@ -14985,10 +16248,12 @@
                 return WebMrbc.MrbTokens.tREGEXP;
             }
             this.yylval.setnd(this.new_str(this.tok(), this.toklen()));
-            if (this.IS_LABEL_SUFFIX(0)) {
-                this.lstate = WebMrbc.mrb_lex_state_enum.EXPR_BEG;
-                this.nextc();
-                return WebMrbc.MrbTokens.tLABEL_END;
+            if (this.IS_LABEL_POSSIBLE(cmd_state)) {
+                if (this.IS_LABEL_SUFFIX(0)) {
+                    this.lstate = WebMrbc.mrb_lex_state_enum.EXPR_BEG;
+                    this.nextc();
+                    return WebMrbc.MrbTokens.tLABEL_END;
+                }
             }
             return WebMrbc.MrbTokens.tSTRING;
         },
@@ -15314,7 +16579,7 @@
                 var endp = { };
 
                 this.errno = 0;
-                d = WebMrbc.MrbParser.strtod(this.tok(), 0, endp);
+                d = WebMrbc.MrbParser.mrb_float_read(this.tok(), 0, endp);
                 if (d === 0 && Bridge.referenceEquals(endp.v, this.tok())) {
                     this.yyWarning("corrupted float value {0}", [WebMrbc.MrbParser.uTF8ArrayToString(this.tok().subarray(0, ((this.toklen() + 1) | 0)), 0)]);
                 } else if (this.errno === WebMrbc.MrbParser.ERANGE) {
@@ -15460,8 +16725,8 @@
                             case WebMrbc.mrb_lex_state_enum.EXPR_DOT: 
                             case WebMrbc.mrb_lex_state_enum.EXPR_CLASS: 
                             case WebMrbc.mrb_lex_state_enum.EXPR_VALUE: 
-                                this.lineno = (this.lineno + 1) | 0;
-                                this.column = 0;
+                                this.setlineno((this.getlineno() + 1) | 0);
+                                this.setcolumn(0);
                                 if (this.parsing_heredoc != null) {
                                     if (this.lex_strterm != null) {
                                         return this.parse_string();
@@ -15556,7 +16821,7 @@
                         this.pushback(c);
                         return 33;
                     case 61: 
-                        if (this.column === 1) {
+                        if (this.getcolumn() === 1) {
                             if (this.peeks(WebMrbc.MrbParser.begin, 0)) {
                                 c = this.peekc_n(((WebMrbc.MrbParser.begin.length - 1) | 0));
                                 if (c < 0 || this.ISSPACE(c)) {
@@ -15570,8 +16835,8 @@
                                     if (c !== 10) {
                                         this.skip(10);
                                     }
-                                    this.lineno = (this.lineno + 1) | 0;
-                                    this.column = 0;
+                                    this.setlineno((this.getlineno() + 1) | 0);
+                                    this.setcolumn(0);
                                     continue;
                                 }
                             }
@@ -16015,8 +17280,8 @@
                     case 92: 
                         c = this.nextc();
                         if (c === 10) {
-                            this.lineno = (this.lineno + 1) | 0;
-                            this.column = 0;
+                            this.setlineno((this.getlineno() + 1) | 0);
+                            this.setcolumn(0);
                             space_seen = true;
                             continue; /*  skip \\n */
                         }
@@ -16025,7 +17290,7 @@
                     case 37: 
                         if (this.IS_BEG()) {
                             c = this.nextc();
-                            this.quotation(c);
+                            return this.quotation(c);
                         }
                         for (; ; ) {
                             if (((c = this.nextc())) === 61) {
@@ -16034,8 +17299,7 @@
                                 return WebMrbc.MrbTokens.tOP_ASGN;
                             }
                             if (this.IS_SPCARG(c, space_seen)) {
-                                this.quotation(c);
-                                continue;
+                                return this.quotation(c);
                             }
                             break;
                         }
@@ -16267,7 +17531,7 @@
                             kw = this.mrb_reserved_word(this.tok(), this.toklen());
                             if (kw != null) {
                                 var state = this.lstate;
-                                this.yylval.setnum(this.lineno);
+                                this.yylval.setnum(this.getlineno());
                                 this.lstate = kw.state;
                                 if (state === WebMrbc.mrb_lex_state_enum.EXPR_FNAME) {
                                     this.yylval.setid(this.intern_cstr(kw.name));
@@ -16325,7 +17589,7 @@
             }
         },
         mrb_parser_parse: function () {
-            this.yylval = new WebMrbc.MrbToken(this.filename);
+            this.yylval = new WebMrbc.MrbToken(this.getfilename());
 
             try {
                 this.cmd_start = true;
@@ -16345,8 +17609,7 @@
         mrb_parser_set_filename: function (f) {
             var i;
 
-            this.filename = f;
-            this.lineno = (this.getfilename_table_length() > 0) ? 0 : 1;
+            this.setlineno((this.getfilename_table_length() > 0) ? 0 : 1);
 
             for (i = 0; i < this.getfilename_table_length(); i = (i + 1) | 0) {
                 if (Bridge.referenceEquals(this.filename_table.getItem(i), f)) {
@@ -16359,11 +17622,23 @@
             this.filename_table.add(f);
         },
         mrb_parse_nstring: function (filename, s) {
-            this.filename = filename;
+            this.mrb_parser_set_filename(filename);
             this.s = s;
             this.sp = 0;
 
             this.mrb_parser_parse();
+        },
+        to_ruby: function () {
+            if (this.tree != null) {
+                var cond = new WebMrbc.ruby_code_cond(this.getfilename());
+                this.tree.to_ruby(cond);
+                return cond.toString();
+            }
+            if (this.s != null) {
+                return WebMrbc.MrbParser.uTF8ArrayToString(this.s, 0);
+            } else {
+                return "";
+            }
         },
         WebMrbc$MrbParser$yyInput$advance: function () {
             var token = this.parser_yylex();
@@ -16373,51 +17648,51 @@
         }
     });
 
-    Bridge.ns("WebMrbc.MrbParser", $_);
+    Bridge.ns("WebMrbc.MrbParser", $asm.$);
 
-    Bridge.apply($_.WebMrbc.MrbParser, {
-        f1: function (_o1) {
-            _o1.add("break", new WebMrbc.kwtable.$ctor1("break", WebMrbc.MrbTokens.keyword_break, WebMrbc.MrbTokens.keyword_break, WebMrbc.mrb_lex_state_enum.EXPR_MID));
-            _o1.add("else", new WebMrbc.kwtable.$ctor1("else", WebMrbc.MrbTokens.keyword_else, WebMrbc.MrbTokens.keyword_else, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
-            _o1.add("nil", new WebMrbc.kwtable.$ctor1("nil", WebMrbc.MrbTokens.keyword_nil, WebMrbc.MrbTokens.keyword_nil, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("ensure", new WebMrbc.kwtable.$ctor1("ensure", WebMrbc.MrbTokens.keyword_ensure, WebMrbc.MrbTokens.keyword_ensure, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
-            _o1.add("end", new WebMrbc.kwtable.$ctor1("end", WebMrbc.MrbTokens.keyword_end, WebMrbc.MrbTokens.keyword_end, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("then", new WebMrbc.kwtable.$ctor1("then", WebMrbc.MrbTokens.keyword_then, WebMrbc.MrbTokens.keyword_then, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
-            _o1.add("not", new WebMrbc.kwtable.$ctor1("not", WebMrbc.MrbTokens.keyword_not, WebMrbc.MrbTokens.keyword_not, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
-            _o1.add("false", new WebMrbc.kwtable.$ctor1("false", WebMrbc.MrbTokens.keyword_false, WebMrbc.MrbTokens.keyword_false, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("self", new WebMrbc.kwtable.$ctor1("self", WebMrbc.MrbTokens.keyword_self, WebMrbc.MrbTokens.keyword_self, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("elsif", new WebMrbc.kwtable.$ctor1("elsif", WebMrbc.MrbTokens.keyword_elsif, WebMrbc.MrbTokens.keyword_elsif, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("rescue", new WebMrbc.kwtable.$ctor1("rescue", WebMrbc.MrbTokens.keyword_rescue, WebMrbc.MrbTokens.modifier_rescue, WebMrbc.mrb_lex_state_enum.EXPR_MID));
-            _o1.add("true", new WebMrbc.kwtable.$ctor1("true", WebMrbc.MrbTokens.keyword_true, WebMrbc.MrbTokens.keyword_true, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("until", new WebMrbc.kwtable.$ctor1("until", WebMrbc.MrbTokens.keyword_until, WebMrbc.MrbTokens.modifier_until, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("unless", new WebMrbc.kwtable.$ctor1("unless", WebMrbc.MrbTokens.keyword_unless, WebMrbc.MrbTokens.modifier_unless, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("return", new WebMrbc.kwtable.$ctor1("return", WebMrbc.MrbTokens.keyword_return, WebMrbc.MrbTokens.keyword_return, WebMrbc.mrb_lex_state_enum.EXPR_MID));
-            _o1.add("def", new WebMrbc.kwtable.$ctor1("def", WebMrbc.MrbTokens.keyword_def, WebMrbc.MrbTokens.keyword_def, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
-            _o1.add("and", new WebMrbc.kwtable.$ctor1("and", WebMrbc.MrbTokens.keyword_and, WebMrbc.MrbTokens.keyword_and, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("do", new WebMrbc.kwtable.$ctor1("do", WebMrbc.MrbTokens.keyword_do, WebMrbc.MrbTokens.keyword_do, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
-            _o1.add("yield", new WebMrbc.kwtable.$ctor1("yield", WebMrbc.MrbTokens.keyword_yield, WebMrbc.MrbTokens.keyword_yield, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
-            _o1.add("for", new WebMrbc.kwtable.$ctor1("for", WebMrbc.MrbTokens.keyword_for, WebMrbc.MrbTokens.keyword_for, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("undef", new WebMrbc.kwtable.$ctor1("undef", WebMrbc.MrbTokens.keyword_undef, WebMrbc.MrbTokens.keyword_undef, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
-            _o1.add("or", new WebMrbc.kwtable.$ctor1("or", WebMrbc.MrbTokens.keyword_or, WebMrbc.MrbTokens.keyword_or, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("in", new WebMrbc.kwtable.$ctor1("in", WebMrbc.MrbTokens.keyword_in, WebMrbc.MrbTokens.keyword_in, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("when", new WebMrbc.kwtable.$ctor1("when", WebMrbc.MrbTokens.keyword_when, WebMrbc.MrbTokens.keyword_when, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("retry", new WebMrbc.kwtable.$ctor1("retry", WebMrbc.MrbTokens.keyword_retry, WebMrbc.MrbTokens.keyword_retry, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("if", new WebMrbc.kwtable.$ctor1("if", WebMrbc.MrbTokens.keyword_if, WebMrbc.MrbTokens.modifier_if, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("case", new WebMrbc.kwtable.$ctor1("case", WebMrbc.MrbTokens.keyword_case, WebMrbc.MrbTokens.keyword_case, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("redo", new WebMrbc.kwtable.$ctor1("redo", WebMrbc.MrbTokens.keyword_redo, WebMrbc.MrbTokens.keyword_redo, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("next", new WebMrbc.kwtable.$ctor1("next", WebMrbc.MrbTokens.keyword_next, WebMrbc.MrbTokens.keyword_next, WebMrbc.mrb_lex_state_enum.EXPR_MID));
-            _o1.add("super", new WebMrbc.kwtable.$ctor1("super", WebMrbc.MrbTokens.keyword_super, WebMrbc.MrbTokens.keyword_super, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
-            _o1.add("module", new WebMrbc.kwtable.$ctor1("module", WebMrbc.MrbTokens.keyword_module, WebMrbc.MrbTokens.keyword_module, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            _o1.add("begin", new WebMrbc.kwtable.$ctor1("begin", WebMrbc.MrbTokens.keyword_begin, WebMrbc.MrbTokens.keyword_begin, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
-            _o1.add("__LINE__", new WebMrbc.kwtable.$ctor1("__LINE__", WebMrbc.MrbTokens.keyword__LINE__, WebMrbc.MrbTokens.keyword__LINE__, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("__FILE__", new WebMrbc.kwtable.$ctor1("__FILE__", WebMrbc.MrbTokens.keyword__FILE__, WebMrbc.MrbTokens.keyword__FILE__, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("__ENCODING__", new WebMrbc.kwtable.$ctor1("__ENCODING__", WebMrbc.MrbTokens.keyword__ENCODING__, WebMrbc.MrbTokens.keyword__ENCODING__, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("END", new WebMrbc.kwtable.$ctor1("END", WebMrbc.MrbTokens.keyword_END, WebMrbc.MrbTokens.keyword_END, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("alias", new WebMrbc.kwtable.$ctor1("alias", WebMrbc.MrbTokens.keyword_alias, WebMrbc.MrbTokens.keyword_alias, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
-            _o1.add("BEGIN", new WebMrbc.kwtable.$ctor1("BEGIN", WebMrbc.MrbTokens.keyword_BEGIN, WebMrbc.MrbTokens.keyword_BEGIN, WebMrbc.mrb_lex_state_enum.EXPR_END));
-            _o1.add("class", new WebMrbc.kwtable.$ctor1("class", WebMrbc.MrbTokens.keyword_class, WebMrbc.MrbTokens.keyword_class, WebMrbc.mrb_lex_state_enum.EXPR_CLASS));
-            _o1.add("while", new WebMrbc.kwtable.$ctor1("while", WebMrbc.MrbTokens.keyword_while, WebMrbc.MrbTokens.modifier_while, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
-            return _o1;
+    Bridge.apply($asm.$.WebMrbc.MrbParser, {
+        f1: function (_o5) {
+            _o5.add("break", new WebMrbc.kwtable.$ctor1("break", WebMrbc.MrbTokens.keyword_break, WebMrbc.MrbTokens.keyword_break, WebMrbc.mrb_lex_state_enum.EXPR_MID));
+            _o5.add("else", new WebMrbc.kwtable.$ctor1("else", WebMrbc.MrbTokens.keyword_else, WebMrbc.MrbTokens.keyword_else, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
+            _o5.add("nil", new WebMrbc.kwtable.$ctor1("nil", WebMrbc.MrbTokens.keyword_nil, WebMrbc.MrbTokens.keyword_nil, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("ensure", new WebMrbc.kwtable.$ctor1("ensure", WebMrbc.MrbTokens.keyword_ensure, WebMrbc.MrbTokens.keyword_ensure, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
+            _o5.add("end", new WebMrbc.kwtable.$ctor1("end", WebMrbc.MrbTokens.keyword_end, WebMrbc.MrbTokens.keyword_end, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("then", new WebMrbc.kwtable.$ctor1("then", WebMrbc.MrbTokens.keyword_then, WebMrbc.MrbTokens.keyword_then, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
+            _o5.add("not", new WebMrbc.kwtable.$ctor1("not", WebMrbc.MrbTokens.keyword_not, WebMrbc.MrbTokens.keyword_not, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
+            _o5.add("false", new WebMrbc.kwtable.$ctor1("false", WebMrbc.MrbTokens.keyword_false, WebMrbc.MrbTokens.keyword_false, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("self", new WebMrbc.kwtable.$ctor1("self", WebMrbc.MrbTokens.keyword_self, WebMrbc.MrbTokens.keyword_self, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("elsif", new WebMrbc.kwtable.$ctor1("elsif", WebMrbc.MrbTokens.keyword_elsif, WebMrbc.MrbTokens.keyword_elsif, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("rescue", new WebMrbc.kwtable.$ctor1("rescue", WebMrbc.MrbTokens.keyword_rescue, WebMrbc.MrbTokens.modifier_rescue, WebMrbc.mrb_lex_state_enum.EXPR_MID));
+            _o5.add("true", new WebMrbc.kwtable.$ctor1("true", WebMrbc.MrbTokens.keyword_true, WebMrbc.MrbTokens.keyword_true, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("until", new WebMrbc.kwtable.$ctor1("until", WebMrbc.MrbTokens.keyword_until, WebMrbc.MrbTokens.modifier_until, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("unless", new WebMrbc.kwtable.$ctor1("unless", WebMrbc.MrbTokens.keyword_unless, WebMrbc.MrbTokens.modifier_unless, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("return", new WebMrbc.kwtable.$ctor1("return", WebMrbc.MrbTokens.keyword_return, WebMrbc.MrbTokens.keyword_return, WebMrbc.mrb_lex_state_enum.EXPR_MID));
+            _o5.add("def", new WebMrbc.kwtable.$ctor1("def", WebMrbc.MrbTokens.keyword_def, WebMrbc.MrbTokens.keyword_def, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
+            _o5.add("and", new WebMrbc.kwtable.$ctor1("and", WebMrbc.MrbTokens.keyword_and, WebMrbc.MrbTokens.keyword_and, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("do", new WebMrbc.kwtable.$ctor1("do", WebMrbc.MrbTokens.keyword_do, WebMrbc.MrbTokens.keyword_do, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
+            _o5.add("yield", new WebMrbc.kwtable.$ctor1("yield", WebMrbc.MrbTokens.keyword_yield, WebMrbc.MrbTokens.keyword_yield, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
+            _o5.add("for", new WebMrbc.kwtable.$ctor1("for", WebMrbc.MrbTokens.keyword_for, WebMrbc.MrbTokens.keyword_for, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("undef", new WebMrbc.kwtable.$ctor1("undef", WebMrbc.MrbTokens.keyword_undef, WebMrbc.MrbTokens.keyword_undef, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
+            _o5.add("or", new WebMrbc.kwtable.$ctor1("or", WebMrbc.MrbTokens.keyword_or, WebMrbc.MrbTokens.keyword_or, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("in", new WebMrbc.kwtable.$ctor1("in", WebMrbc.MrbTokens.keyword_in, WebMrbc.MrbTokens.keyword_in, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("when", new WebMrbc.kwtable.$ctor1("when", WebMrbc.MrbTokens.keyword_when, WebMrbc.MrbTokens.keyword_when, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("retry", new WebMrbc.kwtable.$ctor1("retry", WebMrbc.MrbTokens.keyword_retry, WebMrbc.MrbTokens.keyword_retry, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("if", new WebMrbc.kwtable.$ctor1("if", WebMrbc.MrbTokens.keyword_if, WebMrbc.MrbTokens.modifier_if, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("case", new WebMrbc.kwtable.$ctor1("case", WebMrbc.MrbTokens.keyword_case, WebMrbc.MrbTokens.keyword_case, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("redo", new WebMrbc.kwtable.$ctor1("redo", WebMrbc.MrbTokens.keyword_redo, WebMrbc.MrbTokens.keyword_redo, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("next", new WebMrbc.kwtable.$ctor1("next", WebMrbc.MrbTokens.keyword_next, WebMrbc.MrbTokens.keyword_next, WebMrbc.mrb_lex_state_enum.EXPR_MID));
+            _o5.add("super", new WebMrbc.kwtable.$ctor1("super", WebMrbc.MrbTokens.keyword_super, WebMrbc.MrbTokens.keyword_super, WebMrbc.mrb_lex_state_enum.EXPR_ARG));
+            _o5.add("module", new WebMrbc.kwtable.$ctor1("module", WebMrbc.MrbTokens.keyword_module, WebMrbc.MrbTokens.keyword_module, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            _o5.add("begin", new WebMrbc.kwtable.$ctor1("begin", WebMrbc.MrbTokens.keyword_begin, WebMrbc.MrbTokens.keyword_begin, WebMrbc.mrb_lex_state_enum.EXPR_BEG));
+            _o5.add("__LINE__", new WebMrbc.kwtable.$ctor1("__LINE__", WebMrbc.MrbTokens.keyword__LINE__, WebMrbc.MrbTokens.keyword__LINE__, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("__FILE__", new WebMrbc.kwtable.$ctor1("__FILE__", WebMrbc.MrbTokens.keyword__FILE__, WebMrbc.MrbTokens.keyword__FILE__, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("__ENCODING__", new WebMrbc.kwtable.$ctor1("__ENCODING__", WebMrbc.MrbTokens.keyword__ENCODING__, WebMrbc.MrbTokens.keyword__ENCODING__, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("END", new WebMrbc.kwtable.$ctor1("END", WebMrbc.MrbTokens.keyword_END, WebMrbc.MrbTokens.keyword_END, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("alias", new WebMrbc.kwtable.$ctor1("alias", WebMrbc.MrbTokens.keyword_alias, WebMrbc.MrbTokens.keyword_alias, WebMrbc.mrb_lex_state_enum.EXPR_FNAME));
+            _o5.add("BEGIN", new WebMrbc.kwtable.$ctor1("BEGIN", WebMrbc.MrbTokens.keyword_BEGIN, WebMrbc.MrbTokens.keyword_BEGIN, WebMrbc.mrb_lex_state_enum.EXPR_END));
+            _o5.add("class", new WebMrbc.kwtable.$ctor1("class", WebMrbc.MrbTokens.keyword_class, WebMrbc.MrbTokens.keyword_class, WebMrbc.mrb_lex_state_enum.EXPR_CLASS));
+            _o5.add("while", new WebMrbc.kwtable.$ctor1("while", WebMrbc.MrbTokens.keyword_while, WebMrbc.MrbTokens.modifier_while, WebMrbc.mrb_lex_state_enum.EXPR_VALUE));
+            return _o5;
         }
     });
 
@@ -16433,20 +17708,24 @@
             return this._n;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.MathSingleBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "math_single");
 
-            var field = $("<field>");
-            field.attr("name", "OP");
-            field.text("NEG");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "OP");
+            field.appendChild(document.createTextNode("NEG"));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "NUM");
-            value.append(this._n.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "NUM");
+            value.appendChild(this._n.to_xml());
+            block.appendChild(value);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.write("-");
+            this._n.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:nagete {0})", this.getn());
@@ -16465,15 +17744,26 @@
             return this._retval;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsFlowStatementsBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_flow_statements");
 
-            var field = $("<field>");
-            field.attr("name", "FLOW");
-            field.text("CONTINUE");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "FLOW");
+            field.appendChild(document.createTextNode("CONTINUE"));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            if (this._retval != null) {
+                cond.write("next ");
+                this._retval.to_ruby(cond);
+                cond.write_line();
+            } else {
+                cond.write_line("next");
+            }
+            cond.decrement_nest();
         },
         toString: function () {
             return System.String.format("(:next . {0})", this.getretval());
@@ -16492,9 +17782,12 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_NIL);
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicNullBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_null");
             return block;
+        },
+        to_rb: function (cond) {
+            cond.write("nil");
         },
         toString: function () {
             return System.String.format("(:nil)", null);
@@ -16521,11 +17814,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.NotifyInitialEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$25("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$25("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$25", $_, {
+    Bridge.define("$AnonymousType$25", $asm, {
         $kind: "anonymous",
         ctor: function (message0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -16554,13 +17847,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$25)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$25)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7209530294, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550209755, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -16609,6 +17902,9 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write(this.getn().toString());
+        },
         toString: function () {
             return System.String.format("(:nthref . {0})", this.getn());
         }
@@ -16637,44 +17933,52 @@
         },
         to_xml: function () {
             // TODO:Rubyの演算は数値だけとは限らない
-            var block = $("<block>");
-            block.attr("type", WebMrbc.MathArithmeticBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "math_arithmetic");
 
-            var field = $("<field>");
-            field.attr("name", "OP");
-            switch (this.getp().sym2name(this.getop())) {
+            var field = document.createElement("field");
+            field.setAttribute("name", "OP");
+            switch (this.getp().WebMrbc$IMrbParser$sym2name(this.getop())) {
                 case "+": 
-                    field.text("ADD");
+                    field.appendChild(document.createTextNode("ADD"));
                     break;
                 case "-": 
-                    field.text("MINUS");
+                    field.appendChild(document.createTextNode("MINUS"));
                     break;
                 case "*": 
-                    field.text("MULTIPLY");
+                    field.appendChild(document.createTextNode("MULTIPLY"));
                     break;
                 case "/": 
-                    field.text("DIVIDE");
+                    field.appendChild(document.createTextNode("DIVIDE"));
                     break;
                 case "**": 
-                    field.text("POWER");
+                    field.appendChild(document.createTextNode("POWER"));
                     break;
             }
-            block.append(field);
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "A");
-            value.append(this.getlhs().to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "A");
+            value.appendChild(this.getlhs().to_xml());
+            block.appendChild(value);
 
-            value = $("<value>");
-            value.attr("name", "B");
-            value.append(this.getrhs().to_xml());
-            block.append(value);
+            value = document.createElement("value");
+            value.setAttribute("name", "B");
+            value.appendChild(this.getrhs().to_xml());
+            block.appendChild(value);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            this._lhs.to_ruby(cond);
+            cond.write(System.String.concat(" ", this.getp().WebMrbc$IMrbParser$sym2name(this._op), "= "));
+            this._rhs.to_ruby(cond);
+            cond.decrement_nest();
+            cond.write_line();
+        },
         toString: function () {
-            return System.String.format("(:asgn {0} {1} {2})", this.getlhs(), this.getp().sym2name(this.getop()), this.getrhs());
+            return System.String.format("(:asgn {0} {1} {2})", this.getlhs(), this.getp().WebMrbc$IMrbParser$sym2name(this.getop()), this.getrhs());
         }
     });
 
@@ -16716,25 +18020,30 @@
             return this._b;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicOperationBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_operation");
 
-            var field = $("<field>");
-            field.attr("name", "OP");
-            field.text("OR");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "OP");
+            field.appendChild(document.createTextNode("OR"));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "A");
-            value.append(this._a.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "A");
+            value.appendChild(this._a.to_xml());
+            block.appendChild(value);
 
-            value = $("<value>");
-            value.attr("name", "B");
-            value.append(this._b.to_xml());
-            block.append(value);
+            value = document.createElement("value");
+            value.setAttribute("name", "B");
+            value.appendChild(this._b.to_xml());
+            block.appendChild(value);
 
             return block;
+        },
+        to_rb: function (cond) {
+            this._a.to_ruby(cond);
+            cond.write(" || ");
+            this._b.to_ruby(cond);
         },
         toString: function () {
             return System.String.format("(:or {0} {1})", this.geta(), this.getb());
@@ -16776,6 +18085,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write_line("END {");
+            this._postexe.to_ruby(cond);
+            cond.write_line("}");
+        },
         toString: function () {
             return System.String.format("(:postexe {0})", this.getpostexe());
         }
@@ -16812,7 +18126,7 @@
         updateParams_: function () {
             // Check for duplicated arguments.
             var badArg = false;
-            var hash = new $_.$AnonymousType$26();
+            var hash = new $asm.$AnonymousType$26();
             for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
                 if (hash[System.String.concat("arg_", this.arguments_[i].toLowerCase())]) {
                     badArg = true;
@@ -17000,18 +18314,18 @@
         }
     });
 
-    Bridge.define("$AnonymousType$26", $_, {
+    Bridge.define("$AnonymousType$26", $asm, {
         $kind: "anonymous",
         ctor: function () {
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$26)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$26)) {
                 return false;
             }
             return ;
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7226307510]);
+            var h = Bridge.addHash([7550210011]);
             return h;
         },
         toJSON: function () {
@@ -17087,7 +18401,7 @@
             this.rendered = false;
             // Update the quarkConnections_ with existing connections.
             for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
-                var input = this.getInput(System.String.concat("ARG", i));
+                var input = this.getInput("ARG" + i);
                 if (input != null) {
                     var connection = input.connection.targetConnection;
                     this.quarkConnections_.set(this.quarkIds_[i], connection);
@@ -17108,7 +18422,7 @@
                     var quarkId = this.quarkIds_[i1];
                     var connection1 = { };
                     if (this.quarkConnections_.tryGetValue(quarkId, connection1)) {
-                        if (!Blockly.Mutator.reconnect(connection1.v, this, System.String.concat("ARG", i1))) {
+                        if (!Blockly.Mutator.reconnect(connection1.v, this, "ARG" + i1)) {
                             // Block no longer exists or has been attached elsewhere.
                             delete this.quarkConnections_.get(quarkId);
                         }
@@ -17124,7 +18438,7 @@
         updateShape_: function () {
             var i;
             for (i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
-                var field = this.getField(System.String.concat("ARGNAME", i));
+                var field = this.getField("ARGNAME" + i);
                 if (field != null) {
                     // Ensure argument name is up to date.
                     // The argument name field is deterministic based on the mutation,
@@ -17139,13 +18453,13 @@
                 } else {
                     // Add new input.
                     field = new Blockly.FieldLabel(this.arguments_[i]);
-                    var input = this.appendValueInput(System.String.concat("ARG", i)).setAlign(Blockly.ALIGN_RIGHT).appendField(field, System.String.concat("ARGNAME", i));
+                    var input = this.appendValueInput("ARG" + i).setAlign(Blockly.ALIGN_RIGHT).appendField(field, "ARGNAME" + i);
                     input.init();
                 }
             }
             // Remove deleted inputs.
-            while (this.getInput(System.String.concat("ARG", i)) != null) {
-                this.removeInput(System.String.concat("ARG", i));
+            while (this.getInput("ARG" + i) != null) {
+                this.removeInput("ARG" + i);
                 i = (i + 1) | 0;
             }
             // Add "with:" if there are parameters, remove otherwise.
@@ -17191,7 +18505,7 @@
             for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
                 if (Blockly.Names.equals(oldName, this.arguments_[i])) {
                     this.arguments_[i] = newName;
-                    this.getField(System.String.concat("ARGNAME", i)).setValue(newName);
+                    this.getField("ARGNAME" + i).setValue(newName);
                 }
             }
         },
@@ -17291,7 +18605,7 @@
             }
             var legal = false;
             // Is the block nested in a procedure?
-            var block = Bridge.cast(this, WebMrbc.Block);
+            var block = this;
             do {
                 if (this.FUNCTION_TYPES.indexOf(block.type) !== -1) {
                     legal = true;
@@ -17518,7 +18832,7 @@
             return this._InitialValue.toString(16).toUpperCase();
         },
         getDisp$1: function (value) {
-            return System.String.concat(System.String.concat(this._Disp, value.toString()), this._Unit);
+            return System.String.concat(this._Disp, value.toString(), this._Unit);
         }
     });
 
@@ -17530,6 +18844,9 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            cond.write_line("redo");
         },
         toString: function () {
             return System.String.format("(:redo)", null);
@@ -17560,6 +18877,12 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write(System.String.concat("/", WebMrbc.MrbParser.uTF8ArrayToString(this._pattern, 0)));
+            cond.write(System.String.concat("/", WebMrbc.MrbParser.uTF8ArrayToString(this._flags, 0)));
+            cond.write(System.String.concat("/", WebMrbc.MrbParser.uTF8ArrayToString(this._encp, 0)));
+            cond.write("/");
+        },
         toString: function () {
             return System.String.format("(:regx . ({0} . {1} . {2}))", this.getpattern(), this.getflags(), this.getencp());
         }
@@ -17575,7 +18898,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.ReleaseEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 を破棄", [new $_.$AnonymousType$19("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 を破棄", [new $asm.$AnonymousType$19("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -17584,6 +18907,7 @@
         _body: null,
         _rescue: null,
         _else: null,
+        ensure: false,
         config: {
             init: function () {
                 this._rescue = new (System.Collections.Generic.List$1(WebMrbc.rescue_node.rescue_t))();
@@ -17623,6 +18947,31 @@
             // TODO:？？？
             return this.getbody().to_xml();
         },
+        to_rb: function (cond) {
+            var $t;
+            if (!this.ensure) {
+                cond.write_line("begin");
+                cond.increment_indent();
+            }
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            $t = Bridge.getEnumerator(this._rescue);
+            while ($t.moveNext()) {
+                var r = $t.getCurrent();
+                r.to_ruby(cond);
+            }
+            if (this._else != null) {
+                cond.write_line("else");
+                cond.increment_indent();
+                this._else.to_ruby(cond);
+                cond.decrement_indent();
+            }
+            if (!this.ensure) {
+                cond.write_line("end");
+            } else {
+                cond.increment_indent();
+            }
+        },
         toString: function () {
             var $t;
             var str = System.String.format("(:rescue {0} ", this.getbody());
@@ -17644,6 +18993,9 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write_line("retry");
+        },
         toString: function () {
             return System.String.format("(:retry)", null);
         }
@@ -17661,21 +19013,32 @@
             return this._retval;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", "procedures_return");
+            var block = document.createElement("block");
+            block.setAttribute("type", "procedures_return");
 
-            var mutation = $("<mutation>");
-            mutation.attr("value", (this._retval != null) ? "0" : "1");
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("value", (this._retval != null) ? "0" : "1");
+            block.appendChild(mutation);
 
             if (this._retval != null) {
-                var value = $("<value>");
-                value.attr("name", "VALUE");
-                value.append(this._retval.to_xml());
-                block.append(value);
+                var value = document.createElement("value");
+                value.setAttribute("name", "VALUE");
+                value.appendChild(this._retval.to_xml());
+                block.appendChild(value);
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            if (this._retval != null) {
+                cond.write("return ");
+                this._retval.to_ruby(cond);
+                cond.write_line();
+            } else {
+                cond.write_line("return");
+            }
+            cond.decrement_nest();
         },
         toString: function () {
             return System.String.format("(:return . {0})", this.getretval());
@@ -17990,14 +19353,14 @@
         },
         i2c_new: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), " = I2c.new("), dropdown_i2c_port_no), ")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), " = I2c.new(", dropdown_i2c_port_no, ")\n");
             return code;
         },
         i2c_write: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".write("), value_address), ",\""), value_data), "\")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".write(", value_address, ",\"", value_data, "\")\n");
             return code;
         },
         i2c_read: function (block) {
@@ -18006,9 +19369,9 @@
             var value_address_h = Blockly.Ruby.valueToCode(block, "ADDRESS_H", Blockly.Ruby.ORDER_ATOMIC);
             var code;
             if (value_address_h == null) {
-                code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".read("), value_address_l), ")");
+                code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".read(", value_address_l, ")");
             } else {
-                code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".read("), value_address_l), ","), value_address_h), ")");
+                code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".read(", value_address_l, ",", value_address_h, ")");
             }
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
@@ -18020,20 +19383,20 @@
         i2c_lwrite: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".lwrite("), value_data), ")");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".lwrite(", value_data, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_end: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var checkbox_stop = Bridge.referenceEquals(block.getFieldValue("STOP"), "TRUE");
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".lwrite("), System.Boolean.toString(checkbox_stop)), ")");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".lwrite(", System.Boolean.toString(checkbox_stop), ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_request: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_count = Blockly.Ruby.valueToCode(block, "COUNT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".request("), value_address), ","), value_count), ")");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".request(", value_address, ",", value_count, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         i2c_lread: function (block) {
@@ -18049,7 +19412,7 @@
         i2c_frequency: function (block) {
             var dropdown_i2c_port_no = block.getFieldValue("I2C_PORT_NO");
             var value_frequency = Blockly.Ruby.valueToCode(block, "FREQUENCY", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".frequency("), value_frequency), ")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.i2CPortNameToVariable(dropdown_i2c_port_no), ".frequency(", value_frequency, ")\n");
             return code;
         },
         call: function (block) {
@@ -18060,29 +19423,29 @@
         pin_mode: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var dropdown_pin_mode = block.getFieldValue("PIN_MODE");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("pinMode(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ","), WebMrbc.GrSakura.pinModeNameToNum(dropdown_pin_mode)), ")\n");
+            var code = "pinMode(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + WebMrbc.GrSakura.pinModeNameToNum(dropdown_pin_mode) + ")\n";
             return code;
         },
         digital_write: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var dropdown_pin_value = block.getFieldValue("PIN_VALUE");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("digitalWrite(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ","), WebMrbc.GrSakura.pinValueNameToNum(dropdown_pin_value)), ")\n");
+            var code = "digitalWrite(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + "," + WebMrbc.GrSakura.pinValueNameToNum(dropdown_pin_value) + ")\n";
             return code;
         },
         digital_read: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = System.String.concat(System.String.concat("digitalRead(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ")");
+            var code = "digitalRead(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         analog_read: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = System.String.concat(System.String.concat("analogRead(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ")");
+            var code = "analogRead(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         pwm: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var value_pwm_out = Blockly.Ruby.valueToCode(block, "PWM_OUT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("pwm(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ","), value_pwm_out), ")\n");
+            var code = System.String.concat("pwm(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ",", value_pwm_out, ")\n");
             return code;
         },
         pwm_value: function (block) {
@@ -18092,7 +19455,7 @@
         },
         analog_reference: function (block) {
             var dropdown_analog_reference_mode = block.getFieldValue("ANALOG_REFERENCE_MODE");
-            var code = System.String.concat(System.String.concat("analogReference(", WebMrbc.GrSakura.analogRefModeNameToNum(dropdown_analog_reference_mode)), ")\n");
+            var code = "analogReference(" + WebMrbc.GrSakura.analogRefModeNameToNum(dropdown_analog_reference_mode) + ")\n";
             return code;
         },
         init_dac: function (block) {
@@ -18101,7 +19464,7 @@
         },
         analog_dac: function (block) {
             var value_value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("analogDac(", value_value), ")\n");
+            var code = System.String.concat("analogDac(", value_value, ")\n");
             return code;
         },
         dac_value: function (block) {
@@ -18111,7 +19474,7 @@
         },
         delay: function (block) {
             var value_value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("delay(", value_value), ")\n");
+            var code = System.String.concat("delay(", value_value, ")\n");
             return code;
         },
         millis: function (block) {
@@ -18124,7 +19487,7 @@
         },
         led: function (block) {
             var value_sw = Blockly.Ruby.valueToCode(block, "SW", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("led(", value_sw), ")\n");
+            var code = System.String.concat("led(", value_sw, ")\n");
             return code;
         },
         bit: function (block) {
@@ -18147,7 +19510,7 @@
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var value_frequency = Blockly.Ruby.valueToCode(block, "FREQUENCY", Blockly.Ruby.ORDER_ATOMIC);
             var value_duration = Blockly.Ruby.valueToCode(block, "DURATION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("tone(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ","), value_frequency), ","), value_duration), ")\n");
+            var code = System.String.concat("tone(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ",", value_frequency, ",", value_duration, ")\n");
             return code;
         },
         tone_value: function (block) {
@@ -18157,12 +19520,12 @@
         },
         no_tone: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
-            var code = System.String.concat(System.String.concat("noTone(", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ")\n");
+            var code = "noTone(" + WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no) + ")\n";
             return code;
         },
         random_seed: function (block) {
             var value_name = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("randomSeed(", value_name), ")\n");
+            var code = System.String.concat("randomSeed(", value_name, ")\n");
             return code;
         },
         random: function (block) {
@@ -18170,9 +19533,9 @@
             var value_max = Blockly.Ruby.valueToCode(block, "MAX", Blockly.Ruby.ORDER_ATOMIC);
             var code;
             if (System.String.isNullOrEmpty(value_min)) {
-                code = System.String.concat(System.String.concat("random(", value_max), ")");
+                code = System.String.concat("random(", value_max, ")");
             } else {
-                code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("random(", value_min), ","), value_max), ")");
+                code = System.String.concat("random(", value_min, ",", value_max, ")");
             }
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
@@ -18180,42 +19543,42 @@
             var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var dropdown_eep_open_mode = block.getFieldValue("EEP_OPEN_MODE");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("MemFile.open(", WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no)), ","), value_filename), ","), WebMrbc.GrSakura.memOpenModeNameToNum(dropdown_eep_open_mode)), ")\n");
+            var code = System.String.concat("MemFile.open(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ",", value_filename, ",", WebMrbc.GrSakura.memOpenModeNameToNum(dropdown_eep_open_mode), ")\n");
             return code;
         },
         memfile_close: function (block) {
             var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
-            var code = System.String.concat(System.String.concat("MemFile.close(", WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no)), ")\n");
+            var code = "MemFile.close(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ")\n";
             return code;
         },
         memfile_read: function (block) {
             var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
-            var code = System.String.concat(System.String.concat("MemFile.read(", WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no)), ")");
+            var code = "MemFile.read(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_write: function (block) {
             var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("MemFile.write(", WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no)), ","), value_data), ","), value_length), ")");
+            var code = System.String.concat("MemFile.write(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ",", value_data, ",", value_length, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_seek: function (block) {
             var dropdown_mem_file_no = block.getFieldValue("MEM_FILE_NO");
             var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("MemFile.seek(", WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no)), ","), value_position), ")");
+            var code = System.String.concat("MemFile.seek(" + WebMrbc.GrSakura.memFileHandlerNameToNum(dropdown_mem_file_no) + ",", value_position, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_cp: function (block) {
             var value_src_filename = Blockly.Ruby.valueToCode(block, "SRC_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var value_dst_filename = Blockly.Ruby.valueToCode(block, "DST_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var dropdown_eep_cp_mode = block.getFieldValue("EEP_CP_MODE");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("MemFile.cp(", value_dst_filename), ","), value_dst_filename), ","), WebMrbc.GrSakura.memCpModeNameToNum(dropdown_eep_cp_mode)), ")");
+            var code = System.String.concat("MemFile.cp(", value_dst_filename, ",", value_dst_filename, ",", WebMrbc.GrSakura.memCpModeNameToNum(dropdown_eep_cp_mode), ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         memfile_rm: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("MemFile.rm(", value_filename), ")");
+            var code = System.String.concat("MemFile.rm(", value_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_year: function (block) {
@@ -18247,15 +19610,15 @@
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_datetime: function (block) {
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("[", Blockly.Ruby.valueToCode(block, "YEAR", Blockly.Ruby.ORDER_ATOMIC)), ", "), Blockly.Ruby.valueToCode(block, "MONTH", Blockly.Ruby.ORDER_ATOMIC)), ", "), Blockly.Ruby.valueToCode(block, "DAY", Blockly.Ruby.ORDER_ATOMIC)), ", "), Blockly.Ruby.valueToCode(block, "HOUR", Blockly.Ruby.ORDER_ATOMIC)), ", "), Blockly.Ruby.valueToCode(block, "MINUTE", Blockly.Ruby.ORDER_ATOMIC)), ", "), Blockly.Ruby.valueToCode(block, "SECOND", Blockly.Ruby.ORDER_ATOMIC)), "]");
+            var code = System.String.concat("[", Blockly.Ruby.valueToCode(block, "YEAR", Blockly.Ruby.ORDER_ATOMIC), ", ", Blockly.Ruby.valueToCode(block, "MONTH", Blockly.Ruby.ORDER_ATOMIC), ", ", Blockly.Ruby.valueToCode(block, "DAY", Blockly.Ruby.ORDER_ATOMIC), ", ", Blockly.Ruby.valueToCode(block, "HOUR", Blockly.Ruby.ORDER_ATOMIC), ", ", Blockly.Ruby.valueToCode(block, "MINUTE", Blockly.Ruby.ORDER_ATOMIC), ", ", Blockly.Ruby.valueToCode(block, "SECOND", Blockly.Ruby.ORDER_ATOMIC), "]");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_get_datetime_item: function (block) {
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("@", Blockly.Ruby.variableDB_.getName(block.getFieldValue("ARRAY"), Blockly.Variables.NAME_TYPE)), "["), block.getFieldValue("ITEM")), "]");
+            var code = System.String.concat("@", Blockly.Ruby.variableDB_.getName(block.getFieldValue("ARRAY"), Blockly.Variables.NAME_TYPE), "[", block.getFieldValue("ITEM"), "]");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_set_datetime_item: function (block) {
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("@", Blockly.Ruby.variableDB_.getName(block.getFieldValue("ARRAY"), Blockly.Variables.NAME_TYPE)), "["), block.getFieldValue("ITEM")), "] = "), Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC)), "\n");
+            var code = System.String.concat("@", Blockly.Ruby.variableDB_.getName(block.getFieldValue("ARRAY"), Blockly.Variables.NAME_TYPE), "[", block.getFieldValue("ITEM"), "] = ", Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_ATOMIC), "\n");
             return code;
         },
         rtc_gettime: function (block) {
@@ -18264,7 +19627,7 @@
         },
         rtc_settime: function (block) {
             var value_date = Blockly.Ruby.valueToCode(block, "DATE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("Rtc.setTime(", value_date), ")");
+            var code = System.String.concat("Rtc.setTime(", value_date, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         rtc_deinit: function (block) {
@@ -18277,73 +19640,73 @@
         },
         sd_exists: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("SD.exists(", value_filename), ")");
+            var code = System.String.concat("SD.exists(", value_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_mkdir: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "DIRNAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("SD.mkdir(", value_filename), ")");
+            var code = System.String.concat("SD.mkdir(", value_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_remove: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("SD.remove(", value_filename), ")");
+            var code = System.String.concat("SD.remove(", value_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_copy: function (block) {
             var value_src_filename = Blockly.Ruby.valueToCode(block, "SRC_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var value_dst_filename = Blockly.Ruby.valueToCode(block, "DST_FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("SD.copy(", value_src_filename), ","), value_dst_filename), ")");
+            var code = System.String.concat("SD.copy(", value_src_filename, ",", value_dst_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_rmdir: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "DIRNAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("SD.rmdir(", value_filename), ")");
+            var code = System.String.concat("SD.rmdir(", value_filename, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_open: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
             var dropdown_sd_open_mode = block.getFieldValue("SD_OPEN_MODE");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("SD.open(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ","), value_filename), ","), WebMrbc.GrSakura.sdOpenModeNameToNum(dropdown_sd_open_mode)), ")");
+            var code = System.String.concat("SD.open(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ",", value_filename, ",", WebMrbc.GrSakura.sdOpenModeNameToNum(dropdown_sd_open_mode), ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_close: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
-            var code = System.String.concat(System.String.concat("SD.close(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ")");
+            var code = "SD.close(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_read: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
-            var code = System.String.concat(System.String.concat("SD.read(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ")");
+            var code = "SD.read(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_seek: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_position = Blockly.Ruby.valueToCode(block, "POSITION", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("SD.seek(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ","), value_position), ")");
+            var code = System.String.concat("SD.seek(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ",", value_position, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_write: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("SD.write(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ","), value_data), ","), value_length), ")");
+            var code = System.String.concat("SD.write(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ",", value_data, ",", value_length, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_flush: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
-            var code = System.String.concat(System.String.concat("SD.flush(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ")\n");
+            var code = "SD.flush(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")\n";
             return code;
         },
         sd_size: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
-            var code = System.String.concat(System.String.concat("SD.size(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ")");
+            var code = "SD.size(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         sd_position: function (block) {
             var dropdown_sd_file_no = block.getFieldValue("SD_FILE_NO");
-            var code = System.String.concat(System.String.concat("SD.position(", WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no)), ")");
+            var code = "SD.position(" + WebMrbc.GrSakura.sdFileHandlerNameToNum(dropdown_sd_file_no) + ")";
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         bps_value: function (block) {
@@ -18353,25 +19716,25 @@
         serial_new: function (block) {
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_bps = Blockly.Ruby.valueToCode(block, "BPS", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), " = Serial.new("), WebMrbc.GrSakura.serialPortNameToNum(dropdown_serial_port_no)), ","), value_bps), ")");
+            var code = System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), " = Serial.new(", WebMrbc.GrSakura.serialPortNameToNum(dropdown_serial_port_no), ",", value_bps, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_bps: function (block) {
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_bps = Blockly.Ruby.valueToCode(block, "BPS", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".bps("), value_bps), ")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".bps(", value_bps, ")\n");
             return code;
         },
         serial_print: function (block) {
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_str = Blockly.Ruby.valueToCode(block, "STR", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".print("), value_str), ")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".print(", value_str, ")\n");
             return code;
         },
         serial_println: function (block) {
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_str = Blockly.Ruby.valueToCode(block, "STR", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".println("), value_str), ")\n");
+            var code = System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".println(", value_str, ")\n");
             return code;
         },
         serial_available: function (block) {
@@ -18388,7 +19751,7 @@
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".bps("), value_data), ","), value_length), ")");
+            var code = System.String.concat(WebMrbc.GrSakura.serialPortNameToVariable(dropdown_serial_port_no), ".bps(", value_data, ",", value_length, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         serial_flash: function (block) {
@@ -18409,34 +19772,34 @@
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var text_min = block.getFieldValue("MIN");
             var text_max = block.getFieldValue("MAX");
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("Servo.attach(", number_ch), ","), WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), ","), text_min), ","), text_max), ")\n");
+            var code = System.String.concat("Servo.attach(", number_ch, ",", WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no), ",", text_min, ",", text_max, ")\n");
             return code;
         },
         servo_write: function (block) {
             var number_ch = block.getFieldValue("CH");
             var value_angle = Blockly.Ruby.valueToCode(block, "ANGLE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("Servo.write(", number_ch), ","), value_angle), ")\n");
+            var code = System.String.concat("Servo.write(", number_ch, ",", value_angle, ")\n");
             return code;
         },
         servo_us: function (block) {
             var number_ch = block.getFieldValue("CH");
             var value_us = Blockly.Ruby.valueToCode(block, "US", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("Servo.us(", number_ch), ","), value_us), ")\n");
+            var code = System.String.concat("Servo.us(", number_ch, ",", value_us, ")\n");
             return code;
         },
         servo_read: function (block) {
             var number_ch = block.getFieldValue("CH");
-            var code = System.String.concat(System.String.concat("Servo.read(", number_ch), ")");
+            var code = System.String.concat("Servo.read(", number_ch, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         servo_attached: function (block) {
             var number_ch = block.getFieldValue("CH");
-            var code = System.String.concat(System.String.concat("Servo.attached(", number_ch), ")");
+            var code = System.String.concat("Servo.attached(", number_ch, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         servo_detach: function (block) {
             var number_ch = block.getFieldValue("CH");
-            var code = System.String.concat(System.String.concat("Servo.detach(", number_ch), ")\n");
+            var code = System.String.concat("Servo.detach(", number_ch, ")\n");
             return code;
         },
         system_exit: function (block) {
@@ -18445,7 +19808,7 @@
         },
         system_setrun: function (block) {
             var value_filename = Blockly.Ruby.valueToCode(block, "FILENAME", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat("System.setrun(", value_filename), ")\n");
+            var code = System.String.concat("System.setrun(", value_filename, ")\n");
             return code;
         },
         system_version: function (block) {
@@ -18456,13 +19819,13 @@
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("System.push(", value_address), ","), value_data), ","), value_length), ")\n");
+            var code = System.String.concat("System.push(", value_address, ",", value_data, ",", value_length, ")\n");
             return code;
         },
         system_pop: function (block) {
             var value_address = Blockly.Ruby.valueToCode(block, "ADDRESS", Blockly.Ruby.ORDER_ATOMIC);
             var value_length = Blockly.Ruby.valueToCode(block, "LENGTH", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("System.pop(", value_address), ","), value_length), ")");
+            var code = System.String.concat("System.pop(", value_address, ",", value_length, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         system_fileload: function (block) {
@@ -18513,7 +19876,7 @@
             var data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
             var code = new System.Text.StringBuilder();
             code.append("if (prop.anno)\n");
-            code.append(System.String.concat(System.String.concat("\tprop.set_anno(", data), " != src)\n"));
+            code.append(System.String.concat("\tprop.set_anno(", data, " != src)\n"));
             code.append("end\n");
             return code.toString();
         },
@@ -18525,15 +19888,15 @@
 
             switch (dropdown_width) {
                 case "BYTE": 
-                    code = System.String.concat(System.String.concat("src.getbyte(", value_position), ")");
+                    code = System.String.concat("src.getbyte(", value_position, ")");
                     break;
                 case "SHORT": 
-                    functionName = Blockly.Ruby.provideFunction_("getshort", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(str, pos)"), "\t(src.getbyte(pos) << 8) + src.getbyte(pos + 1)", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(functionName, "(src, "), value_position), ")");
+                    functionName = Blockly.Ruby.provideFunction_("getshort", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(str, pos)"), "\t(src.getbyte(pos) << 8) + src.getbyte(pos + 1)", "end"]);
+                    code = System.String.concat(functionName, "(src, ", value_position, ")");
                     break;
                 case "INT": 
-                    functionName = Blockly.Ruby.provideFunction_("getint", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(str, pos)"), "\t(src.getbyte(pos) << 24) + (src.getbyte(pos + 1) << 16) + (src.getbyte(pos + 2) << 8) + src.getbyte(pos + 3)", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(functionName, "(src, "), value_position), ")");
+                    functionName = Blockly.Ruby.provideFunction_("getint", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(str, pos)"), "\t(src.getbyte(pos) << 24) + (src.getbyte(pos + 1) << 16) + (src.getbyte(pos + 2) << 8) + src.getbyte(pos + 3)", "end"]);
+                    code = System.String.concat(functionName, "(src, ", value_position, ")");
                     break;
             }
 
@@ -18548,15 +19911,15 @@
 
             switch (dropdown_width) {
                 case "BYTE": 
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("src.setbyte(", value_position), ", "), value_value), ")\n");
+                    code = System.String.concat("src.setbyte(", value_position, ", ", value_value, ")\n");
                     break;
                 case "SHORT": 
-                    functionName = Blockly.Ruby.provideFunction_("setshort", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(str, pos, value)"), "\tsrc.setbyte(pos, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 1, value & 0xFF)", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "(src, "), value_position), ", "), value_value), ")\n");
+                    functionName = Blockly.Ruby.provideFunction_("setshort", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(str, pos, value)"), "\tsrc.setbyte(pos, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 1, value & 0xFF)", "end"]);
+                    code = System.String.concat(functionName, "(src, ", value_position, ", ", value_value, ")\n");
                     break;
                 case "INT": 
-                    functionName = Blockly.Ruby.provideFunction_("setint", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(str, pos, value)"), "\tsrc.setbyte(pos, (value >> 24) & 0xFF)", "\tsrc.setbyte(pos + 1, (value >> 16) & 0xFF)", "\tsrc.setbyte(pos + 2, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 3, value & 0xFF)", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "(src, "), value_position), ", "), value_value), ")\n");
+                    functionName = Blockly.Ruby.provideFunction_("setint", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(str, pos, value)"), "\tsrc.setbyte(pos, (value >> 24) & 0xFF)", "\tsrc.setbyte(pos + 1, (value >> 16) & 0xFF)", "\tsrc.setbyte(pos + 2, (value >> 8) & 0xFF)", "\tsrc.setbyte(pos + 3, value & 0xFF)", "end"]);
+                    code = System.String.concat(functionName, "(src, ", value_position, ", ", value_value, ")\n");
                     break;
             }
             return code;
@@ -18566,7 +19929,7 @@
                 case "SET": 
                     return "return 0\n";
                 case "GET": 
-                    return System.String.concat(System.String.concat("return ", Blockly.Ruby.quote_("")), "\n");
+                    return System.String.concat("return ", Blockly.Ruby.quote_(""), "\n");
             }
             return "return\n";
         },
@@ -18607,12 +19970,12 @@
                 if (System.String.isNullOrEmpty(argument1)) {
                     argument1 = "''";
                 }
-                code = System.String.concat(System.String.concat(System.String.concat(argument01, ".chr + "), argument1), ".chr");
+                code = System.String.concat(argument01, ".chr + ", argument1, ".chr");
                 return [code, this.ORDER_UNARY_SIGN];
             } else {
                 var codes = System.Array.init(0, null);
                 for (var n = 0; n < block.itemCount_; n = (n + 1) | 0) {
-                    var temp = Blockly.Ruby.valueToCode(block, System.String.concat("ADD", n), Blockly.Ruby.ORDER_NONE);
+                    var temp = Blockly.Ruby.valueToCode(block, "ADD" + n, Blockly.Ruby.ORDER_NONE);
                     if (System.String.isNullOrEmpty(temp)) {
                         temp = "''";
                     }
@@ -18626,7 +19989,7 @@
             var dropdown_type = block.getFieldValue("TYPE");
             var value_epc = Blockly.Ruby.valueToCode(block, "EPC", Blockly.Ruby.ORDER_ATOMIC);
             // nilにはリモートノードを指定できる
-            var code = System.String.concat(System.String.concat(System.String.concat(dropdown_type, "(nil, "), value_epc), ")");
+            var code = System.String.concat(dropdown_type, "(nil, ", value_epc, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         create_esv_set: function (block) {
@@ -18634,30 +19997,30 @@
             var value_epc = Blockly.Ruby.valueToCode(block, "EPC", Blockly.Ruby.ORDER_ATOMIC);
             var value_edt = Blockly.Ruby.valueToCode(block, "EDT", Blockly.Ruby.ORDER_ATOMIC);
             // nilにはリモートノードを指定できる
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(dropdown_type, "(nil, "), value_epc), ", "), value_edt), ")");
+            var code = System.String.concat(dropdown_type, "(nil, ", value_epc, ", ", value_edt, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         esv_add_edt: function (block) {
             var variable_esv = Blockly.Ruby.variableDB_.getName(block.getFieldValue("ESV"), Blockly.Variables.NAME_TYPE);
             var value_epc = Blockly.Ruby.valueToCode(block, "EPC", Blockly.Ruby.ORDER_ATOMIC);
             var value_edt = Blockly.Ruby.valueToCode(block, "EDT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(variable_esv, ".add_edt("), value_epc), ", "), value_edt), ")\n");
+            var code = System.String.concat(variable_esv, ".add_edt(", value_epc, ", ", value_edt, ")\n");
             return code;
         },
         esv_add_epc: function (block) {
             var variable_esv = Blockly.Ruby.variableDB_.getName(block.getFieldValue("ESV"), Blockly.Variables.NAME_TYPE);
             var value_epc = Blockly.Ruby.valueToCode(block, "EPC", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(variable_esv, ".add_epc("), value_epc), ")\n");
+            var code = System.String.concat(variable_esv, ".add_epc(", value_epc, ")\n");
             return code;
         },
         send_esv: function (block) {
             var variable_esv = Blockly.Ruby.variableDB_.getName(block.getFieldValue("ESV"), Blockly.Variables.NAME_TYPE);
-            var code = System.String.concat(System.String.concat("snd_esv(", variable_esv), ")\n");
+            var code = System.String.concat("snd_esv(", variable_esv, ")\n");
             return code;
         },
         release_esv: function (block) {
             var variable_esv = Blockly.Ruby.variableDB_.getName(block.getFieldValue("ESV"), Blockly.Variables.NAME_TYPE);
-            var code = System.String.concat(System.String.concat("rel_esv(", variable_esv), ")\n");
+            var code = System.String.concat("rel_esv(", variable_esv, ")\n");
             return code;
         },
         notify_initial_esv: function (block) {
@@ -18689,7 +20052,7 @@
         svctask_set_timer: function (block) {
             var variable_svc = Blockly.Ruby.variableDB_.getName(block.getFieldValue("SVC"), Blockly.Variables.NAME_TYPE);
             var value_timer = Blockly.Ruby.valueToCode(block, "TIMER", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(variable_svc, ".set_timer("), value_timer), ")\n");
+            var code = System.String.concat(variable_svc, ".set_timer(", value_timer, ")\n");
             return code;
         },
         svctask_timer: function (block) {
@@ -18700,14 +20063,14 @@
         svctask_progress: function (block) {
             var variable_svc = Blockly.Ruby.variableDB_.getName(block.getFieldValue("SVC"), Blockly.Variables.NAME_TYPE);
             var value_elapse = Blockly.Ruby.valueToCode(block, "ELAPSE", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(variable_svc, ".progress("), value_elapse), ")\n");
+            var code = System.String.concat(variable_svc, ".progress(", value_elapse, ")\n");
             return code;
         },
         svctask_recv_msg: function (block) {
             var variable_svc = Blockly.Ruby.variableDB_.getName(block.getFieldValue("SVC"), Blockly.Variables.NAME_TYPE);
             var value_endpoint = Blockly.Ruby.valueToCode(block, "ENDPOINT", Blockly.Ruby.ORDER_ATOMIC);
             var value_data = Blockly.Ruby.valueToCode(block, "DATA", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(variable_svc, ".recv_msg("), value_endpoint), ", "), value_data), ")\n");
+            var code = System.String.concat(variable_svc, ".recv_msg(", value_endpoint, ", ", value_data, ")\n");
             return code;
         },
         svctask_call_timeout: function (block) {
@@ -18719,7 +20082,7 @@
             var value_node = Blockly.Ruby.valueToCode(block, "NODE", Blockly.Ruby.ORDER_ATOMIC);
             var value_edtat = Blockly.Ruby.valueToCode(block, "EDTAT", Blockly.Ruby.ORDER_ATOMIC);
             var value_endpoint = Blockly.Ruby.valueToCode(block, "ENDPOINT", Blockly.Ruby.ORDER_ATOMIC);
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("is_match(", value_node), ", "), value_edtat), ", "), value_endpoint), ")");
+            var code = System.String.concat("is_match(", value_node, ", ", value_edtat, ", ", value_endpoint, ")");
             return [code, Blockly.Ruby.ORDER_ATOMIC];
         },
         defineSvcTask: function (workspace, localNode) {
@@ -18768,9 +20131,9 @@
             var wa = new WebMrbc.CodeGenWorkArea();
             var sb = new System.Text.StringBuilder();
 
-            sb.appendLine(System.String.concat(System.String.concat("class ", identifier), " ECNL::SvcTask"));
+            sb.appendLine(System.String.concat("class ", identifier, " ECNL::SvcTask"));
             sb.appendLine("\tdef initialize()");
-            sb.appendLine(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\t\t@profile = ", localNode.identifier), ".new("), localNode.instanceCode), ")"));
+            sb.appendLine(System.String.concat("\t\t@profile = ", localNode.identifier, ".new(", localNode.instanceCode, ")"));
             switch (localNode.objects.length) {
                 case 0: 
                     sb.appendLine("\t\t@devices = []");
@@ -18778,7 +20141,7 @@
                 case 1: 
                     {
                         var o = localNode.objects[0];
-                        sb.appendLine(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\t\t@devices = [ ", o.identifier), ".new("), o.instanceCode), ", @profile) ]"));
+                        sb.appendLine(System.String.concat("\t\t@devices = [ ", o.identifier, ".new(", o.instanceCode, ", @profile) ]"));
                     }
                     break;
                 default: 
@@ -18786,7 +20149,7 @@
                     $t = Bridge.getEnumerator(localNode.objects);
                     while ($t.moveNext()) {
                         var o1 = $t.getCurrent();
-                        sb.appendLine(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\t\t\t", o1.identifier), ".new("), o1.instanceCode), ", @profile) ]"));
+                        sb.appendLine(System.String.concat("\t\t\t", o1.identifier, ".new(", o1.instanceCode, ", @profile) ]"));
                     }
                     sb.appendLine("\t\t]");
                     break;
@@ -18958,20 +20321,20 @@
             return sb.toString();
         },
         init_smalruby: function (workspace) {
-            this.definitions_.receiver_stack = ["main"];
-            this.definitions_.eobject_stack = System.Array.init(0, null);
+            this.definitions_.set("receiver_stack", new (System.Collections.Generic.List$1(String))());
+            this.definitions_.set("eobject_stack", new (System.Collections.Generic.List$1(String))());
         },
         defineENode: function (enode, workspace) {
             var code = Blockly.Ruby.workspaceToCode(workspace);
             var identifier = enode.identifier;
             var blockName = System.String.concat("enode_", identifier);
 
-            if (Blockly.Ruby.definitions_[blockName] == null) {
+            if (!Blockly.Ruby.definitions_.containsKey(blockName)) {
                 var wa = new WebMrbc.CodeGenWorkArea();
                 var cg = new WebMrbc.CodeGenerator(enode);
                 var sb = new System.Text.StringBuilder();
 
-                sb.appendLine(System.String.concat(System.String.concat("class ", identifier), " < ECNL::ENode"));
+                sb.appendLine(System.String.concat("class ", identifier, " < ECNL::ENode"));
                 sb.appendLine("\tdef initialize(eojx3)");
                 sb.append(cg.defineEchonetObject("\t\t"));
                 sb.appendLine();
@@ -18984,7 +20347,10 @@
                 sb.appendLine("end");
 
                 code = sb.toString();
-                Blockly.Ruby.definitions_[blockName] = code;
+                Blockly.Ruby.definitions_.set(blockName, function (_o1) {
+                        _o1.add(code);
+                        return _o1;
+                    }(new (System.Collections.Generic.List$1(String))()));
             }
             return code;
         },
@@ -18995,13 +20361,13 @@
             var cg = new WebMrbc.CodeGenerator(eobject);
             var sb = new System.Text.StringBuilder();
 
-            sb.appendLine(System.String.concat(System.String.concat("class ", identifier), " < ECNL::EObject"));
+            sb.appendLine(System.String.concat("class ", identifier, " < ECNL::EObject"));
             sb.appendLine("\tdef initialize(eojx3, enod)");
             sb.append(cg.defineEchonetObject("\t\t"));
             sb.appendLine();
             sb.append(cg.configEchonetObject("\t\t"));
             sb.appendLine();
-            sb.appendLine(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\t\tsuper(", eobject.type.classGroup.classGroupCode), ", "), eobject.type.classCode), ", eojx3, enod, eprpinib_table)"));
+            sb.appendLine("\t\tsuper(" + eobject.type.classGroup.classGroupCode + ", " + eobject.type.classCode + ", eojx3, enod, eprpinib_table)");
             sb.appendLine("\tend");
             sb.appendLine();
             sb.append(code);
@@ -19010,32 +20376,32 @@
             return sb.toString();
         },
         eobjectStack: function () {
-            return Bridge.cast(this.definitions_.eobject_stack, Array);
+            return this.definitions_.get("eobject_stack");
         },
         eobject: function () {
             var t = this.eobjectStack();
-            if (t.length === 0) {
+            if (t.getCount() === 0) {
                 return null;
             }
-            return t[((t.length - 1) | 0)];
+            return t.getItem(((t.getCount() - 1) | 0));
         },
         receiverStack: function () {
-            return Bridge.cast(this.definitions_.receiver_stack, Array);
+            return this.definitions_.get("receiver_stack");
         },
         receiver: function () {
             var t = this.receiverStack();
-            if (t.length === 0) {
+            if (t.getCount() === 0) {
                 return null;
             }
-            return t[((t.length - 1) | 0)];
+            return t.getItem(((t.getCount() - 1) | 0));
         },
         receiverName: function (options) {
             if (options === void 0) { options = null; }
             if (options == null) {
-                options = new $_.$AnonymousType$26();
+                options = new $asm.$AnonymousType$26();
             }
 
-            var opts = new $_.$AnonymousType$27(this.eobject(), true);
+            var opts = new $asm.$AnonymousType$27(this.eobject(), true);
 
             for (var o in options) opts[o] = options[o];
             var r = this.receiver();
@@ -19046,7 +20412,7 @@
                     return "self.";
                 }
             } else {
-                return System.String.concat(opts.object.identifier, ".");
+                return System.String.concat(opts.object, ".");
             }
         },
         eobjectMethodCall_: function (method, args, options) {
@@ -19063,7 +20429,7 @@
             var code;
             if (this.eobject() != null) {
                 if (args != null && args.length > 0) {
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(this.receiverName(options), method), "("), args), ")");
+                    code = System.String.concat(this.receiverName(options), method, "(", args, ")");
                 } else {
                     code = System.String.concat(this.receiverName(options), method);
                 }
@@ -19075,7 +20441,7 @@
         eobjectSetVariable_: function (name, val, operator) {
             if (operator === void 0) { operator = "="; }
             if (this.eobject() != null) {
-                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(this.receiverName(new $_.$AnonymousType$28(false)), name), operator), " "), val), "\n");
+                return System.String.concat(this.receiverName(new $asm.$AnonymousType$28(false)), name, operator, " ", val, "\n");
             } else {
                 return "";
             }
@@ -19086,7 +20452,7 @@
             var body;
 
             if (((c = this.eobject())) != null) {
-                this.receiverStack().push(c);
+                this.receiverStack().add(c);
                 try {
                     body = this.statementToCode(block, bodyName);
                     if (System.String.isNullOrEmpty(body)) {
@@ -19094,7 +20460,7 @@
                     }
                 }
                 finally {
-                    this.receiverStack().pop();
+                    this.receiverStack().removeAt(((this.receiverStack().getCount() - 1) | 0));
                 }
 
                 if (arg != null) {
@@ -19103,10 +20469,87 @@
                     arg = "";
                 }
 
-                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("\n", this.receiverName(new $_.$AnonymousType$26())), "on(:"), name), arg), ") do\n"), body), "end\n");
+                return System.String.concat("\n", this.receiverName(new $asm.$AnonymousType$26()), "on(:", name, arg, ") do\n", body, "end\n");
             } else {
                 return "";
             }
+        },
+        eproperty_fixlen: function (block) {
+            var $t, $t1;
+            var text_identifier = block.identifier_;
+            var value_description = block.description_;
+            var value_property_code = System.Int32.format(block.property_code_, "X2");
+            var value_property_size = block.property_size_.toString();
+            var statements_get = Blockly.Ruby.statementToCode(block, "GET");
+            var value_get_ret = Blockly.Ruby.valueToCode(block, "GET_RET", Blockly.Ruby.ORDER_ATOMIC);
+            var code = new System.Text.StringBuilder();
+            var indent = "\t";
+
+            code.appendLine(System.String.concat(indent, System.String.format("# {0}設定関数", value_description)));
+            code.appendLine(System.String.concat(indent, System.String.format("def {0}_set(prop, src)", text_identifier)));
+            indent = System.String.concat(indent, "\t");
+            code.appendLine(System.String.concat(indent, System.String.format("# サイズが{0}以外は受け付けない", value_property_size)));
+            code.appendLine(System.String.concat(indent, System.String.format("if (src.bytesize != {0}) then", value_property_size)));
+            code.appendLine(System.String.concat(indent, "\treturn 0"));
+            code.appendLine(System.String.concat(indent, "end"));
+            code.appendLine();
+            code.appendLine(System.String.concat(indent, "if (prop.anno) then"));
+            code.appendLine(System.String.concat(indent, "\tprop.set_anno(prop.exinf != src)"));
+            code.appendLine(System.String.concat(indent, "end"));
+            code.appendLine();
+            switch (value_property_size) {
+                case "1": 
+                    code.appendLine(System.String.concat(indent, "val = src.getbyte(0)"));
+                    break;
+                case "2": 
+                    code.appendLine(System.String.concat(indent, "val = (src.getbyte(0) << 8) | src.getbyte(1)"));
+                    break;
+                case "4": 
+                    code.appendLine(System.String.concat(indent, "val = (src.getbyte(0) << 24) | (src.getbyte(1) << 16) | (src.getbyte(2) << 8) | src.getbyte(3)"));
+                    break;
+            }
+
+            if (block.cases_.length > 0) {
+                code.appendLine();
+                code.appendLine(System.String.concat(indent, "case val"));
+                var i = 0;
+                for (; block.getInput("CASE" + i) != null; i = (i + 1) | 0) {
+                    var description = block.getFieldValue("CASE_DESCRIPTION" + i);
+                    var value = block.getFieldValue("CASE_VALUE" + i);
+                    code.appendLine(System.String.concat(indent, System.String.format("# {0}の場合", description)));
+                    code.appendLine(System.String.concat(indent, System.String.format("when {0}", value)));
+                    indent = System.String.concat(indent, "\t");
+                    var statements_set = Blockly.Ruby.statementToCode(block, "SET" + i);
+                    $t = Bridge.getEnumerator(statements_set.split(String.fromCharCode(10)));
+                    while ($t.moveNext()) {
+                        var line = $t.getCurrent();
+                        code.appendLine(System.String.concat(indent, line));
+                    }
+                    indent = indent.substr(0, ((indent.length - 1) | 0));
+                }
+
+                code.appendLine(System.String.concat(indent, "end"));
+            }
+
+            code.appendLine(System.String.concat(indent, "return ", value_property_size));
+            indent = indent.substr(0, ((indent.length - 1) | 0));
+            code.appendLine(System.String.concat(indent, "end"));
+            code.appendLine();
+
+            code.appendLine(System.String.concat(indent, System.String.format("# {0}取得関数", value_description)));
+            code.appendLine(System.String.concat(indent, "def ", text_identifier, "_get(prop, size)"));
+            indent = System.String.concat(indent, "\t");
+            $t1 = Bridge.getEnumerator(statements_get.split(String.fromCharCode(10)));
+            while ($t1.moveNext()) {
+                var line1 = $t1.getCurrent();
+                code.appendLine(System.String.concat(indent, line1));
+            }
+            code.appendLine(System.String.concat(indent, "return ", value_get_ret));
+            indent = indent.substr(0, ((indent.length - 1) | 0));
+            code.appendLine(System.String.concat(indent, "end"));
+            code.appendLine();
+
+            return code.toString();
         },
         eproperty_varlen: function (block) {
             var $t, $t1;
@@ -19122,101 +20565,27 @@
             var indent = "\t";
 
             code.appendLine(System.String.concat(indent, System.String.format("# {0}設定関数", value_description)));
-            code.appendLine(System.String.concat(System.String.concat(System.String.concat(indent, "def "), text_identifier), "_set(prop, src)"));
+            code.appendLine(System.String.concat(indent, "def ", text_identifier, "_set(prop, src)"));
             indent = System.String.concat(indent, "\t");
             $t = Bridge.getEnumerator(statements_set.split(String.fromCharCode(10)));
             while ($t.moveNext()) {
                 var line = $t.getCurrent();
                 code.appendLine(System.String.concat(indent, line));
             }
-            code.appendLine(System.String.concat(System.String.concat(indent, "return "), value_set_ret));
+            code.appendLine(System.String.concat(indent, "return ", value_set_ret));
             indent = indent.substr(0, ((indent.length - 1) | 0));
             code.appendLine(System.String.concat(indent, "end"));
             code.appendLine();
 
             code.appendLine(System.String.concat(indent, System.String.format("# {0}取得関数", value_description)));
-            code.appendLine(System.String.concat(System.String.concat(System.String.concat(indent, "def "), text_identifier), "_get(prop, size)"));
+            code.appendLine(System.String.concat(indent, "def ", text_identifier, "_get(prop, size)"));
             indent = System.String.concat(indent, "\t");
             $t1 = Bridge.getEnumerator(statements_get.split(String.fromCharCode(10)));
             while ($t1.moveNext()) {
                 var line1 = $t1.getCurrent();
                 code.appendLine(System.String.concat(indent, line1));
             }
-            code.appendLine(System.String.concat(System.String.concat(indent, "return "), value_get_ret));
-            indent = indent.substr(0, ((indent.length - 1) | 0));
-            code.appendLine(System.String.concat(indent, "end"));
-            code.appendLine();
-
-            return code.toString();
-        },
-        eproperty_fixlen: function (block) {
-            var $t, $t1;
-            var text_identifier = block.getFieldValue("IDENTIFIER");
-            var value_description = block.getFieldValue("DESCRIPTION");
-            var value_property_code = block.getFieldValue("PROPERTY_CODE");
-            var value_property_size = block.getFieldValue("PROPERTY_SIZE");
-            var statements_get = Blockly.Ruby.statementToCode(block, "GET");
-            var value_get_ret = Blockly.Ruby.valueToCode(block, "GET_RET", Blockly.Ruby.ORDER_ATOMIC);
-            var code = new System.Text.StringBuilder();
-            var indent = "\t";
-
-            code.appendLine(System.String.concat(indent, System.String.format("# {0}設定関数", value_description)));
-            code.appendLine(System.String.concat(indent, System.String.format("def {0}_set(prop, src)", text_identifier)));
-            indent = System.String.concat(indent, "\t");
-            code.appendLine(System.String.concat(indent, System.String.format("# サイズが{0}以外は受け付けない", value_property_size)));
-            code.appendLine(System.String.concat(indent, System.String.format("if (src.bytesize != {0}) then", value_property_size)));
-            code.appendLine(System.String.concat(indent, "return 0"));
-            code.appendLine(System.String.concat(indent, "end"));
-            code.appendLine();
-            code.appendLine(System.String.concat(indent, "if (prop.anno) then"));
-            code.appendLine(System.String.concat(indent, "prop.set_anno(prop.exinf != src)"));
-            code.appendLine(System.String.concat(indent, "end"));
-            code.appendLine();
-            switch (value_property_size) {
-                case "1": 
-                    code.appendLine(System.String.concat(indent, "val = src.getbyte(0)"));
-                    break;
-                case "2": 
-                    code.appendLine(System.String.concat(indent, "val = (src.getbyte(0) << 8) | src.getbyte(1)"));
-                    break;
-                case "4": 
-                    code.appendLine(System.String.concat(indent, "val = (src.getbyte(0) << 24) | (src.getbyte(1) << 16) | (src.getbyte(2) << 8) | src.getbyte(3)"));
-                    break;
-            }
-            code.appendLine();
-            code.appendLine(System.String.concat(indent, "case val"));
-            var i = 0;
-            for (; block.getInput(System.String.concat("CASE", i)) != null; i = (i + 1) | 0) {
-                var description = block.getFieldValue(System.String.concat("CASE_DESCRIPTION", i));
-                var value = block.getFieldValue(System.String.concat("CASE_VALUE", i));
-                code.appendLine(System.String.concat(indent, System.String.format("# {0}の場合", description)));
-                code.appendLine(System.String.concat(indent, System.String.format("when {0}", value)));
-                indent = System.String.concat(indent, "\t");
-                var statements_set = Blockly.Ruby.statementToCode(block, System.String.concat("SET", i));
-                $t = Bridge.getEnumerator(statements_set.split(String.fromCharCode(10)));
-                while ($t.moveNext()) {
-                    var line = $t.getCurrent();
-                    code.appendLine(System.String.concat(indent, line));
-                }
-                indent = indent.substr(0, ((indent.length - 1) | 0));
-            }
-            if (i !== 0) {
-                code.appendLine(System.String.concat(indent, "end"));
-            }
-            code.appendLine(System.String.concat(System.String.concat(indent, "return "), value_property_size));
-            indent = indent.substr(0, ((indent.length - 1) | 0));
-            code.appendLine(System.String.concat(indent, "end"));
-            code.appendLine();
-
-            code.appendLine(System.String.concat(indent, System.String.format("# {0}取得関数", value_description)));
-            code.appendLine(System.String.concat(System.String.concat(System.String.concat(indent, "def "), text_identifier), "_get(prop, size)"));
-            indent = System.String.concat(indent, "\t");
-            $t1 = Bridge.getEnumerator(statements_get.split(String.fromCharCode(10)));
-            while ($t1.moveNext()) {
-                var line1 = $t1.getCurrent();
-                code.appendLine(System.String.concat(indent, line1));
-            }
-            code.appendLine(System.String.concat(System.String.concat(indent, "return "), value_property_size));
+            code.appendLine(System.String.concat(indent, "return ", value_get_ret));
             indent = indent.substr(0, ((indent.length - 1) | 0));
             code.appendLine(System.String.concat(indent, "end"));
             code.appendLine();
@@ -19272,7 +20641,7 @@
         },
         init: function (workspace) {
             // Create a dictionary of definitions to be printed before the code.
-            Blockly.Ruby.definitions_ = {};
+            Blockly.Ruby.definitions_ = new (System.Collections.Generic.Dictionary$2(String,System.Collections.Generic.List$1(String)))();
             // Create a dictionary mapping desired function names in definitions_
             // to actual function names (to avoid collisions with user functions).
             Blockly.Ruby.functionNames_ = new (System.Collections.Generic.Dictionary$2(String,String))();
@@ -19285,24 +20654,27 @@
                     Blockly.Ruby.variableDB_.localVars = null;
                     this.variableDB_.localVarsDB = null;
 
-                    Blockly.Ruby.variableDB_.getRubyName = $_.WebMrbc.Ruby.f1;
+                    Blockly.Ruby.variableDB_.getRubyName = $asm.$.WebMrbc.Ruby.f1;
 
-                    Blockly.Ruby.variableDB_.pushScope = $_.WebMrbc.Ruby.f2;
+                    Blockly.Ruby.variableDB_.pushScope = $asm.$.WebMrbc.Ruby.f2;
 
-                    Blockly.Ruby.variableDB_.addLocalVariable = Bridge.fn.bind(this, $_.WebMrbc.Ruby.f3);
+                    Blockly.Ruby.variableDB_.addLocalVariable = Bridge.fn.bind(this, $asm.$.WebMrbc.Ruby.f3);
 
-                    Blockly.Ruby.variableDB_.popScope = Bridge.fn.bind(this, $_.WebMrbc.Ruby.f4);
+                    Blockly.Ruby.variableDB_.popScope = Bridge.fn.bind(this, $asm.$.WebMrbc.Ruby.f4);
                 } else {
                     Blockly.Ruby.variableDB_.reset();
                 }
 
-                var defvars = System.Array.init(0, null);
+                var defvars = new (System.Collections.Generic.List$1(String))();
                 var variables = Blockly.Variables.allVariables(workspace);
                 for (var x = 0; x < variables.length; x = (x + 1) | 0) {
-                    defvars.push(System.String.concat(System.String.concat("@", Blockly.Ruby.variableDB_.getName(variables[x], Blockly.Variables.NAME_TYPE)), " = nil"));
+                    defvars.add(System.String.concat("@", Blockly.Ruby.variableDB_.getName(variables[x], Blockly.Variables.NAME_TYPE), " = nil"));
                 }
                 var code = defvars.join("\n");
-                this.definitions_.variables = code;
+                this.definitions_.set("variables", function (_o2) {
+                        _o2.add(code);
+                        return _o2;
+                    }(new (System.Collections.Generic.List$1(String))()));
             }
 
             this.init_smalruby(workspace);
@@ -19312,29 +20684,29 @@
         },
         generateDefinitions: function (helpers) {
             var $t;
-            var requires = System.Array.init(0, null);
-            var prepares = System.Array.init(0, null);
-            var definitions = System.Array.init(0, null);
-            $t = Bridge.getEnumerator(Object.keys(this.definitions_));
+            var requires = new (System.Collections.Generic.List$1(String))();
+            var prepares = new (System.Collections.Generic.List$1(String))();
+            var definitions = new (System.Collections.Generic.List$1(String))();
+            $t = Bridge.getEnumerator(this.definitions_.getKeys(), String);
             while ($t.moveNext()) {
                 var name = $t.getCurrent();
-                var def = Bridge.as(this.definitions_[name], String);
+                var def = this.definitions_.get(name);
                 if (def == null) {
                     continue;
                 }
 
                 if (name.match(new RegExp("^require__")) != null) {
-                    requires.push(def);
+                    requires.addRange(def);
                 } else if (name.match(new RegExp("^prepare__")) != null) {
-                    prepares.push(def);
+                    prepares.addRange(def);
                 } else {
-                    definitions.push(def);
+                    definitions.addRange(def);
                 }
             }
 
             var allDefs = "";
 
-            if (requires.length > 0) {
+            if (requires.getCount() > 0) {
                 allDefs = System.String.concat(allDefs, (System.String.concat(requires.join("\n"), "\n\n")));
             }
 
@@ -19342,11 +20714,11 @@
                 allDefs = System.String.concat(allDefs, (System.String.concat(helpers.join("\n"), "\n\n")));
             }
 
-            if (prepares.length > 0) {
+            if (prepares.getCount() > 0) {
                 allDefs = System.String.concat(allDefs, (System.String.concat(prepares.join("\n"), "\n\n")));
             }
 
-            if (definitions.length > 0) {
+            if (definitions.getCount() > 0) {
                 allDefs = System.String.concat(allDefs, (System.String.concat(definitions.join("\n"), "\n\n")));
             }
             return allDefs;
@@ -19357,7 +20729,7 @@
             var indent = "\t";
             var allDefs = this.generateDefinitions(helpers);
             allDefs = System.String.concat(indent, allDefs.split("\n").join(System.String.concat("\n", indent)));
-            return System.String.concat(System.String.concat(allDefs.replace(new RegExp("\n\n+", "g"), "\n\n"), "\n"), code);
+            return System.String.concat(allDefs.replace(new RegExp("\n\n+", "g"), "\n\n"), "\n", code);
         },
         scrubNakedValue: function (line) {
             return System.String.concat(line, "\n");
@@ -19366,16 +20738,16 @@
             // copy and modified goog.string.quote:
             // http://docs.closure-library.googlecode.com/git/namespace_goog_string.html
             var s = str.toString();
-            var sb = ["\""];
+            var sb = $asm.$.WebMrbc.Ruby.f5(new (System.Collections.Generic.List$1(String))());
             for (var i = 0; i < s.length; i = (i + 1) | 0) {
                 var ch = s.charAt(i);
                 var rch = { };
                 if (!Blockly.Ruby.escapeChars_.tryGetValue(ch, rch)) {
                     rch.v = ch;
                 }
-                sb[((i + 1) | 0)] = rch.v;
+                sb.setItem(((i + 1) | 0), rch.v);
             }
-            sb.push("\"");
+            sb.add("\"");
             return sb.join("");
         },
         scrub_: function (block, code) {
@@ -19411,11 +20783,11 @@
             }
             var nextCode = this.blockToCode(nextBlock);
 
-            return System.String.concat(System.String.concat(commentCode, code), nextCode);
+            return System.String.concat(commentCode, code, nextCode);
         },
         colour_picker: function (block) {
             // Colour picker.
-            var code = System.String.concat(System.String.concat("'", block.getFieldValue("COLOUR")), "'");
+            var code = System.String.concat("'", block.getFieldValue("COLOUR"), "'");
             return [code, this.ORDER_ATOMIC];
         },
         colour_random: function (block) {
@@ -19425,7 +20797,7 @@
         },
         colour_rgb: function (block) {
             // Compose a colour from RGB components expressed as percentages.
-            var functionName = Blockly.Ruby.provideFunction_("colour_rgb", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(r, g, b)"), "  r = (2.55 * [100, [0, r].max].min).round", "  g = (2.55 * [100, [0, g].max].min).round", "  b = (2.55 * [100, [0, b].max].min).round", "  '#%02x%02x%02x' % [r, g, b]", "end"]);
+            var functionName = Blockly.Ruby.provideFunction_("colour_rgb", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(r, g, b)"), "  r = (2.55 * [100, [0, r].max].min).round", "  g = (2.55 * [100, [0, g].max].min).round", "  b = (2.55 * [100, [0, b].max].min).round", "  '#%02x%02x%02x' % [r, g, b]", "end"]);
             var r = Blockly.Ruby.valueToCode(block, "RED", Blockly.Ruby.ORDER_NONE);
             if (System.String.isNullOrEmpty(r)) {
                 r = "0";
@@ -19438,12 +20810,12 @@
             if (System.String.isNullOrEmpty(b)) {
                 b = "0";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), r), ", "), g), ", "), b), ")");
+            var code = System.String.concat(functionName, "(", r, ", ", g, ", ", b, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         colour_blend: function (block) {
             // Blend two colours together.
-            var functionName = Blockly.Ruby.provideFunction_("colour_blend", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(colour1, colour2, ratio) "), "  _, r1, g1, b1 = colour1.unpack('A1A2A2A2').map {|x| x.to_i(16)}", "  _, r2, g2, b2 = colour2.unpack('A1A2A2A2').map {|x| x.to_i(16)}", "  ratio = [1, [0, ratio].max].min", "  r = (r1 * (1 - ratio) + r2 * ratio).round", "  g = (g1 * (1 - ratio) + g2 * ratio).round", "  b = (b1 * (1 - ratio) + b2 * ratio).round", "  '#%02x%02x%02x' % [r, g, b]", "end"]);
+            var functionName = Blockly.Ruby.provideFunction_("colour_blend", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(colour1, colour2, ratio) "), "  _, r1, g1, b1 = colour1.unpack('A1A2A2A2').map {|x| x.to_i(16)}", "  _, r2, g2, b2 = colour2.unpack('A1A2A2A2').map {|x| x.to_i(16)}", "  ratio = [1, [0, ratio].max].min", "  r = (r1 * (1 - ratio) + r2 * ratio).round", "  g = (g1 * (1 - ratio) + g2 * ratio).round", "  b = (b1 * (1 - ratio) + b2 * ratio).round", "  '#%02x%02x%02x' % [r, g, b]", "end"]);
             var colour1 = Blockly.Ruby.valueToCode(block, "COLOUR1", Blockly.Ruby.ORDER_NONE);
             if (System.String.isNullOrEmpty(colour1)) {
                 colour1 = "'#000000'";
@@ -19456,7 +20828,7 @@
             if (System.String.isNullOrEmpty(ratio)) {
                 ratio = "0";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), colour1), ", "), colour2), ", "), ratio), ")");
+            var code = System.String.concat(functionName, "(", colour1, ", ", colour2, ", ", ratio, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         lists_create_empty: function (block) {
@@ -19467,12 +20839,12 @@
             // Create a list with any number of elements of any type.
             var code = System.Array.init(block.itemCount_, null);
             for (var n = 0; n < block.itemCount_; n = (n + 1) | 0) {
-                code[n] = Blockly.Ruby.valueToCode(block, System.String.concat("ADD", n), Blockly.Ruby.ORDER_NONE);
+                code[n] = Blockly.Ruby.valueToCode(block, "ADD" + n, Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(code[n])) {
                     code[n] = "None";
                 }
             }
-            var _code = System.String.concat(System.String.concat("[", code.join(", ")), "]");
+            var _code = System.String.concat("[", code.join(", "), "]");
             return [_code, this.ORDER_ATOMIC];
         },
         lists_repeat: function (block) {
@@ -19485,7 +20857,7 @@
             if (System.String.isNullOrEmpty(argument1)) {
                 argument1 = "0";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat("[", argument0), "] * "), argument1);
+            var code = System.String.concat("[", argument0, "] * ", argument1);
             return [code, this.ORDER_MULTIPLICATIVE];
         },
         lists_length: function (block) {
@@ -19516,7 +20888,7 @@
                 list = "''";
             }
             var finder = Bridge.referenceEquals(block.getFieldValue("END"), "FIRST") ? ".find_first" : ".find_last";
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(list, finder), "("), search), ")");
+            var code = System.String.concat(list, finder, "(", search, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         lists_getIndex: function (block) {
@@ -19569,13 +20941,13 @@
                     at = (((parseInt(at, 10) - 1) | 0)).toString();
                 } else {
                     // If the index is dynamic, decrement it in code.
-                    at = System.String.concat(System.String.concat("(", at), " - 1).to_i");
+                    at = System.String.concat("(", at, " - 1).to_i");
                 }
                 if (Bridge.referenceEquals(mode, "GET")) {
-                    var code4 = System.String.concat(System.String.concat(System.String.concat(list, "["), at), "]");
+                    var code4 = System.String.concat(list, "[", at, "]");
                     return [code4, this.ORDER_MEMBER];
                 } else {
-                    var code5 = System.String.concat(System.String.concat(System.String.concat(list, ".delete_at("), at), ")");
+                    var code5 = System.String.concat(list, ".delete_at(", at, ")");
                     if (Bridge.referenceEquals(mode, "GET_REMOVE")) {
                         return [code5, this.ORDER_FUNCTION_CALL];
                     } else if (Bridge.referenceEquals(mode, "REMOVE")) {
@@ -19584,10 +20956,10 @@
                 }
             } else if (Bridge.referenceEquals(where, "FROM_END")) {
                 if (Bridge.referenceEquals(mode, "GET")) {
-                    var code6 = System.String.concat(System.String.concat(System.String.concat(list, "[-"), at), "]");
+                    var code6 = System.String.concat(list, "[-", at, "]");
                     return [code6, this.ORDER_MEMBER];
                 } else {
-                    var code7 = System.String.concat(System.String.concat(System.String.concat(list, ".delete_at(-"), at), ")");
+                    var code7 = System.String.concat(list, ".delete_at(-", at, ")");
                     if (Bridge.referenceEquals(mode, "GET_REMOVE")) {
                         return [code7, this.ORDER_FUNCTION_CALL];
                     } else if (Bridge.referenceEquals(mode, "REMOVE")) {
@@ -19596,12 +20968,12 @@
                 }
             } else if (Bridge.referenceEquals(where, "RANDOM")) {
                 if (Bridge.referenceEquals(mode, "GET")) {
-                    var functionName = Blockly.Ruby.provideFunction_("lists_random_item", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(myList)"), "  myList[rand(myList.size)]", "end"]);
-                    var code8 = System.String.concat(System.String.concat(System.String.concat(functionName, "("), list), ")");
+                    var functionName = Blockly.Ruby.provideFunction_("lists_random_item", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(myList)"), "  myList[rand(myList.size)]", "end"]);
+                    var code8 = System.String.concat(functionName, "(", list, ")");
                     return [code8, this.ORDER_FUNCTION_CALL];
                 } else {
-                    var functionName1 = Blockly.Ruby.provideFunction_("lists_remove_random_item", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(myList)"), "  myList.delete_at(rand(myList.size))", "end"]);
-                    var code9 = System.String.concat(System.String.concat(System.String.concat(functionName1, "("), list), ")");
+                    var functionName1 = Blockly.Ruby.provideFunction_("lists_remove_random_item", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(myList)"), "  myList.delete_at(rand(myList.size))", "end"]);
+                    var code9 = System.String.concat(functionName1, "(", list, ")");
                     if (Bridge.referenceEquals(mode, "GET_REMOVE")) {
                         return [code9, this.ORDER_FUNCTION_CALL];
                     } else if (Bridge.referenceEquals(mode, "REMOVE")) {
@@ -19636,15 +21008,15 @@
 
             if (Bridge.referenceEquals(where, "FIRST")) {
                 if (Bridge.referenceEquals(mode, "SET")) {
-                    return System.String.concat(System.String.concat(System.String.concat(list, "[0] = "), value), "\n");
+                    return System.String.concat(list, "[0] = ", value, "\n");
                 } else if (Bridge.referenceEquals(mode, "INSERT")) {
-                    return System.String.concat(System.String.concat(System.String.concat(list, ".unshift("), value), ")\n");
+                    return System.String.concat(list, ".unshift(", value, ")\n");
                 }
             } else if (Bridge.referenceEquals(where, "LAST")) {
                 if (Bridge.referenceEquals(mode, "SET")) {
-                    return System.String.concat(System.String.concat(System.String.concat(list, "[-1] = "), value), "\n");
+                    return System.String.concat(list, "[-1] = ", value, "\n");
                 } else if (Bridge.referenceEquals(mode, "INSERT")) {
-                    return System.String.concat(System.String.concat(System.String.concat(list, ".push("), value), ")\n");
+                    return System.String.concat(list, ".push(", value, ")\n");
                 }
             } else if (Bridge.referenceEquals(where, "FROM_START")) {
                 // Blockly uses one-based indicies.
@@ -19653,12 +21025,12 @@
                     at = (((parseInt(at, 10) - 1) | 0)).toString();
                 } else {
                     // If the index is dynamic, decrement it in code.
-                    at = System.String.concat(System.String.concat("(", at), " - 1).to_i");
+                    at = System.String.concat("(", at, " - 1).to_i");
                 }
                 if (Bridge.referenceEquals(mode, "SET")) {
-                    return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(list, "["), at), "] = "), value), "\n");
+                    return System.String.concat(list, "[", at, "] = ", value, "\n");
                 } else if (Bridge.referenceEquals(mode, "INSERT")) {
-                    return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(list, ".insert("), at), ", "), value), ")\n");
+                    return System.String.concat(list, ".insert(", at, ", ", value, ")\n");
                 }
             } else if (Bridge.referenceEquals(where, "FROM_END")) {
                 if (Bridge.referenceEquals(mode, "SET")) {
@@ -19669,10 +21041,10 @@
                         at = parseInt(at, 10).toString();
                     } else {
                         // If the index is dynamic, decrement it in code.
-                        at = System.String.concat(System.String.concat("(", at), ").to_i");
+                        at = System.String.concat("(", at, ").to_i");
                     }
 
-                    return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(list, "[-"), at), "] = "), value), "\n");
+                    return System.String.concat(list, "[-", at, "] = ", value, "\n");
                 } else if (Bridge.referenceEquals(mode, "INSERT")) {
 
                     // Blockly uses one-based indicies.
@@ -19681,26 +21053,26 @@
                         at = (((parseInt(at, 10) + 1) | 0)).toString();
                     } else {
                         // If the index is dynamic, decrement it in code.
-                        at = System.String.concat(System.String.concat("(", at), " + 1).to_i");
+                        at = System.String.concat("(", at, " + 1).to_i");
                     }
 
-                    return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(list, ".insert(-"), at), ", "), value), ")\n");
+                    return System.String.concat(list, ".insert(-", at, ", ", value, ")\n");
                 }
             } else if (Bridge.referenceEquals(where, "RANDOM")) {
                 if (Bridge.referenceEquals(mode, "SET")) {
-                    var functionName = Blockly.Ruby.provideFunction_("lists_set_random_item", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(myList, value)"), System.String.concat("  myList[rand(myList.size)] = ", value), "end"]);
-                    var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), list), ", "), value), ")\n");
+                    var functionName = Blockly.Ruby.provideFunction_("lists_set_random_item", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(myList, value)"), System.String.concat("  myList[rand(myList.size)] = ", value), "end"]);
+                    var code = System.String.concat(functionName, "(", list, ", ", value, ")\n");
                     return code;
                 } else if (Bridge.referenceEquals(mode, "INSERT")) {
-                    var functionName1 = Blockly.Ruby.provideFunction_("lists_insert_random_item", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(myList, value)"), System.String.concat(System.String.concat("  myList.insert(rand(myList.size), ", value), ")"), "end"]);
-                    var code1 = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName1, "("), list), ", "), value), ")\n");
+                    var functionName1 = Blockly.Ruby.provideFunction_("lists_insert_random_item", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(myList, value)"), System.String.concat("  myList.insert(rand(myList.size), ", value, ")"), "end"]);
+                    var code1 = System.String.concat(functionName1, "(", list, ", ", value, ")\n");
                     return code1;
                 }
             }
             throw new System.Exception("Unhandled combination (lists_setIndex).");
         },
         lists_getSublist: function (block) {
-            var functionName = Blockly.Ruby.provideFunction_("lists_sublist", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(myList, range)"), "  myList[range] || []", "end"]);
+            var functionName = Blockly.Ruby.provideFunction_("lists_sublist", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(myList, range)"), "  myList[range] || []", "end"]);
             // Get sublist.
             var list = Blockly.Ruby.valueToCode(block, "LIST", Blockly.Ruby.ORDER_MEMBER);
             if (System.String.isNullOrEmpty(list)) {
@@ -19729,7 +21101,7 @@
                 if (Blockly.isNumber(at1)) {
                     at1 = (((-parseInt(at1, 10)) | 0)).toString();
                 } else {
-                    at1 = System.String.concat(System.String.concat("-", at1), ".to_i");
+                    at1 = System.String.concat("-", at1, ".to_i");
                 }
             }
             if (Bridge.referenceEquals(where2, "LAST") || (Bridge.referenceEquals(where2, "FROM_END") && Bridge.referenceEquals(at2, "1"))) {
@@ -19744,34 +21116,34 @@
                 if (Blockly.isNumber(at2)) {
                     at2 = (((-parseInt(at2, 10)) | 0)).toString();
                 } else {
-                    at2 = System.String.concat(System.String.concat("-", at2), ".to_i");
+                    at2 = System.String.concat("-", at2, ".to_i");
                 }
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), list), ", "), at1), ".."), at2), ")");
+            var code = System.String.concat(functionName, "(", list, ", ", at1, "..", at2, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         controls_if: function (block) {
             // If/elseif/else condition.
             var n = 0;
-            var argument = Blockly.Ruby.valueToCode(block, System.String.concat("IF", n), Blockly.Ruby.ORDER_NONE);
+            var argument = Blockly.Ruby.valueToCode(block, "IF" + n, Blockly.Ruby.ORDER_NONE);
             if (System.String.isNullOrEmpty(argument)) {
                 argument = "false";
             }
-            var branch = Blockly.Ruby.statementToCode(block, System.String.concat("DO", n));
+            var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
             if (System.String.isNullOrEmpty(branch)) {
                 branch = "\n";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat("if ", argument), "\n"), branch);
+            var code = System.String.concat("if ", argument, "\n", branch);
             for (n = 1; n <= block.elseifCount_; n = (n + 1) | 0) {
-                argument = Blockly.Ruby.valueToCode(block, System.String.concat("IF", n), Blockly.Ruby.ORDER_NONE);
+                argument = Blockly.Ruby.valueToCode(block, "IF" + n, Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(argument)) {
                     argument = "false";
                 }
-                branch = Blockly.Ruby.statementToCode(block, System.String.concat("DO", n));
+                branch = Blockly.Ruby.statementToCode(block, "DO" + n);
                 if (System.String.isNullOrEmpty(branch)) {
                     branch = "\n";
                 }
-                code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat("elsif ", argument), "\n"), branch)));
+                code = System.String.concat(code, (System.String.concat("elsif ", argument, "\n", branch)));
             }
             if (block.elseCount_ !== 0) {
                 branch = Blockly.Ruby.statementToCode(block, "ELSE");
@@ -19802,7 +21174,7 @@
             if (System.String.isNullOrEmpty(argument1)) {
                 argument1 = "0";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(argument0, String.fromCharCode(32)), operator), String.fromCharCode(32)), argument1);
+            var code = System.String.concat(argument0, String.fromCharCode(32), operator, String.fromCharCode(32), argument1);
             return [code, order];
         },
         logic_operation: function (block) {
@@ -19825,7 +21197,7 @@
                     argument1 = defaultArgument;
                 }
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(argument0, String.fromCharCode(32)), operator), String.fromCharCode(32)), argument1);
+            var code = System.String.concat(argument0, String.fromCharCode(32), operator, String.fromCharCode(32), argument1);
             return [code, order];
         },
         logic_negate: function (block) {
@@ -19860,7 +21232,7 @@
             if (System.String.isNullOrEmpty(value_else)) {
                 value_else = "nil";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(value_if, " ? "), value_then), " : "), value_else);
+            var code = System.String.concat(value_if, " ? ", value_then, " : ", value_else);
             return [code, this.ORDER_CONDITIONAL];
         },
         controls_repeat: function (block) {
@@ -19871,9 +21243,9 @@
                 branch = "end\n";
             }
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat("'", block.id), "'")), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat("'", block.id, "'")), branch);
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(repeats, ".times do\n"), branch), "end\n");
+            var code = System.String.concat(repeats + ".times do\n", branch, "end\n");
             return code;
         },
         controls_repeat_ext: function (block) {
@@ -19892,9 +21264,9 @@
                 branch = "end\n";
             }
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat("'", block.id), "'")), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat("'", block.id, "'")), branch);
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(repeats, ".times do\n"), branch), "end\n");
+            var code = System.String.concat(repeats, ".times do\n", branch, "end\n");
             return code;
         },
         controls_whileUntil: function (block) {
@@ -19909,10 +21281,10 @@
                 branch = "end\n";
             }
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat("\"", block.id), "\"")), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat("\"", block.id, "\"")), branch);
             }
             var mode = until ? "until " : "while ";
-            return System.String.concat(System.String.concat(System.String.concat(System.String.concat(mode, argument0), " do\n"), branch), "end\n");
+            return System.String.concat(mode, argument0, " do\n", branch, "end\n");
         },
         controls_for: function (block) {
             // For loop.
@@ -19936,14 +21308,14 @@
                 branch = "";
             }
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat(String.fromCharCode(34), block.id), String.fromCharCode(34))), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(String.fromCharCode(34), block.id, String.fromCharCode(34))), branch);
             }
 
             // Helper function
-            var forLoop = $_.WebMrbc.Ruby.f5;
+            var forLoop = $asm.$.WebMrbc.Ruby.f6;
 
             var generateForLoop = function (_fromVal, _toVal, _increment) {
-                return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(forLoop(), " from: ("), _fromVal), "), "), "to: ("), _toVal), "), "), "by: ("), _increment), ")");
+                return System.String.concat(forLoop(), " from: (", _fromVal, "), ", "to: (", _toVal, "), ", "by: (", _increment, ")");
             };
 
             var code = "";
@@ -19965,7 +21337,7 @@
                 if (increment == null) {
                     increment = "1";
                 } else {
-                    increment = System.String.concat(System.String.concat("(", increment), ").to_f");
+                    increment = System.String.concat("(", increment, ").to_f");
                 }
 
                 _forLoop = generateForLoop(System.String.concat(fromVal, ".to_f"), System.String.concat(toVal, ".to_f"), increment);
@@ -19973,7 +21345,7 @@
 
             Blockly.Ruby.variableDB_.popScope();
 
-            code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(_forLoop, " do |"), loopVar), "|\n"), branch), "end\n")));
+            code = System.String.concat(code, (System.String.concat(_forLoop, " do |", loopVar, "|\n", branch, "end\n")));
 
             return code;
         },
@@ -19991,12 +21363,12 @@
                 branch = "end\n";
             }
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat("\"", block.id), "\"")), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat("\"", block.id, "\"")), branch);
             }
 
             Blockly.Ruby.variableDB_.popScope();
 
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(argument0, ".each do |"), loopVar), "|\n"), branch), "end\n");
+            var code = System.String.concat(argument0, ".each do |", loopVar, "|\n", branch, "end\n");
             return code;
         },
         controls_flow_statements: function (block) {
@@ -20034,7 +21406,7 @@
             if (System.String.isNullOrEmpty(argument1)) {
                 argument1 = "0";
             }
-            var code = System.String.concat(System.String.concat(argument0, operator), argument1);
+            var code = System.String.concat(argument0, operator, argument1);
             return [code, order];
         },
         math_single: function (block) {
@@ -20051,12 +21423,12 @@
                 return [System.String.concat("-", code), this.ORDER_UNARY_SIGN];
             }
             if (Bridge.referenceEquals(operator, "SIN") || Bridge.referenceEquals(operator, "COS") || Bridge.referenceEquals(operator, "TAN")) {
-                arg = System.String.concat(System.String.concat("(", Blockly.Ruby.valueToCode(block, "NUM", Blockly.Ruby.ORDER_MULTIPLICATIVE)), ")");
+                arg = System.String.concat("(", Blockly.Ruby.valueToCode(block, "NUM", Blockly.Ruby.ORDER_MULTIPLICATIVE), ")");
                 if (System.String.isNullOrEmpty(arg)) {
                     arg = "0";
                 }
             } else {
-                arg = System.String.concat(System.String.concat("(", Blockly.Ruby.valueToCode(block, "NUM", Blockly.Ruby.ORDER_NONE)), ")");
+                arg = System.String.concat("(", Blockly.Ruby.valueToCode(block, "NUM", Blockly.Ruby.ORDER_NONE), ")");
                 if (System.String.isNullOrEmpty(arg)) {
                     arg = "0";
                 }
@@ -20068,19 +21440,19 @@
                     code = System.String.concat(arg, ".abs");
                     break;
                 case "ROOT": 
-                    code = System.String.concat(System.String.concat("Math.sqrt(", arg), ")");
+                    code = System.String.concat("Math.sqrt(", arg, ")");
                     break;
                 case "LN": 
-                    code = System.String.concat(System.String.concat("Math.log(", arg), ")");
+                    code = System.String.concat("Math.log(", arg, ")");
                     break;
                 case "LOG10": 
-                    code = System.String.concat(System.String.concat("Math.log10(", arg), ")");
+                    code = System.String.concat("Math.log10(", arg, ")");
                     break;
                 case "EXP": 
-                    code = System.String.concat(System.String.concat("Math.exp(", arg), ")");
+                    code = System.String.concat("Math.exp(", arg, ")");
                     break;
                 case "POW10": 
-                    code = System.String.concat(System.String.concat("(10 ** ", arg), ")");
+                    code = System.String.concat("(10 ** ", arg, ")");
                     break;
                 case "ROUND": 
                     code = System.String.concat(arg, ".round");
@@ -20092,13 +21464,13 @@
                     code = System.String.concat(arg, ".floor");
                     break;
                 case "SIN": 
-                    code = System.String.concat(System.String.concat("Math.sin(", arg), " / 180.0 * Math::PI)");
+                    code = System.String.concat("Math.sin(", arg, " / 180.0 * Math::PI)");
                     break;
                 case "COS": 
-                    code = System.String.concat(System.String.concat("Math.cos(", arg), " / 180.0 * Math::PI)");
+                    code = System.String.concat("Math.cos(", arg, " / 180.0 * Math::PI)");
                     break;
                 case "TAN": 
-                    code = System.String.concat(System.String.concat("Math.tan(", arg), " / 180.0 * Math::PI)");
+                    code = System.String.concat("Math.tan(", arg, " / 180.0 * Math::PI)");
                     break;
             }
             if (!System.String.isNullOrEmpty(code)) {
@@ -20108,13 +21480,13 @@
             // wrapping the code.
             switch (operator) {
                 case "ASIN": 
-                    code = System.String.concat(System.String.concat("Math.asin(", arg), ") / Math::PI * 180");
+                    code = System.String.concat("Math.asin(", arg, ") / Math::PI * 180");
                     break;
                 case "ACOS": 
-                    code = System.String.concat(System.String.concat("Math.acos(", arg), ") / Math::PI * 180");
+                    code = System.String.concat("Math.acos(", arg, ") / Math::PI * 180");
                     break;
                 case "ATAN": 
-                    code = System.String.concat(System.String.concat("Math.atan(", arg), ") / Math::PI * 180");
+                    code = System.String.concat("Math.atan(", arg, ") / Math::PI * 180");
                     break;
                 default: 
                     throw new System.Exception(System.String.concat("Unknown math operator: ", operator));
@@ -20143,8 +21515,8 @@
             var dropdown_property = block.getFieldValue("PROPERTY");
             var code = null;
             if (Bridge.referenceEquals(dropdown_property, "PRIME")) {
-                var functionName = Blockly.Ruby.provideFunction_("is_prime", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), " n"), "  return false if n < 0", "  (2..Math.sqrt(n)).each { |i| return false if n % i == 0}", "  true", "end"]);
-                code = System.String.concat(System.String.concat(System.String.concat(functionName, "("), number_to_check), ")");
+                var functionName = Blockly.Ruby.provideFunction_("is_prime", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), " n"), "  return false if n < 0", "  (2..Math.sqrt(n)).each { |i| return false if n % i == 0}", "  true", "end"]);
+                code = System.String.concat(functionName, "(", number_to_check, ")");
                 return [code, this.ORDER_FUNCTION_CALL];
             }
             switch (dropdown_property) {
@@ -20169,7 +21541,7 @@
                     if (System.String.isNullOrEmpty(divisor) || Bridge.referenceEquals(divisor, "0")) {
                         return ["false", this.ORDER_ATOMIC];
                     }
-                    code = System.String.concat(System.String.concat(System.String.concat(number_to_check, " % "), divisor), " == 0");
+                    code = System.String.concat(number_to_check, " % ", divisor, " == 0");
                     break;
             }
             return [code, this.ORDER_RELATIONAL];
@@ -20181,7 +21553,7 @@
                 argument0 = "0";
             }
             var varName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE);
-            return System.String.concat(System.String.concat(System.String.concat(varName, " += "), argument0), "\n");
+            return System.String.concat(varName, " += ", argument0, "\n");
         },
         math_round: function (block) {
             return this.math_single(block);
@@ -20217,14 +21589,14 @@
                     // As a list of numbers can contain more than one mode,
                     // the returned result is provided as an array.
                     // Mode of [3, "x", "x", 1, 1, 2, "3"] -> ["x", 1].
-                    var functionName = Blockly.Ruby.provideFunction_("math_modes", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(some_list)"), "  groups = some_list.group_by{|v| v}", "  ", "  groups = groups.sort {|a,b| b[1].size <=> a[1].size}", "  ", "  max_size = groups[0][1].size", "  ", "  modes = []", "  ", "  groups.each do |group|", "    ", "    break if group[1].size != max_size", "    ", "    modes << group[0]", "    ", "  end", "  ", "  modes", "", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(functionName, "("), list), ")");
+                    var functionName = Blockly.Ruby.provideFunction_("math_modes", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(some_list)"), "  groups = some_list.group_by{|v| v}", "  ", "  groups = groups.sort {|a,b| b[1].size <=> a[1].size}", "  ", "  max_size = groups[0][1].size", "  ", "  modes = []", "  ", "  groups.each do |group|", "    ", "    break if group[1].size != max_size", "    ", "    modes << group[0]", "    ", "  end", "  ", "  modes", "", "end"]);
+                    code = System.String.concat(functionName, "(", list, ")");
                     break;
                 case "STD_DEV": 
                     code = System.String.concat(list, ".standard_deviation");
                     break;
                 case "RANDOM": 
-                    code = System.String.concat(System.String.concat(System.String.concat(list, "[rand("), list), ".size)]");
+                    code = System.String.concat(list, "[rand(", list, ".size)]");
                     break;
                 default: 
                     throw new System.Exception(System.String.concat("Unknown operator: ", func));
@@ -20241,7 +21613,7 @@
             if (System.String.isNullOrEmpty(argument1)) {
                 argument1 = "0";
             }
-            var code = System.String.concat(System.String.concat(argument0, " % "), argument1);
+            var code = System.String.concat(argument0, " % ", argument1);
             return [code, this.ORDER_MULTIPLICATIVE];
         },
         math_constrain: function (block) {
@@ -20258,7 +21630,7 @@
             if (System.String.isNullOrEmpty(argument2)) {
                 argument2 = "float('inf')";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("[[", argument0), ", "), argument1), "].max, "), argument2), "].min");
+            var code = System.String.concat("[[", argument0, ", ", argument1, "].max, ", argument2, "].min");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         math_random_int: function (block) {
@@ -20271,7 +21643,7 @@
             if (System.String.isNullOrEmpty(argument1)) {
                 argument1 = "0";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat("rand(", argument0), ".."), argument1), ")");
+            var code = System.String.concat("rand(", argument0, "..", argument1, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         math_random_float: function (block) {
@@ -20288,15 +21660,18 @@
             var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"), Blockly.Procedures.NAME_TYPE);
             var branch = Blockly.Ruby.statementToCode(block, "STACK");
             if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat(System.String.concat("\"", block.id), "\"")), branch);
+                branch = System.String.concat(Blockly.Ruby.INFINITE_LOOP_TRAP.replace(new RegExp("%1", "g"), System.String.concat("\"", block.id, "\"")), branch);
             }
             var returnValue = Blockly.Ruby.valueToCode(block, "RETURN", Blockly.Ruby.ORDER_NONE);
             if (System.String.isNullOrEmpty(returnValue)) {
-                returnValue = System.String.concat(System.String.concat("\n  return ", returnValue), "\n");
+                returnValue = System.String.concat("\n  return ", returnValue, "\n");
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("def ", funcName), "("), args.join(", ")), ")\n"), branch), returnValue), "end");
+            var code = System.String.concat("def ", funcName, "(", args.join(", "), ")\n", branch, returnValue, "end");
             code = Blockly.Ruby.scrub_(block, code);
-            Blockly.Ruby.definitions_[funcName] = code;
+            Blockly.Ruby.definitions_.set(funcName, function (_o4) {
+                    _o4.add(code);
+                    return _o4;
+                }(new (System.Collections.Generic.List$1(String))()));
 
             Blockly.Ruby.variableDB_.popScope();
 
@@ -20310,13 +21685,13 @@
             var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"), Blockly.Procedures.NAME_TYPE);
             var args = System.Array.init(0, null);
             for (var x = 0; x < block.arguments_.length; x = (x + 1) | 0) {
-                args[x] = Blockly.Ruby.valueToCode(block, System.String.concat("ARG", x), Blockly.Ruby.ORDER_NONE);
+                args[x] = Blockly.Ruby.valueToCode(block, "ARG" + x, Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(args[x])) {
                     args[x] = "None";
                 }
             }
 
-            var code = System.String.concat(System.String.concat(System.String.concat(funcName, "("), args.join(", ")), ")");
+            var code = System.String.concat(funcName, "(", args.join(", "), ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         procedures_callnoreturn: function (block) {
@@ -20324,12 +21699,12 @@
             var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"), Blockly.Procedures.NAME_TYPE);
             var args = System.Array.init(0, null);
             for (var x = 0; x < block.arguments_.length; x = (x + 1) | 0) {
-                args[x] = Blockly.Ruby.valueToCode(block, System.String.concat("ARG", x), Blockly.Ruby.ORDER_NONE);
+                args[x] = Blockly.Ruby.valueToCode(block, "ARG" + x, Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(args[x])) {
                     args[x] = "None";
                 }
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(funcName, "("), args.join(", ")), ")\n");
+            var code = System.String.concat(funcName, "(", args.join(", "), ")\n");
             return code;
         },
         procedures_ifreturn: function (block) {
@@ -20338,13 +21713,13 @@
             if (System.String.isNullOrEmpty(condition)) {
                 condition = "False";
             }
-            var code = System.String.concat(System.String.concat("if ", condition), "\n");
+            var code = System.String.concat("if ", condition, "\n");
             if (block.hasReturnValue_) {
                 var value = Blockly.Ruby.valueToCode(block, "VALUE", Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(value)) {
                     value = "None";
                 }
-                code = System.String.concat(code, (System.String.concat(System.String.concat("\n  return ", value), "\n")));
+                code = System.String.concat(code, (System.String.concat("\n  return ", value, "\n")));
             } else {
                 code = System.String.concat(code, "\n  return\n");
             }
@@ -20378,12 +21753,12 @@
                 if (System.String.isNullOrEmpty(argument1)) {
                     argument1 = "''";
                 }
-                code = System.String.concat(System.String.concat(System.String.concat(argument01, ".to_s + "), argument1), ".to_s");
+                code = System.String.concat(argument01, ".to_s + ", argument1, ".to_s");
                 return [code, this.ORDER_UNARY_SIGN];
             } else {
                 var codes = System.Array.init(0, null);
                 for (var n = 0; n < block.itemCount_; n = (n + 1) | 0) {
-                    var temp = Blockly.Ruby.valueToCode(block, System.String.concat("ADD", n), Blockly.Ruby.ORDER_NONE);
+                    var temp = Blockly.Ruby.valueToCode(block, "ADD" + n, Blockly.Ruby.ORDER_NONE);
                     if (System.String.isNullOrEmpty(temp)) {
                         temp = "''";
                     }
@@ -20400,7 +21775,7 @@
             if (System.String.isNullOrEmpty(argument0)) {
                 argument0 = "''";
             }
-            return System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(varName, " = "), varName), ".to_s + ("), argument0), ").to_s\n");
+            return System.String.concat(varName, " = ", varName, ".to_s + (", argument0, ").to_s\n");
         },
         text_length: function (block) {
             // String length.
@@ -20431,7 +21806,7 @@
             if (System.String.isNullOrEmpty(text)) {
                 text = "''";
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(text, finder), "("), search), ")");
+            var code = System.String.concat(text, finder, "(", search, ")");
             return [code, this.ORDER_FUNCTION_CALL];
         },
         text_charAt: function (block) {
@@ -20468,16 +21843,16 @@
                     code = System.String.concat(text, "[-1]");
                     return [code, this.ORDER_MEMBER];
                 case "FROM_START": 
-                    functionName = Blockly.Ruby.provideFunction_("text_get_from_start", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), " (text, index)"), "  return \"\" if index < 0", "  text[index] || \"\"", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), text), ", "), at), ")");
+                    functionName = Blockly.Ruby.provideFunction_("text_get_from_start", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), " (text, index)"), "  return \"\" if index < 0", "  text[index] || \"\"", "end"]);
+                    code = System.String.concat(functionName, "(", text, ", ", at, ")");
                     return [code, this.ORDER_FUNCTION_CALL];
                 case "FROM_END": 
-                    functionName = Blockly.Ruby.provideFunction_("text_get_from_end", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), " (text, index)"), "  return \"\" if index < 0", "  text[-index-1] || \"\"'", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(functionName, "("), text), ", "), at), ")");
+                    functionName = Blockly.Ruby.provideFunction_("text_get_from_end", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), " (text, index)"), "  return \"\" if index < 0", "  text[-index-1] || \"\"'", "end"]);
+                    code = System.String.concat(functionName, "(", text, ", ", at, ")");
                     return [code, this.ORDER_FUNCTION_CALL];
                 case "RANDOM": 
-                    functionName = Blockly.Ruby.provideFunction_("text_random_letter", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), " (text)"), "  text[rand(text.size)]", "end"]);
-                    code = System.String.concat(System.String.concat(System.String.concat(functionName, "("), text), ")");
+                    functionName = Blockly.Ruby.provideFunction_("text_random_letter", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), " (text)"), "  text[rand(text.size)]", "end"]);
+                    code = System.String.concat(functionName, "(", text, ")");
                     return [code, this.ORDER_FUNCTION_CALL];
             }
             throw new System.Exception("Unhandled option (text_charAt).");
@@ -20513,7 +21888,7 @@
                 if (Blockly.isNumber(at1)) {
                     at1 = (((-parseInt(at1, 10)) | 0)).toString();
                 } else {
-                    at1 = System.String.concat(System.String.concat("-", at1), ".to_i");
+                    at1 = System.String.concat("-", at1, ".to_i");
                 }
             }
             if (Bridge.referenceEquals(where2, "LAST") || (Bridge.referenceEquals(where2, "FROM_END") && Bridge.referenceEquals(at2, "1"))) {
@@ -20531,7 +21906,7 @@
                     at2 = System.String.concat(at2, ".to_i");
                 }
             }
-            var code = System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat(text, "["), at1), ".."), at2), "]");
+            var code = System.String.concat(text, "[", at1, "..", at2, "]");
             return [code, this.ORDER_MEMBER];
         },
         text_changeCase: function (block) {
@@ -20551,12 +21926,12 @@
                 code = System.String.concat(argument0, operator);
             } else {
                 // Title case is not a native Ruby function. Define one.
-                var functionName = Blockly.Ruby.provideFunction_("text_to_title_case", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(str)"), "  str.gsub(/\\S+/) {|txt| txt.capitalize}", "end"]);
+                var functionName = Blockly.Ruby.provideFunction_("text_to_title_case", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(str)"), "  str.gsub(/\\S+/) {|txt| txt.capitalize}", "end"]);
                 var argument01 = Blockly.Ruby.valueToCode(block, "TEXT", Blockly.Ruby.ORDER_NONE);
                 if (System.String.isNullOrEmpty(argument01)) {
                     argument01 = "''";
                 }
-                code = System.String.concat(System.String.concat(System.String.concat(functionName, "("), argument01), ")");
+                code = System.String.concat(functionName, "(", argument01, ")");
             }
 
             return [code, this.ORDER_MEMBER];
@@ -20581,13 +21956,13 @@
             if (System.String.isNullOrEmpty(argument0)) {
                 argument0 = "''";
             }
-            return System.String.concat(System.String.concat("blockly_puts(", argument0), ")\n");
+            return System.String.concat("blockly_puts(", argument0, ")\n");
         },
         text_prompt: function (block) {
             // Prompt function.
-            var functionName = Blockly.Ruby.provideFunction_("text_prompt", [System.String.concat(System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder()), "(msg):"), "    print (msg)", "    $stdin.gets"]);
+            var functionName = Blockly.Ruby.provideFunction_("text_prompt", [System.String.concat("def ", Blockly.Ruby.functionNamePlaceholder(), "(msg):"), "    print (msg)", "    $stdin.gets"]);
             var msg = Blockly.Ruby.quote_(block.getFieldValue("TEXT"));
-            var code = System.String.concat(System.String.concat(System.String.concat(functionName, "("), msg), ")");
+            var code = System.String.concat(functionName, "(", msg, ")");
             var toNumber = Bridge.referenceEquals(block.getFieldValue("TYPE"), "NUMBER");
             if (toNumber) {
                 code = System.String.concat(code, ".to_f");
@@ -20606,7 +21981,7 @@
                 argument0 = "0";
             }
             var varName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE);
-            return System.String.concat(System.String.concat(System.String.concat(varName, " = "), argument0), "\n");
+            return System.String.concat(varName, " = ", argument0, "\n");
         },
         switch_case_number: function (block) {
             // case/when/else condition.
@@ -20614,20 +21989,20 @@
             if (System.String.isNullOrEmpty(argument)) {
                 argument = "-1";
             }
-            var code = System.String.concat(System.String.concat("case ", argument), "\n");
+            var code = System.String.concat("case ", argument, "\n");
             for (var n = 0; n <= block.cases_.length; n = (n + 1) | 0) {
-                var branch = Blockly.Ruby.statementToCode(block, System.String.concat("DO", n));
+                var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
                 if (System.String.isNullOrEmpty(branch)) {
                     branch = "\n";
                 }
-                argument = block.getFieldValue(System.String.concat("CONST", n));
+                argument = block.getFieldValue("CONST" + n);
                 if (argument != null) {
-                    code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat("when ", argument), "\n"), branch)));
+                    code = System.String.concat(code, (System.String.concat("when ", argument, "\n", branch)));
                 } else {
-                    var min = block.getFieldValue(System.String.concat("RANGE_MIN", n));
-                    var max = block.getFieldValue(System.String.concat("RANGE_MAX", n));
+                    var min = block.getFieldValue("RANGE_MIN" + n);
+                    var max = block.getFieldValue("RANGE_MAX" + n);
                     if ((min != null) && (max != null)) {
-                        code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("when ", min), ".."), max), "\n"), branch)));
+                        code = System.String.concat(code, (System.String.concat("when ", min, "..", max, "\n", branch)));
                     }
                 }
             }
@@ -20647,20 +22022,20 @@
             if (System.String.isNullOrEmpty(argument)) {
                 argument = "-1";
             }
-            var code = System.String.concat(System.String.concat("case ", argument), "\n");
+            var code = System.String.concat("case ", argument, "\n");
             for (var n = 0; n <= block.cases_.length; n = (n + 1) | 0) {
-                var branch = Blockly.Ruby.statementToCode(block, System.String.concat("DO", n));
+                var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
                 if (System.String.isNullOrEmpty(branch)) {
                     branch = "\n";
                 }
-                argument = block.getFieldValue(System.String.concat("CONST", n));
+                argument = block.getFieldValue("CONST" + n);
                 if (argument != null) {
-                    code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat("when ", argument), "\n"), branch)));
+                    code = System.String.concat(code, (System.String.concat("when ", argument, "\n", branch)));
                 } else {
-                    var min = block.getFieldValue(System.String.concat("RANGE_MIN", n));
-                    var max = block.getFieldValue(System.String.concat("RANGE_MAX", n));
+                    var min = block.getFieldValue("RANGE_MIN" + n);
+                    var max = block.getFieldValue("RANGE_MAX" + n);
                     if ((min != null) && (max != null)) {
-                        code = System.String.concat(code, (System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("when ", min), ".."), max), "\n"), branch)));
+                        code = System.String.concat(code, (System.String.concat("when ", min, "..", max, "\n", branch)));
                     }
                 }
             }
@@ -20676,7 +22051,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$27", $_, {
+    Bridge.define("$AnonymousType$27", $asm, {
         $kind: "anonymous",
         ctor: function (object, dropSelf) {
             this.object = object;
@@ -20689,13 +22064,13 @@
             return this.dropSelf;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$27)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$27)) {
                 return false;
             }
             return Bridge.equals(this.object, o.object) && Bridge.equals(this.dropSelf, o.dropSelf);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7243084726, this.object, this.dropSelf]);
+            var h = Bridge.addHash([7550210267, this.object, this.dropSelf]);
             return h;
         },
         toJSON: function () {
@@ -20706,7 +22081,7 @@
         }
     });
 
-    Bridge.define("$AnonymousType$28", $_, {
+    Bridge.define("$AnonymousType$28", $asm, {
         $kind: "anonymous",
         ctor: function (dropSelf) {
             this.dropSelf = dropSelf;
@@ -20715,13 +22090,13 @@
             return this.dropSelf;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$28)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$28)) {
                 return false;
             }
             return Bridge.equals(this.dropSelf, o.dropSelf);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7259861942, this.dropSelf]);
+            var h = Bridge.addHash([7550210523, this.dropSelf]);
             return h;
         },
         toJSON: function () {
@@ -20731,9 +22106,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.Ruby", $_);
+    Bridge.ns("WebMrbc.Ruby", $asm.$);
 
-    Bridge.apply($_.WebMrbc.Ruby, {
+    Bridge.apply($asm.$.WebMrbc.Ruby, {
         f1: function (name, type) {
 
             if (Bridge.referenceEquals(type, Blockly.Variables.NAME_TYPE)) {
@@ -20741,12 +22116,12 @@
                 var scope = Blockly.Ruby.variableDB_.localVars;
 
                 while (scope != null) {
-
-                    if (name in scope) {
-                        return scope["name"];
+                    var localVar = { };
+                    if (scope.tryGetValue(name, localVar)) {
+                        return localVar.v;
                     }
 
-                    scope = scope["chain"];
+                    scope = scope.chain;
                 }
 
                 return System.String.concat("@", Blockly.Ruby.variableDB_.getName(name, type));
@@ -20758,7 +22133,7 @@
             var previousLV = Blockly.Ruby.variableDB_.localVars;
             var previousDB = Blockly.Ruby.variableDB_.localVarsDB;
 
-            Blockly.Ruby.variableDB_.localVars = Object("create", null);
+            Blockly.Ruby.variableDB_.localVars = new WebMrbc.LocalVars();
             Blockly.Ruby.variableDB_.localVarsDB = new Blockly.Names(Blockly.Ruby.reservedWords());
 
             Blockly.Ruby.variableDB_.localVars["chain"] = previousLV;
@@ -20769,10 +22144,14 @@
             return Blockly.Ruby.variableDB_.localVars[name].toString();
         },
         f4: function () {
-            Blockly.Ruby.variableDB_.localVars = this.variableDB_.localVars["chain"];
+            Blockly.Ruby.variableDB_.localVars = this.variableDB_.localVars.chain;
             Blockly.Ruby.variableDB_.localVarsDB = this.variableDB_.localVarsDB.chain;
         },
-        f5: function () {
+        f5: function (_o3) {
+            _o3.add("\"");
+            return _o3;
+        },
+        f6: function () {
             return Blockly.Ruby.provideFunction_("for_loop", ["# loops though all numbers from +params[:from]+ to +params[:to]+ by the step", "# value +params[:by]+ and calls the given block passing the numbers", "def ' + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_() + ' params", "", "  from = params[:from] #.to_f", "  to = params[:to] #.to_f", "  by = params[:by].abs #.to_f", "", "  from.step(to, (from > to) ? -1 * by : by) do |value|", "    yield value", "  end", "", "end"]);
         }
     });
@@ -20786,7 +22165,7 @@
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SCLASS);
             this._obj = o;
-            this._super = Bridge.cast(p.locals_node(), WebMrbc.node);
+            this._super = p.WebMrbc$IMrbParser$locals_node();
             this._body = b;
         },
         getobj: function () {
@@ -20797,6 +22176,18 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            cond.write("class << ");
+            this._obj.to_ruby(cond);
+            /* if (_super != null) {
+				cond.write(">");
+				_super.to_ruby(cond);
+			}*/
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
         },
         toString: function () {
             return System.String.format("(:sclass {0} {1})", this.getobj(), this.getbody());
@@ -20815,16 +22206,7 @@
         ctor: function (p, body) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SCOPE);
-            var n2 = Bridge.cast(p.locals_node(), WebMrbc.node);
-
-            if (n2 != null && (n2.getcar() != null || n2.getcdr() != null)) {
-                do {
-                    if (n2.getcar() != null) {
-                        this._local_variables.add(System.Nullable.getValue(Bridge.cast(n2.getcar(), System.Int32)));
-                    }
-                    n2 = Bridge.cast(n2.getcdr(), WebMrbc.node);
-                } while (n2 != null);
-            }
+            this._local_variables.addRange(p.WebMrbc$IMrbParser$locals_node());
             this._body = body;
         },
         getlocal_variables: function () {
@@ -20835,12 +22217,15 @@
         },
         to_xml: function () {
             // TODO:？？？
-            var s = $("<scope>");
+            var s = document.createElement("scope");
             var b = this._body.to_xml();
             if (b != null) {
-                s.append(b);
+                s.appendChild(b);
             }
             return s;
+        },
+        to_rb: function (cond) {
+            this._body.to_ruby(cond);
         },
         toString: function () {
             var $t;
@@ -20917,7 +22302,7 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SDEF);
             this._obj = o;
             this._name = m;
-            this._lv = Bridge.cast(p.locals_node(), WebMrbc.node);
+            this._lv = p.WebMrbc$IMrbParser$locals_node();
             if (a != null) {
                 var n = a;
 
@@ -20975,9 +22360,64 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            var $t, $t1, $t2;
+            cond.increment_nest();
+            cond.write(System.String.concat("def self.", this.getp().WebMrbc$IMrbParser$sym2name(this._name), "("));
+            var i = (((((((this._mandatory_args.getCount() + this._optional_args.getCount()) | 0) + (this._rest !== 0 ? 1 : 0)) | 0) + this._post_mandatory_args.getCount()) | 0) + (this._blk !== 0 ? 1 : 0)) | 0;
+            if (i > 0) {
+                $t = Bridge.getEnumerator(this._mandatory_args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                $t1 = Bridge.getEnumerator(this._optional_args);
+                while ($t1.moveNext()) {
+                    var a1 = $t1.getCurrent();
+                    a1.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                if (this._rest !== 0) {
+                    if (this._rest === -1) {
+                        cond.write("*");
+                    } else {
+                        cond.write(this.getp().WebMrbc$IMrbParser$sym2name(this._rest));
+                    }
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                    $t2 = Bridge.getEnumerator(this._post_mandatory_args);
+                    while ($t2.moveNext()) {
+                        var a2 = $t2.getCurrent();
+                        a2.to_ruby(cond);
+                        i = (i - 1) | 0;
+                        if (i > 0) {
+                            cond.write(", ");
+                        }
+                    }
+                }
+                if (this._blk !== 0) {
+                    cond.write(System.String.concat("&", this.getp().WebMrbc$IMrbParser$sym2name(this._blk)));
+                }
+            }
+            cond.write(")");
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
+        },
         toString: function () {
             var $t, $t1, $t2;
-            var str = System.String.format("(:sdef {0} {1} (", this.getobj(), this.getp().sym2name(this.getname()));
+            var str = System.String.format("(:sdef {0} {1} (", this.getobj(), this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
             $t = Bridge.getEnumerator(this.getmandatory_args());
             while ($t.moveNext()) {
                 var n = $t.getCurrent();
@@ -20988,13 +22428,13 @@
                 var n1 = $t1.getCurrent();
                 str = System.String.concat(str, (System.String.format("{0}, ", n1)));
             }
-            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(this.getrest()))));
+            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(this.getrest()))));
             $t2 = Bridge.getEnumerator(this.getpost_mandatory_args());
             while ($t2.moveNext()) {
                 var n2 = $t2.getCurrent();
                 str = System.String.concat(str, (System.String.format("{0}, ", n2)));
             }
-            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(this.getblk()))));
+            str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(this.getblk()))));
             return System.String.concat(str, System.String.format(" . {0}))", this.getbody()));
         }
     });
@@ -21224,6 +22664,9 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write("self");
+        },
         toString: function () {
             return System.String.format("(:self)", null);
         }
@@ -21239,7 +22682,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SendEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 を送信", [new $_.$AnonymousType$19("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 を送信", [new $asm.$AnonymousType$19("field_variable", "ESV", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21586,105 +23029,12 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write("*");
+            this._a.to_ruby(cond);
+        },
         toString: function () {
             return System.String.format("(:splat . {0})", this.geta());
-        }
-    });
-
-    Bridge.define("WebMrbc.str_node", {
-        inherits: [WebMrbc.node,WebMrbc.IEvaluatable],
-        _str: null,
-        _len: 0,
-        config: {
-            alias: [
-            "evaluate", "WebMrbc$IEvaluatable$evaluate"
-            ]
-        },
-        ctor: function (p, s, len) {
-            this.$initialize();
-            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_STR);
-            this._str = WebMrbc.MrbParser.strndup(s, 0, len);
-            this._len = len;
-        },
-        getstr: function () {
-            return this._str;
-        },
-        getlen: function () {
-            return this._len;
-        },
-        to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.TextBlock.type_name);
-
-            var field = $("<field>");
-            field.attr("name", "TEXT");
-            field.text(WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0));
-            block.append(field);
-
-            return block;
-        },
-        toString: function () {
-            return System.String.format("(:str . ('{0}' . {1}))", this.getstr(), this.getlen());
-        },
-        to_s: function () {
-            return WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0);
-        },
-        evaluate: function (method, args) {
-            var s = this.to_s();
-
-            switch (method) {
-                case "<=>": 
-                    {
-                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
-                            break;
-                        }
-                        var c = WebMrbc.MrbParser.uTF8StringToArray(System.String.compare(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()).toString());
-                        return new WebMrbc.int_node(this.getp(), c, 10);
-                    }
-                case "==": 
-                    {
-                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
-                            break;
-                        }
-                        if (System.String.compare(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()) === 0) {
-                            return new WebMrbc.true_node(this.getp());
-                        } else {
-                            return new WebMrbc.true_node(this.getp());
-                        }
-                    }
-                case "+": 
-                    {
-                        if ((args.getCount() !== 1) || !(Bridge.is(args.getItem(0), WebMrbc.str_node))) {
-                            break;
-                        }
-                        var t = WebMrbc.MrbParser.uTF8StringToArray(System.String.concat(s, Bridge.cast(args.getItem(0), WebMrbc.str_node).to_s()));
-                        return new WebMrbc.str_node(this.getp(), t, ((t.length - 1) | 0));
-                    }
-                case "*": 
-                    {
-                        var a;
-                        if (args.getCount() !== 1) {
-                            break;
-                        }
-                        if (Bridge.is(args.getItem(0), WebMrbc.int_node)) {
-                            a = System.Int64.clip32(Bridge.cast(args.getItem(0), WebMrbc.int_node).to_i());
-                        } else {
-                            if (Bridge.is(args.getItem(0), WebMrbc.float_node)) {
-                                a = Bridge.Int.clip32(Bridge.cast(args.getItem(0), WebMrbc.float_node).to_f());
-                            } else {
-                                break;
-                            }
-                        }
-                        var sb = new System.Text.StringBuilder();
-                        for (var i = 0; i < a; i = (i + 1) | 0) {
-                            sb.append(a);
-                        }
-                        var t1 = WebMrbc.MrbParser.uTF8StringToArray(sb.toString());
-                        return new WebMrbc.str_node(this.getp(), t1, ((t1.length - 1) | 0));
-                    }
-            }
-
-            return null;
         }
     });
 
@@ -21715,26 +23065,60 @@
         },
         to_xml: function () {
             var $t;
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ProceduresCallreturnBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = $("<mutation>");
-            mutation.attr("name", "super");
-            block.append(mutation);
+            var mutation = document.createElement("mutation");
+            mutation.setAttribute("name", "super");
+            block.appendChild(mutation);
 
             var i = 0;
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = $("<arg>");
+                var arg = document.createElement("arg");
                 // TODO: 引数名を持ってくkる
-                arg.attr("name", i.toString());
-                arg.append(a.to_xml());
-                block.append(arg);
+                arg.setAttribute("name", i.toString());
+                arg.appendChild(a.to_xml());
+                block.appendChild(arg);
                 i = (i + 1) | 0;
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            var $t;
+            cond.increment_nest();
+            var blk_arg = Bridge.as(this._block, WebMrbc.block_arg_node);
+            var blk = this._block;
+            if (blk_arg != null) {
+                blk = null;
+            }
+            var i = (this._args.getCount() + (blk_arg != null ? 1 : 0)) | 0;
+            if (i === 0) {
+                cond.write("super");
+            } else {
+                cond.write("super(");
+                $t = Bridge.getEnumerator(this._args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+                if (blk_arg != null) {
+                    blk_arg.to_ruby(cond);
+                }
+                cond.write(")");
+            }
+            cond.decrement_nest();
+            if (blk != null) {
+                blk.to_ruby(cond);
+            } else if (cond.getnest() === 0) {
+                cond.write_line();
+            }
         },
         toString: function () {
             var $t;
@@ -21749,7 +23133,7 @@
         add_block: function (b) {
             if (b != null) {
                 if (this._block != null) {
-                    this.getp().yyError("both block arg and actual block given");
+                    this.getp().WebMrbc$IMrbParser$yyError("both block arg and actual block given");
                 }
                 this._block = b;
             }
@@ -21766,7 +23150,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskCallTimeoutBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 のタイムアウト処理を行う", [new $_.$AnonymousType$19("field_variable", "SVC", "item")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 のタイムアウト処理を行う", [new $asm.$AnonymousType$19("field_variable", "SVC", "item")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21780,7 +23164,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskIsMatchBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", [new $_.$AnonymousType$19("field_variable", "SVC", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "NODE", "EObject"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "EDTAT", "String")], "Boolean", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", [new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "NODE", "EObject"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EDTAT", "String")], "Boolean", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21794,7 +23178,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskProgressBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 %2 の時間を %3 [ms]経過させる", [new $_.$AnonymousType$19("field_variable", "SVC", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "ELAPSE", "Number")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 %2 の時間を %3 [ms]経過させる", [new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ELAPSE", "Number")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21808,7 +23192,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskRecvMsgBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", [new $_.$AnonymousType$19("field_variable", "SVC", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "DATA", "String")], null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", [new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "DATA", "String")], null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21822,11 +23206,11 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskSetTimer.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$29("%1 %2 のタイマーを %3 [ms]に設定", [new $_.$AnonymousType$19("field_variable", "SVC", "item"), new $_.$AnonymousType$18("input_dummy"), new $_.$AnonymousType$13("input_value", "TIMER", "Number")], 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$29("%1 %2 のタイマーを %3 [ms]に設定", [new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "TIMER", "Number")], 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$29", $_, {
+    Bridge.define("$AnonymousType$29", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -21851,13 +23235,13 @@
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $_.$AnonymousType$29)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$29)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7276639158, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550210779, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -21881,7 +23265,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskTimerBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16("%1 のタイマー値", [new $_.$AnonymousType$19("field_variable", "SVC", "item")], "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$16("%1 のタイマー値", [new $asm.$AnonymousType$19("field_variable", "SVC", "item")], "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -21910,7 +23294,7 @@
             this.setColour(210);
             this.appendValueInput("SWITCH").appendField("右の値が");
             this.setMutator(new Blockly.Mutator([WebMrbc.SwitchCaseNumberConstBlock.type_name, WebMrbc.SwitchCaseNumberRangeBlock.type_name, WebMrbc.SwitchCaseNumberDefaultBlock.type_name]));
-            this.setTooltip(Bridge.fn.bind(this, $_.WebMrbc.SwitchCaseNumberBlock.f1));
+            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.SwitchCaseNumberBlock.f1));
             this.cases_ = [{ item1: "0", item2: null }];
             this.defaultCount_ = 0;
             this.updateShape_();
@@ -21932,16 +23316,16 @@
             var container = document.createElement("mutation");
             for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 var caseInfo;
-                var value = this.getFieldValue(System.String.concat("CONST", i));
+                var value = this.getFieldValue("CONST" + i);
                 if (value != null) {
                     caseInfo = document.createElement("case");
                     caseInfo.setAttribute("value", value);
                 } else {
-                    var min = this.getFieldValue(System.String.concat("RANGE_MIN", i));
-                    var max = this.getFieldValue(System.String.concat("RANGE_MAX", i));
+                    var min = this.getFieldValue("RANGE_MIN" + i);
+                    var max = this.getFieldValue("RANGE_MAX" + i);
                     if (min != null && max != null) {
                         caseInfo = document.createElement("case");
-                        caseInfo.setAttribute("value", System.String.concat(System.String.concat(min, ".."), max));
+                        caseInfo.setAttribute("value", System.String.concat(min, "..", max));
                     } else {
                         continue;
                     }
@@ -21999,13 +23383,13 @@
             var connection = containerBlock.getInput("STACK").connection;
             for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 var caseBlock;
-                var value = this.getFieldValue(System.String.concat("CONST", i));
+                var value = this.getFieldValue("CONST" + i);
                 if (value != null) {
                     caseBlock = workspace.newBlock(WebMrbc.SwitchCaseNumberConstBlock.type_name);
                     caseBlock.setFieldValue(value, "CONST");
                 } else {
-                    var min = this.getFieldValue(System.String.concat("RANGE_MIN", i));
-                    var max = this.getFieldValue(System.String.concat("RANGE_MAX", i));
+                    var min = this.getFieldValue("RANGE_MIN" + i);
+                    var max = this.getFieldValue("RANGE_MAX" + i);
                     if ((min != null) && (max != null)) {
                         caseBlock = workspace.newBlock(WebMrbc.SwitchCaseNumberRangeBlock.type_name);
                         caseBlock.setFieldValue(min, "RANGE_MIN");
@@ -22073,7 +23457,7 @@
             this.updateShape_();
             // Reconnect any child blocks.
             for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
-                Blockly.Mutator.reconnect(statementConnections[i], this, System.String.concat("DO", i));
+                Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
             }
             Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
         },
@@ -22094,14 +23478,14 @@
                 switch (clauseBlock.type) {
                     case WebMrbc.SwitchCaseNumberConstBlock.type_name: 
                         {
-                            var inputDo = this.getInput(System.String.concat("DO", i));
+                            var inputDo = this.getInput("DO" + i);
                             Bridge.cast(clauseBlock, WebMrbc.SwitchCaseNumberConstBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
                         break;
                     case WebMrbc.SwitchCaseNumberRangeBlock.type_name: 
                         {
-                            var inputDo1 = this.getInput(System.String.concat("DO", i));
+                            var inputDo1 = this.getInput("DO" + i);
                             Bridge.cast(clauseBlock, WebMrbc.SwitchCaseNumberRangeBlock).statementConnection_ = (inputDo1 != null) ? inputDo1.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
@@ -22136,9 +23520,9 @@
                 this.removeInput("DEFAULT_DO");
             }
             var i = 0;
-            while (this.getInput(System.String.concat("CASE", i)) != null) {
-                this.removeInput(System.String.concat("CASE", i));
-                this.removeInput(System.String.concat("DO", i));
+            while (this.getInput("CASE" + i) != null) {
+                this.removeInput("CASE" + i);
+                this.removeInput("DO" + i);
                 i = (i + 1) | 0;
             }
             // Rebuild block.
@@ -22147,11 +23531,11 @@
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
                 if (c.item2 == null) {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField(new Blockly.FieldNumber(c.item1, "-Infinity", "Infinity", 0), System.String.concat("CONST", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField(new Blockly.FieldNumber(c.item1, "-Infinity", "Infinity", 0), "CONST" + i).appendField("の");
                 } else {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField(new Blockly.FieldNumber(c.item1, "-Infinity", "Infinity", 0), System.String.concat("RANGE_MIN", i)).appendField("から").appendField(new Blockly.FieldNumber(c.item2, "-Infinity", "Infinity", 0), System.String.concat("RANGE_MAX", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField(new Blockly.FieldNumber(c.item1, "-Infinity", "Infinity", 0), "RANGE_MIN" + i).appendField("から").appendField(new Blockly.FieldNumber(c.item2, "-Infinity", "Infinity", 0), "RANGE_MAX" + i).appendField("の");
                 }
-                this.appendStatementInput(System.String.concat("DO", i)).appendField("とき");
+                this.appendStatementInput("DO" + i).appendField("とき");
                 i = (i + 1) | 0;
             }
             if (this.defaultCount_ !== 0) {
@@ -22161,9 +23545,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.SwitchCaseNumberBlock", $_);
+    Bridge.ns("WebMrbc.SwitchCaseNumberBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.SwitchCaseNumberBlock, {
+    Bridge.apply($asm.$.WebMrbc.SwitchCaseNumberBlock, {
         f1: function () {
             if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
                 return "条件に合うブロックを実行";
@@ -22307,7 +23691,7 @@
             this.setColour(210);
             this.appendValueInput("SWITCH").appendField("右の値が");
             this.setMutator(new Blockly.Mutator([WebMrbc.SwitchCaseTextConstBlock.type_name, WebMrbc.SwitchCaseTextRangeBlock.type_name, WebMrbc.SwitchCaseTextDefaultBlock.type_name]));
-            this.setTooltip(Bridge.fn.bind(this, $_.WebMrbc.SwitchCaseTextBlock.f1));
+            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.SwitchCaseTextBlock.f1));
             this.cases_ = [{ item1: "0", item2: null }];
             this.defaultCount_ = 0;
             this.updateShape_();
@@ -22329,16 +23713,16 @@
             var container = document.createElement("mutation");
             for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 var caseInfo;
-                var value = this.getFieldValue(System.String.concat("CONST", i));
+                var value = this.getFieldValue("CONST" + i);
                 if (value != null) {
                     caseInfo = document.createElement("case");
                     caseInfo.setAttribute("value", value);
                 } else {
-                    var min = this.getFieldValue(System.String.concat("RANGE_MIN", i));
-                    var max = this.getFieldValue(System.String.concat("RANGE_MAX", i));
+                    var min = this.getFieldValue("RANGE_MIN" + i);
+                    var max = this.getFieldValue("RANGE_MAX" + i);
                     if (min != null && max != null) {
                         caseInfo = document.createElement("case");
-                        caseInfo.setAttribute("value", System.String.concat(System.String.concat(min, ".."), max));
+                        caseInfo.setAttribute("value", System.String.concat(min, "..", max));
                     } else {
                         continue;
                     }
@@ -22396,13 +23780,13 @@
             var connection = containerBlock.getInput("STACK").connection;
             for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 var caseBlock;
-                var value = this.getFieldValue(System.String.concat("CONST", i));
+                var value = this.getFieldValue("CONST" + i);
                 if (value != null) {
                     caseBlock = workspace.newBlock(WebMrbc.SwitchCaseTextConstBlock.type_name);
                     caseBlock.setFieldValue(value, "CONST");
                 } else {
-                    var min = this.getFieldValue(System.String.concat("RANGE_MIN", i));
-                    var max = this.getFieldValue(System.String.concat("RANGE_MAX", i));
+                    var min = this.getFieldValue("RANGE_MIN" + i);
+                    var max = this.getFieldValue("RANGE_MAX" + i);
                     if ((min != null) && (max != null)) {
                         caseBlock = workspace.newBlock(WebMrbc.SwitchCaseTextRangeBlock.type_name);
                         caseBlock.setFieldValue(min, "RANGE_MIN");
@@ -22470,7 +23854,7 @@
             this.updateShape_();
             // Reconnect any child blocks.
             for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
-                Blockly.Mutator.reconnect(statementConnections[i], this, System.String.concat("DO", i));
+                Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
             }
             Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
         },
@@ -22491,14 +23875,14 @@
                 switch (clauseBlock.type) {
                     case WebMrbc.SwitchCaseTextConstBlock.type_name: 
                         {
-                            var inputDo = this.getInput(System.String.concat("DO", i));
+                            var inputDo = this.getInput("DO" + i);
                             Bridge.cast(clauseBlock, WebMrbc.SwitchCaseTextConstBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
                         break;
                     case WebMrbc.SwitchCaseTextRangeBlock.type_name: 
                         {
-                            var inputDo1 = this.getInput(System.String.concat("DO", i));
+                            var inputDo1 = this.getInput("DO" + i);
                             Bridge.cast(clauseBlock, WebMrbc.SwitchCaseTextRangeBlock).statementConnection_ = (inputDo1 != null) ? inputDo1.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
@@ -22533,9 +23917,9 @@
                 this.removeInput("DEFAULT_DO");
             }
             var i = 0;
-            while (this.getInput(System.String.concat("CASE", i)) != null) {
-                this.removeInput(System.String.concat("CASE", i));
-                this.removeInput(System.String.concat("DO", i));
+            while (this.getInput("CASE" + i) != null) {
+                this.removeInput("CASE" + i);
+                this.removeInput("DO" + i);
                 i = (i + 1) | 0;
             }
             // Rebuild block.
@@ -22544,11 +23928,11 @@
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
                 if (c.item2 == null) {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField(new Blockly.FieldTextInput(c.item1), System.String.concat("CONST", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField(new Blockly.FieldTextInput(c.item1), "CONST" + i).appendField("の");
                 } else {
-                    this.appendDummyInput(System.String.concat("CASE", i)).appendField(new Blockly.FieldTextInput(c.item1), System.String.concat("RANGE_MIN", i)).appendField("から").appendField(new Blockly.FieldTextInput(c.item2), System.String.concat("RANGE_MAX", i)).appendField("の");
+                    this.appendDummyInput("CASE" + i).appendField(new Blockly.FieldTextInput(c.item1), "RANGE_MIN" + i).appendField("から").appendField(new Blockly.FieldTextInput(c.item2), "RANGE_MAX" + i).appendField("の");
                 }
-                this.appendStatementInput(System.String.concat("DO", i)).appendField("とき");
+                this.appendStatementInput("DO" + i).appendField("とき");
                 i = (i + 1) | 0;
             }
             if (this.defaultCount_ !== 0) {
@@ -22558,9 +23942,9 @@
         }
     });
 
-    Bridge.ns("WebMrbc.SwitchCaseTextBlock", $_);
+    Bridge.ns("WebMrbc.SwitchCaseTextBlock", $asm.$);
 
-    Bridge.apply($_.WebMrbc.SwitchCaseTextBlock, {
+    Bridge.apply($asm.$.WebMrbc.SwitchCaseTextBlock, {
         f1: function () {
             if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
                 return "条件に合うブロックを実行";
@@ -22691,34 +24075,52 @@
             return this._name;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.VariablesGetBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "variables_get");
 
-            var field = $("<field>");
-            field.attr("name", "VAR");
-            field.text(System.String.concat(":", this.getp().sym2name(this._name)));
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode(System.String.concat(":", this.getp().WebMrbc$IMrbParser$sym2name(this._name))));
+            block.appendChild(field);
 
             return block;
         },
+        to_rb: function (cond) {
+            cond.write(System.String.concat(":", this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+        },
         toString: function () {
-            return System.String.format("(:sym . {0})", this.getp().sym2name(this.getname()));
+            return System.String.format("(:sym . {0})", this.getp().WebMrbc$IMrbParser$sym2name(this.getname()));
         }
     });
 
     Bridge.define("WebMrbc.symbols_node", {
         inherits: [WebMrbc.node],
         _a: null,
+        config: {
+            init: function () {
+                this._a = new (System.Collections.Generic.List$1(WebMrbc.node))();
+            }
+        },
         ctor: function (p, a) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SYMBOLS);
-            this._a = a;
+            WebMrbc.node.dump_recur(WebMrbc.node, this._a, a);
         },
         geta: function () {
             return this._a;
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t;
+            cond.write("%i{");
+            $t = Bridge.getEnumerator(this._a);
+            while ($t.moveNext()) {
+                var i = $t.getCurrent();
+                i.to_ruby(cond);
+            }
+            cond.write("}");
         },
         toString: function () {
             return System.String.format("(:symbols . {0})", this.geta());
@@ -23159,23 +24561,23 @@
         updateAt_: function (n, isAt) {
             // Create or delete an input for the numeric index.
             // Destroy old "AT" and "ORDINAL" inputs.
-            this.removeInput(System.String.concat("AT", n));
-            this.removeInput(System.String.concat("ORDINAL", n), true);
+            this.removeInput("AT" + n);
+            this.removeInput("ORDINAL" + n, true);
             // Create either a value "AT" input or a dummy input.
             if (isAt) {
-                this.appendValueInput(System.String.concat("AT", n)).setCheck("Number");
+                this.appendValueInput("AT" + n).setCheck("Number");
                 if (!System.String.isNullOrEmpty(Blockly.Msg.ORDINAL_NUMBER_SUFFIX)) {
-                    this.appendDummyInput(System.String.concat("ORDINAL", n)).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
+                    this.appendDummyInput("ORDINAL" + n).appendField(Blockly.Msg.ORDINAL_NUMBER_SUFFIX);
                 }
             } else {
-                this.appendDummyInput(System.String.concat("AT", n));
+                this.appendDummyInput("AT" + n);
             }
             // Move tail, if present, to end of block.
             if (n === 2 && !System.String.isNullOrEmpty(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL)) {
                 this.removeInput("TAIL", true);
                 this.appendDummyInput("TAIL").appendField(Blockly.Msg.TEXT_GET_SUBSTRING_TAIL);
             }
-            var menu = new Blockly.FieldDropdown(this[System.String.concat("WHERE_OPTIONS_", n)], Bridge.fn.bind(this, function (value) {
+            var menu = new Blockly.FieldDropdown(this["WHERE_OPTIONS_" + n], Bridge.fn.bind(this, function (value) {
                 var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
                 // The "isAt" variable is available due to this function being a
                 // closure.
@@ -23184,13 +24586,13 @@
                     Bridge.cast(block, WebMrbc.TextGetSubstringBlock).updateAt_(n, newAt);
                     // This menu has been destroyed and replaced.
                     // Update the replacement.
-                    block.setFieldValue(value, System.String.concat("WHERE", n));
+                    block.setFieldValue(value, "WHERE" + n);
                     return null;
                 }
                 return undefined;
             }));
 
-            this.getInput(System.String.concat("AT", n)).appendField(menu, System.String.concat("WHERE", n));
+            this.getInput("AT" + n).appendField(menu, "WHERE" + n);
             if (n === 1) {
                 this.moveInputBefore("AT1", "AT2");
             }
@@ -23235,7 +24637,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.TextIsEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.TEXT_ISEMPTY_TITLE, [new $_.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_ISEMPTY_TOOLTIP, Blockly.Msg.TEXT_ISEMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.TEXT_ISEMPTY_TITLE, [new $asm.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Boolean", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_ISEMPTY_TOOLTIP, Blockly.Msg.TEXT_ISEMPTY_HELPURL));
         }
     });
 
@@ -23289,7 +24691,7 @@
             }
             // Disconnect any children that don"t belong.
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                var connection = this.getInput(System.String.concat("ADD", i)).connection.targetConnection;
+                var connection = this.getInput("ADD" + i).connection.targetConnection;
                 if (connection != null && System.Array.indexOfT(connections, connection) === -1) {
                     connection.disconnect();
                 }
@@ -23298,14 +24700,14 @@
             this.updateShape_();
             // Reconnect any child blocks.
             for (var i1 = 0; i1 < this.itemCount_; i1 = (i1 + 1) | 0) {
-                Blockly.Mutator.reconnect(connections[i1], this, System.String.concat("ADD", i1));
+                Blockly.Mutator.reconnect(connections[i1], this, "ADD" + i1);
             }
         },
         saveConnections: function (containerBlock) {
             var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.TextCreateJoinItemBlock);
             var i = 0;
             while (itemBlock != null) {
-                var input = this.getInput(System.String.concat("ADD", i));
+                var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
                 itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.TextCreateJoinItemBlock) : null;
@@ -23320,16 +24722,16 @@
             // Add new inputs.
             var i;
             for (i = 0; i < this.itemCount_; i = (i + 1) | 0) {
-                if (this.getInput(System.String.concat("ADD", i)) == null) {
-                    var input = this.appendValueInput(System.String.concat("ADD", i));
+                if (this.getInput("ADD" + i) == null) {
+                    var input = this.appendValueInput("ADD" + i);
                     if (i === 0) {
                         input.appendField(Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH);
                     }
                 }
             }
             // Remove deleted inputs.
-            while (this.getInput(System.String.concat("ADD", i)) != null) {
-                this.removeInput(System.String.concat("ADD", i));
+            while (this.getInput("ADD" + i) != null) {
+                this.removeInput("ADD" + i);
                 i = (i + 1) | 0;
             }
         },
@@ -23348,7 +24750,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.TextLengthBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$16(Blockly.Msg.TEXT_LENGTH_TITLE, [new $_.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_LENGTH_TOOLTIP, Blockly.Msg.TEXT_LENGTH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.TEXT_LENGTH_TITLE, [new $asm.$AnonymousType$21("input_value", "VALUE", ["String", "Array"])], "Number", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_LENGTH_TOOLTIP, Blockly.Msg.TEXT_LENGTH_HELPURL));
         }
     });
 
@@ -23362,7 +24764,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.TextPrintBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14(Blockly.Msg.TEXT_PRINT_TITLE, [new $_.$AnonymousType$20("input_value", "TEXT")], null, null, WebMrbc.Texts.HUE, Blockly.Msg.TEXT_PRINT_TOOLTIP, Blockly.Msg.TEXT_PRINT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.TEXT_PRINT_TITLE, [new $asm.$AnonymousType$20("input_value", "TEXT")], null, null, WebMrbc.Texts.HUE, Blockly.Msg.TEXT_PRINT_TOOLTIP, Blockly.Msg.TEXT_PRINT_HELPURL));
         }
     });
 
@@ -23516,15 +24918,18 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_TRUE);
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.LogicBooleanBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "logic_boolean");
 
-            var field = $("<field>");
-            field.attr("name", "BOOL");
-            field.text("TRUE");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "BOOL");
+            field.appendChild(document.createTextNode("TRUE"));
+            block.appendChild(field);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.write("true");
         },
         toString: function () {
             return System.String.format("(:true)", null);
@@ -23563,13 +24968,30 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            var $t;
+            cond.write("undef");
+            var i = this._syms.getCount();
+            if (i > 0) {
+                cond.write(" ");
+            }
+            $t = Bridge.getEnumerator(this._syms);
+            while ($t.moveNext()) {
+                var sym = $t.getCurrent();
+                cond.write(this.getp().WebMrbc$IMrbParser$sym2name(sym));
+                i = (i - 1) | 0;
+                if (i > 0) {
+                    cond.write(", ");
+                }
+            }
+        },
         toString: function () {
             var $t;
             var str = "(:undef ";
             $t = Bridge.getEnumerator(this.getsyms());
             while ($t.moveNext()) {
                 var n = $t.getCurrent();
-                str = System.String.concat(str, (System.String.format("{0}, ", this.getp().sym2name(n))));
+                str = System.String.concat(str, (System.String.format("{0}, ", this.getp().WebMrbc$IMrbParser$sym2name(n))));
             }
             return System.String.concat(str, ")");
         }
@@ -23597,31 +25019,48 @@
             return this._else;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsIfBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_if");
 
-            var value = $("<value>");
-            value.attr("name", "IF0");
-            value.append(this._cond.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "IF0");
+            value.appendChild(this._cond.to_xml());
+            block.appendChild(value);
 
             if (this._then != null) {
-                var statement = $("<statement>");
-                statement.attr("name", "DO0");
-                block.append(statement);
+                var statement = document.createElement("statement");
+                statement.setAttribute("name", "DO0");
+                block.appendChild(statement);
 
-                statement.append(this._then.to_xml());
+                statement.appendChild(this._then.to_xml());
             }
 
             if (this._else != null) {
-                var statement1 = $("<statement>");
-                statement1.attr("name", "ELSE");
-                block.append(statement1);
+                var statement1 = document.createElement("statement");
+                statement1.setAttribute("name", "ELSE");
+                block.appendChild(statement1);
 
-                statement1.append(this._else.to_xml());
+                statement1.appendChild(this._else.to_xml());
             }
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            cond.write("unless ");
+            this._cond.to_ruby(cond);
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._else.to_ruby(cond);
+            cond.decrement_indent();
+
+            if (this._then != null) {
+                cond.write_line("else");
+                cond.increment_indent();
+                this._then.to_ruby(cond);
+                cond.decrement_indent();
+            }
+            cond.write_line("end");
         },
         toString: function () {
             return System.String.format("(:unless {0} {1} {2})", this.getcond(), this.getthen(), this.getelse());
@@ -23645,25 +25084,35 @@
             return this._body;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsWhileUntilBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_whileUntil");
 
-            var field = $("<field>");
-            field.attr("name", "MODE");
-            field.text("UNTIL");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "MODE");
+            field.appendChild(document.createTextNode("UNTIL"));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "BOOL");
-            value.append(this._cond.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "BOOL");
+            value.appendChild(this._cond.to_xml());
+            block.appendChild(value);
 
-            var statement = $("<statement>");
-            statement.attr("name", "DO");
-            statement.append(this._body.to_xml());
-            block.append(statement);
+            var statement = document.createElement("statement");
+            statement.setAttribute("name", "DO");
+            statement.appendChild(this._body.to_xml());
+            block.appendChild(statement);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            cond.write("until ");
+            this._cond.to_ruby(cond);
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
         },
         toString: function () {
             return System.String.format("(:until {0} {1})", this.getcond(), this.getbody());
@@ -23714,7 +25163,7 @@
             WebMrbc.Block.ctor.call(this, WebMrbc.VariablesSetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $_.$AnonymousType$14(Blockly.Msg.VARIABLES_SET, [new $_.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.VARIABLES_DEFAULT_NAME), new $_.$AnonymousType$20("input_value", "VALUE")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.VARIABLES_SET_TOOLTIP, Blockly.Msg.VARIABLES_SET_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.VARIABLES_SET, [new $asm.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.VARIABLES_DEFAULT_NAME), new $asm.$AnonymousType$20("input_value", "VALUE")], null, null, WebMrbc.Variables.HUE, Blockly.Msg.VARIABLES_SET_TOOLTIP, Blockly.Msg.VARIABLES_SET_HELPURL));
             this.contextMenuMsg_ = Blockly.Msg.VARIABLES_SET_CREATE_GET;
         },
         customContextMenu: function (options) {
@@ -23749,25 +25198,35 @@
             return this._body;
         },
         to_xml: function () {
-            var block = $("<block>");
-            block.attr("type", WebMrbc.ControlsWhileUntilBlock.type_name);
+            var block = document.createElement("block");
+            block.setAttribute("type", "controls_whileUntil");
 
-            var field = $("<field>");
-            field.attr("name", "MODE");
-            field.text("WHILE");
-            block.append(field);
+            var field = document.createElement("field");
+            field.setAttribute("name", "MODE");
+            field.appendChild(document.createTextNode("WHILE"));
+            block.appendChild(field);
 
-            var value = $("<value>");
-            value.attr("name", "BOOL");
-            value.append(this._cond.to_xml());
-            block.append(value);
+            var value = document.createElement("value");
+            value.setAttribute("name", "BOOL");
+            value.appendChild(this._cond.to_xml());
+            block.appendChild(value);
 
-            var statement = $("<statement>");
-            statement.attr("name", "DO");
-            statement.append(this._body.to_xml());
-            block.append(statement);
+            var statement = document.createElement("statement");
+            statement.setAttribute("name", "DO");
+            statement.appendChild(this._body.to_xml());
+            block.appendChild(statement);
 
             return block;
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            cond.write("while ");
+            this._cond.to_ruby(cond);
+            cond.decrement_nest();
+            cond.increment_indent();
+            this._body.to_ruby(cond);
+            cond.decrement_indent();
+            cond.write_line("end");
         },
         toString: function () {
             return System.String.format("(:while {0} {1})", this.getcond(), this.getbody());
@@ -23777,16 +25236,31 @@
     Bridge.define("WebMrbc.words_node", {
         inherits: [WebMrbc.node],
         _a: null,
+        config: {
+            init: function () {
+                this._a = new (System.Collections.Generic.List$1(WebMrbc.node))();
+            }
+        },
         ctor: function (p, a) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_WORDS);
-            this._a = a;
+            WebMrbc.node.dump_recur(WebMrbc.node, this._a, a);
         },
         geta: function () {
             return this._a;
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t;
+            cond.write("%w(");
+            $t = Bridge.getEnumerator(this._a);
+            while ($t.moveNext()) {
+                var i = $t.getCurrent();
+                i.to_ruby(cond);
+            }
+            cond.write(")");
         },
         toString: function () {
             return System.String.format("(:words . {0})", this.geta());
@@ -23812,6 +25286,11 @@
         to_xml: function () {
             throw new System.NotImplementedException();
         },
+        to_rb: function (cond) {
+            cond.write("%x(");
+            cond.write(WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0));
+            cond.write(")");
+        },
         toString: function () {
             return System.String.format("(:str . ({0} . {1}))", this.getstr(), this.getlen());
         }
@@ -23830,7 +25309,7 @@
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_YIELD);
             if (c != null) {
                 if (c.getcdr() != null) {
-                    p.yyError("both block arg and actual block given");
+                    p.WebMrbc$IMrbParser$yyError("both block arg and actual block given");
                 }
                 c = Bridge.cast(c.getcar(), WebMrbc.node);
             }
@@ -23842,6 +25321,29 @@
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            var $t;
+            cond.increment_nest();
+            var i = this._args.getCount();
+            if (i === 0) {
+                cond.write("yield");
+            } else {
+                cond.write("yield ");
+                $t = Bridge.getEnumerator(this._args);
+                while ($t.moveNext()) {
+                    var a = $t.getCurrent();
+                    a.to_ruby(cond);
+                    i = (i - 1) | 0;
+                    if (i > 0) {
+                        cond.write(", ");
+                    }
+                }
+            }
+            cond.decrement_nest();
+            if (cond.getnest() === 0) {
+                cond.write_line();
+            }
         },
         toString: function () {
             var $t;
@@ -23865,13 +25367,36 @@
         add_block: function (b) {
             if (b != null) {
                 if (this._block != null) {
-                    this.getp().yyError("both block arg and actual block given");
+                    this.getp().WebMrbc$IMrbParser$yyError("both block arg and actual block given");
                 }
                 this._block = b;
             }
         },
         to_xml: function () {
             throw new System.NotImplementedException();
+        },
+        to_rb: function (cond) {
+            cond.increment_nest();
+            var blk_arg = Bridge.as(this._block, WebMrbc.block_arg_node);
+            var blk = this._block;
+            if (blk_arg != null) {
+                blk = null;
+            }
+            if (blk_arg == null) {
+                cond.write("super");
+            } else {
+                cond.write("super(");
+                if (blk_arg != null) {
+                    blk_arg.to_ruby(cond);
+                }
+                cond.write(")");
+            }
+            cond.decrement_nest();
+            if (blk != null) {
+                blk.to_ruby(cond);
+            } else if (cond.getnest() === 0) {
+                cond.write_line();
+            }
         },
         toString: function () {
             return System.String.format("(:zsuper)", null);
@@ -24494,6 +26019,10 @@
                     }
                 } else if ((valueRange.v == null) || ((valueRange.v.getValues().length === 0) && (valueRange.v.getRanges().length === 0))) {
                     var mutation = $("<mutation>");
+                    mutation.attr("property_code", System.Byte.format(pi.propertyCode, "X2"));
+                    mutation.attr("identifier", identifier);
+                    mutation.attr("description", pi.description);
+                    mutation.attr("property_size", pi.size.toString());
                     mutation.attr("default", 1);
                     mutation.attr("user_getter", 1);
                     block.append(mutation);
@@ -24517,6 +26046,10 @@
                     }
                 } else {
                     var mutation1 = $("<mutation>");
+                    mutation1.attr("property_code", System.Byte.format(pi.propertyCode, "X2"));
+                    mutation1.attr("identifier", identifier);
+                    mutation1.attr("description", pi.description);
+                    mutation1.attr("property_size", pi.size.toString());
                     mutation1.attr("default", 0);
                     mutation1.attr("user_getter", 1);
                     block.append(mutation1);
@@ -24531,12 +26064,12 @@
                         mutation1.append(branch);
 
                         field = $("<field>");
-                        field.attr("name", System.String.concat("CASE_DESCRIPTION", i));
+                        field.attr("name", "CASE_DESCRIPTION" + i);
                         field.text(v.getDisp().toString());
                         block.append(field);
 
                         field = $("<field>");
-                        field.attr("name", System.String.concat("CASE_VALUE", i));
+                        field.attr("name", "CASE_VALUE" + i);
                         field.text(v.getVal().toString());
                         block.append(field);
                         i = (i + 1) | 0;
@@ -24552,17 +26085,17 @@
                         mutation1.append(branch1);
 
                         field = $("<field>");
-                        field.attr("name", System.String.concat("CASE_DESCRIPTION", i));
+                        field.attr("name", "CASE_DESCRIPTION" + i);
                         field.text(v1.getDisp().toString());
                         block.append(field);
 
                         field = $("<field>");
-                        field.attr("name", System.String.concat("CASE_MIN", i));
+                        field.attr("name", "CASE_MIN" + i);
                         field.text(v1.getMin().toString());
                         block.append(field);
 
                         field = $("<field>");
-                        field.attr("name", System.String.concat("CASE_MAX", i));
+                        field.attr("name", "CASE_MAX" + i);
                         field.text(v1.getMax().toString());
                         block.append(field);
                         i = (i + 1) | 0;
@@ -24792,12 +26325,12 @@
                 mutation.append(branch);
 
                 field = $("<field>");
-                field.attr("name", System.String.concat("DESCRIPTION", i));
+                field.attr("name", "DESCRIPTION" + i);
                 field.text(v.getDisp().toString());
                 block.append(field);
 
                 field = $("<field>");
-                field.attr("name", System.String.concat("CONST", i));
+                field.attr("name", "CONST" + i);
                 field.text(v.getVal().toString());
                 block.append(field);
                 i = (i + 1) | 0;
@@ -24813,17 +26346,17 @@
                 mutation.append(branch1);
 
                 field = $("<field>");
-                field.attr("name", System.String.concat("DESCRIPTION", i));
+                field.attr("name", "DESCRIPTION" + i);
                 field.text(v1.getDisp().toString());
                 block.append(field);
 
                 field = $("<field>");
-                field.attr("name", System.String.concat("RANGE_MIN", i));
+                field.attr("name", "RANGE_MIN" + i);
                 field.text(v1.getMin().toString());
                 block.append(field);
 
                 field = $("<field>");
-                field.attr("name", System.String.concat("RANGE_MAX", i));
+                field.attr("name", "RANGE_MAX" + i);
                 field.text(v1.getMax().toString());
                 block.append(field);
                 i = (i + 1) | 0;
@@ -24908,9 +26441,31 @@
         },
         template: function (template) {
             template = System.String.replaceAll(template, "%identifier%", this.eobject.identifier);
-            template = System.String.replaceAll(template, "%attribute%", System.String.concat(System.String.concat(System.String.concat(System.String.concat(System.String.concat("EOBJ: ", System.Byte.format(this.eobject.type.classGroup.classGroupCode, "X2")), System.Byte.format(this.eobject.type.classCode, "X2")), System.Byte.format(this.eobject.instanceCode, "X2")), "<br>区分: "), this.eobject.attribute));
+            template = System.String.replaceAll(template, "%attribute%", System.String.concat("EOBJ: ", System.Byte.format(this.eobject.type.classGroup.classGroupCode, "X2"), System.Byte.format(this.eobject.type.classCode, "X2"), System.Byte.format(this.eobject.instanceCode, "X2"), "<br>区分: ", this.eobject.attribute));
             template = System.String.replaceAll(template, "%img%", this.getImageUrl());
             return template;
+        }
+    });
+
+    Bridge.define("WebMrbc.filename_node", {
+        inherits: [WebMrbc.str_node],
+        ctor: function (p, s, len) {
+            this.$initialize();
+            WebMrbc.str_node.ctor.call(this, p, s, len);
+        },
+        to_rb: function (cond) {
+            cond.write("__FILE__");
+        }
+    });
+
+    Bridge.define("WebMrbc.lineno_node", {
+        inherits: [WebMrbc.int_node],
+        ctor: function (p, lineno) {
+            this.$initialize();
+            WebMrbc.int_node.ctor.call(this, p, WebMrbc.MrbParser.uTF8StringToArray(lineno.toString()), 10);
+        },
+        to_rb: function (cond) {
+            cond.write("__LINE__");
         }
     });
 
