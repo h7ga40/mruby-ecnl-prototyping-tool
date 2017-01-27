@@ -1,0 +1,386 @@
+<xml id="toolbox" style="display: none">
+	<category name="Kernel" colour="160">
+		<block type="call"></block>
+		<block type="pin_mode"></block>
+		<block type="digital_write"></block>
+		<block type="digital_read"></block>
+		<block type="analog_read"></block>
+		<block type="pwm">
+			<value name="PWM_OUT">
+				<shadow type="pwm_value"></shadow>
+			</value>
+		</block>
+		<block type="pwm_value"></block>
+		<block type="analog_reference"></block>
+		<block type="init_dac"></block>
+		<block type="analog_dac">
+			<value name="VALUE">
+				<shadow type="dac_value"></shadow>
+			</value>
+		</block>
+		<block type="dac_value"></block>
+		<block type="delay">
+			<value name="VALUE">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="millis"></block>
+		<block type="micros"></block>
+		<block type="led">
+			<value name="SW">
+				<shadow type="bit"></shadow>
+			</value>
+		</block>
+		<block type="bit"></block>
+		<block type="hexadecimal"></block>
+		<block type="tone">
+			<value name="FREQUENCY">
+				<shadow type="tone_value"></shadow>
+			</value>
+			<value name="DURATION">
+				<shadow type="math_number">
+					<field name="NUM">0</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="tone_value"></block>
+		<block type="no_tone"></block>
+		<block type="random_seed">
+			<value name="VALUE">
+				<shadow type="math_number">
+					<field name="NUM">0</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="random">
+			<value name="MIN">
+				<shadow type="math_number">
+					<field name="NUM">0</field>
+				</shadow>
+			</value>
+			<value name="MAX">
+				<shadow type="math_number">
+					<field name="NUM">100</field>
+				</shadow>
+			</value>
+		</block>
+	</category>
+	<category name="System" colour="160">
+		<block type="system_exit"></block>
+		<block type="system_setrun">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="system_version"></block>
+		<block type="system_push">
+			<value name="ADDRESS">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+			<value name="DATA">
+				<shadow type="text"></shadow>
+			</value>
+			<value name="LENGTH">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="system_pop">
+			<value name="ADDRESS">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+			<value name="LENGTH">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="system_fileload"></block>
+		<block type="system_reset"></block>
+		<block type="system_use_sd"></block>
+		<block type="system_use_wifi"></block>
+		<block type="system_get_mrb_path"></block>
+	</category>
+	<category name="MemFile" colour="160">
+		<block type="memfile_open">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="memfile_close"></block>
+		<block type="memfile_read"></block>
+		<block type="memfile_write">
+			<value name="DATA">
+				<shadow type="text"></shadow>
+			</value>
+			<value name="LENGTH">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="memfile_seek">
+			<value name="POSITION">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="memfile_cp">
+			<value name="SRC_FILENAME">
+				<shadow type="text">
+					<field name="TEXT">src.ext</field>
+				</shadow>
+			</value>
+			<value name="DST_FILENAME">
+				<shadow type="text">
+					<field name="TEXT">dst.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="memfile_rm">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+	</category>
+	<category name="Serial" colour="160">
+		<block type="serial_new">
+			<value name="BPS">
+				<shadow type="bps_value">
+					<field name="VALUE">9.6kbps</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="serial_bps">
+			<value name="BPS">
+				<shadow type="bps_value">
+					<field name="VALUE">9.6kbps</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="serial_print">
+			<value name="STR">
+				<shadow type="text"></shadow>
+			</value>
+		</block>
+		<block type="serial_println">
+			<value name="STR">
+				<shadow type="text"></shadow>
+			</value>
+		</block>
+		<block type="serial_available"></block>
+		<block type="serial_read"></block>
+		<block type="serial_write">
+			<value name="DATA">
+				<shadow type="text"></shadow>
+			</value>
+			<value name="LENGTH">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="serial_flash"></block>
+		<block type="bps_value">
+			<field name="VALUE">9.6kbps</field>
+		</block>
+	</category>
+	<category name="I2C" colour="160">
+		<block type="i2c_new"></block>
+		<block type="i2c_write">
+			<value name="ADDRESS">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+			<value name="DATA">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="i2c_read">
+			<value name="ADDRESS_L">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+			<value name="ADDRESS_H">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+		</block>
+		<block type="i2c_begin"></block>
+		<block type="i2c_lwrite">
+			<value name="DATA">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="i2c_end"></block>
+		<block type="i2c_request">
+			<value name="ADDRESS">
+				<shadow type="hexadecimal"></shadow>
+			</value>
+			<value name="COUNT">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="i2c_lread"></block>
+		<block type="i2c_available"></block>
+		<block type="i2c_frequency">
+			<value name="FREQUENCY">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+	</category>
+	<category name="Servo" colour="160">
+		<block type="servo_attach"></block>
+		<block type="servo_write">
+			<value name="ANGLE">
+				<shadow type="servo_angle"></shadow>
+			</value>
+		</block>
+		<block type="servo_us">
+			<value name="US">
+				<shadow type="servo_us_value"></shadow>
+			</value>
+		</block>
+		<block type="servo_read"></block>
+		<block type="servo_attached"></block>
+		<block type="servo_detach"></block>
+		<block type="servo_angle"></block>
+		<block type="servo_us_value"></block>
+	</category>
+	<category name="RTC" colour="160">
+		<block type="rtc_gettime"></block>
+		<block type="rtc_settime">
+			<value name="DATE">
+				<block type="rtc_datetime">
+					<value name="YEAR">
+						<shadow type="rtc_year"></shadow>
+					</value>
+					<value name="MONTH">
+						<shadow type="rtc_month"></shadow>
+					</value>
+					<value name="DAY">
+						<shadow type="rtc_day"></shadow>
+					</value>
+					<value name="HOUR">
+						<shadow type="rtc_hour"></shadow>
+					</value>
+					<value name="MINUTE">
+						<shadow type="rtc_minute"></shadow>
+					</value>
+					<value name="SECOND">
+						<shadow type="rtc_second"></shadow>
+					</value>
+				</block>
+			</value>
+		</block>
+		<block type="rtc_deinit"></block>
+		<block type="rtc_init"></block>
+		<block type="rtc_datetime">
+			<value name="YEAR">
+				<shadow type="rtc_year"></shadow>
+			</value>
+			<value name="MONTH">
+				<shadow type="rtc_month"></shadow>
+			</value>
+			<value name="DAY">
+				<shadow type="rtc_day"></shadow>
+			</value>
+			<value name="HOUR">
+				<shadow type="rtc_hour"></shadow>
+			</value>
+			<value name="MINUTE">
+				<shadow type="rtc_minute"></shadow>
+			</value>
+			<value name="SECOND">
+				<shadow type="rtc_second"></shadow>
+			</value>
+		</block>
+		<block type="rtc_get_datetime_item"></block>
+		<block type="rtc_set_datetime_item"></block>
+		<block type="rtc_year"></block>
+		<block type="rtc_month"></block>
+		<block type="rtc_day"></block>
+		<block type="rtc_hour"></block>
+		<block type="rtc_minute"></block>
+		<block type="rtc_second"></block>
+		<block type="rtc_weekday"></block>
+	</category>
+	<category name="SD" colour="160">
+		<block type="sd_exists">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_mkdir">
+			<value name="DIRNAME">
+				<shadow type="text">
+					<field name="TEXT">dirname</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_remove">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_copy">
+			<value name="SRC_FILENAME">
+				<shadow type="text">
+					<field name="TEXT">src.ext</field>
+				</shadow>
+			</value>
+			<value name="DST_FILENAME">
+				<shadow type="text">
+					<field name="TEXT">dst.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_rmdir">
+			<value name="DIRNAME">
+				<shadow type="text">
+					<field name="TEXT">dirname</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_open">
+			<value name="FILENAME">
+				<shadow type="text">
+					<field name="TEXT">filename.ext</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_close"></block>
+		<block type="sd_read"></block>
+		<block type="sd_seek">
+			<value name="POSITION">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="sd_write">
+			<value name="DATA">
+				<shadow type="text"></shadow>
+			</value>
+			<value name="LENGTH">
+				<shadow type="math_number">
+					<field name="NUM">1</field>
+				</shadow>
+			</value>
+		</block>
+		<block type="sd_flush"></block>
+		<block type="sd_size"></block>
+		<block type="sd_position"></block>
+	</category>
+</xml>

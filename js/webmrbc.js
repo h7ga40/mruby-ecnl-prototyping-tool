@@ -1,6 +1,7 @@
 /**
  * @version 1.0.0.0
- * @copyright Copyright ©  2016
+ * @author コアーズ株式会社
+ * @copyright Copyright ©  2017 by Cores Co., Ltd. Japan
  * @compiler Bridge.NET 15.7.0
  */
 Bridge.assembly("WebMrbc", function ($asm, globals) {
@@ -396,6 +397,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
+    Bridge.define("TerminalOption", {
+        cols: 0,
+        cursorBlink: false,
+        rows: 0,
+        screenKeys: false,
+        useStyle: false
+    });
+
     Bridge.define("WebMrbc.node", {
         statics: {
             cons: function (p, car, cdr) {
@@ -471,10 +480,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 c.setcdr(b);
             }
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var a = Bridge.as(this.getcar(), WebMrbc.node);
             if (a != null && this.getcdr() == null) {
-                return a.to_xml();
+                return a.to_xml(cond);
             }
 
             throw new System.NotImplementedException();
@@ -495,10 +504,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var a = Bridge.as(this.getcar(), WebMrbc.node);
             while (a != null) {
                 a.to_ruby(cond);
-                a = Bridge.as(this.getcdr(), WebMrbc.node);
+                a = Bridge.as(a.getcdr(), WebMrbc.node);
             }
-
-            throw new System.NotImplementedException();
         }
     });
 
@@ -514,53 +521,333 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         statics: {
             module: null,
             term: null,
-            preferences: null,
+            codeEditor: null,
             changedAfterTranslating: false,
             translating: false,
-            classGroups: null,
             nodeProfileClass: null,
+            classGroups: null,
             baseObjectPropertyList: null,
+            arduinoToolbox: null,
+            ecnlToolbox: null,
             config: {
                 init: function () {
-                    this.preferences = new (System.Collections.Generic.Dictionary$2(String,Object))();
                     Bridge.ready(this.main);
                 }
             },
-            initModule: function () {
-                var module = new WebMrbc.EmModule(WebMrbc.App.term);
+            initMruby: function () {
+                var mruby = new WebMrbc.Mruby();
 
                 window.onerror = function (message, url, lineNumber, columnNumber, error) {
                     var spinnerElement = document.getElementById("spinner");
                     // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-                    module.setStatus("Exception thrown, see JavaScript console");
+                    mruby.setStatus("Exception thrown, see JavaScript console");
                     spinnerElement.style.display = "none";
-                    module.setStatus = function (text) {
+                    mruby.setStatus = function (text) {
                         if (!System.String.isNullOrEmpty(text)) {
-                            module.printErr(System.Array.init([System.String.concat("[post-exception status] ", text)], String));
+                            mruby.printErr(System.Array.init([System.String.concat("[post-exception status] ", text)], String));
                         }
                     };
                     return false;
                 };
 
-                return module;
-            },
-            preRun: function () {
-                var FS = WebMrbc.App.module.getFileSystem();
-
-                FS.createFolder("/", "src", true, false);
-                FS.createPreloadedFile("/src", "main.org.rb", "src/main.rb", true, true);
-                FS.createFolder("/", "build", true, true);
-
-                FS.writeFile("/src/main.rb", window["textEditor"].getValue());
+                return mruby;
             },
             main: function () {
                 Number.isFinite = Number.isFinite || function(any) { return typeof any === 'number' && isFinite(any); };
                 Number.isNaN = Number.isNaN || function(any) { return typeof any === 'number' && isNaN(any); };
 
                 WebMrbc.Collections.ClassWorkspaces = new (WebMrbc.Collection$1(WebMrbc.IClassWorkspace))();
-                WebMrbc.Views.MainMenuView = new WebMrbc.MainMenuView();
-                WebMrbc.Views.ClassSelectorView = new WebMrbc.ClassSelectorView(WebMrbc.Collections.ClassWorkspaces);
+                WebMrbc.Views.ClassSelectorView = new WebMrbc.ClassSelectorView();
+                WebMrbc.Views.ClassSelectorView.setCollection(WebMrbc.Collections.ClassWorkspaces);
                 WebMrbc.Views.EObjectModalView = new WebMrbc.EObjectModalView();
+                WebMrbc.Views.MainMenuView = new WebMrbc.MainMenuView();
+
+                var termElement = document.getElementById("term");
+                WebMrbc.App.term = new Terminal(Bridge.merge(new TerminalOption(), {
+                    cols: 80,
+                    rows: 24,
+                    useStyle: true,
+                    screenKeys: true,
+                    cursorBlink: false
+                } ));
+                WebMrbc.App.term.on("data", $asm.$.WebMrbc.App.f1);
+                WebMrbc.App.term.on("title", $asm.$.WebMrbc.App.f2);
+
+                WebMrbc.App.term.open(termElement);
+
+                WebMrbc.App.codeEditor = ace.edit("text-editor");
+                window["textEditor"] = WebMrbc.App.codeEditor;
+                WebMrbc.App.codeEditor.setTheme("ace/theme/twilight");
+                WebMrbc.App.codeEditor.setShowInvisibles(true);
+                WebMrbc.App.codeEditor.gotoLine(0, 0);
+                WebMrbc.App.codeEditor.on("change", $asm.$.WebMrbc.App.f3);
+                var session = WebMrbc.App.codeEditor.getSession();
+                session.setMode("ace/mode/ruby");
+                session.setTabSize(2);
+                session.setUseSoftTabs(false);
+
+                var statusElement = document.getElementById("status");
+                var progressElement = document.getElementById("progress");
+                var spinnerElement = document.getElementById("spinner");
+
+                statusElement.innerHTML = "Downloading...";
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function (e) {
+                    window["textEditor"].setValue(xhr.responseText);
+                    WebMrbc.App.codeEditor.moveCursorTo(0, 0);
+                };
+                xhr.open("GET", "src/main.rb", true);
+                xhr.send(null);
+
+                statusElement.innerHTML = "";
+                spinnerElement.style.display = "none";
+
+                $($asm.$.WebMrbc.App.f6);
+            },
+            initClassGroups: function (action) {
+                $.ajax({ url: "echonet_objects.json", success: function (data, textStatus, request) {
+                    WebMrbc.App.classGroupsSuccess(data, textStatus, request);
+                    !Bridge.staticEquals(action, null) ? action(true) : null;
+                }, error: function (request, textStatus, error) {
+                    WebMrbc.App.ajaxError(request, textStatus, error);
+                    !Bridge.staticEquals(action, null) ? action(false) : null;
+                } });
+            },
+            classGroupsSuccess: function (data, textStatus, request) {
+                var $t, $t1, $t2, $t3, $t4;
+                var _deviceInfo = (Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data;
+                var profProps = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
+                $t = Bridge.getEnumerator(_deviceInfo.baseProfilePropertyList);
+                while ($t.moveNext()) {
+                    var property = $t.getCurrent();
+                    profProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property));
+                }
+                var objProps = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
+                $t1 = Bridge.getEnumerator(_deviceInfo.baseObjectPropertyList);
+                while ($t1.moveNext()) {
+                    var property1 = $t1.getCurrent();
+                    objProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property1));
+                }
+                WebMrbc.App.baseObjectPropertyList = objProps;
+
+                var classGroups = System.Array.init(0, null, WebMrbc.JsonClassGroupInfo);
+                $t2 = Bridge.getEnumerator(_deviceInfo.classGroupList);
+                while ($t2.moveNext()) {
+                    var _item = $t2.getCurrent();
+                    var item = new WebMrbc.JsonClassGroupInfo(_item);
+                    classGroups.push(item);
+                    var classes = System.Array.init(0, null, WebMrbc.JsonClassInfo);
+                    $t3 = Bridge.getEnumerator(_item.classList);
+                    while ($t3.moveNext()) {
+                        var _cls = $t3.getCurrent();
+                        var cls = new WebMrbc.JsonClassInfo(_cls);
+                        cls.classGroup = item;
+                        classes.push(cls);
+                        var properties = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
+                        $t4 = Bridge.getEnumerator(_cls.propertyList);
+                        while ($t4.moveNext()) {
+                            var property2 = $t4.getCurrent();
+                            properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(property2));
+                        }
+                        if ((item.classGroupCode === 14) && (cls.classCode === 240)) {
+                            cls.properties = Bridge.cast(profProps.concat.apply(profProps, properties), System.Array.type(WebMrbc.JsonPropertyInfo));
+                            WebMrbc.App.nodeProfileClass = cls;
+                        } else {
+                            cls.properties = properties;
+                        }
+                    }
+                    item.classes = classes;
+                }
+                WebMrbc.App.classGroups = classGroups;
+            },
+            initArduinoToolbox: function (action) {
+                $.ajax({ url: "arduino_toolbox.xml", dataType: "text", success: function (data, textStatus, request) {
+                    WebMrbc.App.arduinoToolbox = Bridge.cast(data, String);
+                    !Bridge.staticEquals(action, null) ? action(true) : null;
+                }, error: function (request, textStatus, error) {
+                    WebMrbc.App.ajaxError(request, textStatus, error);
+                    !Bridge.staticEquals(action, null) ? action(false) : null;
+                } });
+            },
+            initEcnlToolbox: function (action) {
+                $.ajax({ url: "ecnl_toolbox.xml", dataType: "text", success: function (data, textStatus, request) {
+                    WebMrbc.App.ecnlToolbox = Bridge.cast(data, String);
+                    !Bridge.staticEquals(action, null) ? action(true) : null;
+                }, error: function (request, textStatus, error) {
+                    WebMrbc.App.ajaxError(request, textStatus, error);
+                    !Bridge.staticEquals(action, null) ? action(false) : null;
+                } });
+            },
+            ajaxError: function (request, textStatus, error) {
+            },
+            /**
+             * テキスト入力欄のEnter(Return)キーを無視する
+             *
+             * @static
+             * @private
+             * @this WebMrbc.App
+             * @memberof WebMrbc.App
+             * @param   {$}    el
+             * @return  {$}
+             */
+            ignoreEnterKey: function (el) {
+                return el.find("input[type=text]").keypress($asm.$.WebMrbc.App.f7);
+            },
+            addMainLoop: function () {
+                var view = WebMrbc.Views.MainMenuView.newBlocklyView("MainLoop");
+                var workspace = new WebMrbc.MainLoopWorkspace(view);
+                WebMrbc.Collections.MainLoopWorkspace = workspace;
+                WebMrbc.Collections.ClassWorkspaces.add(workspace);
+                WebMrbc.Views.ClassSelectorView.selectClassWorkspace(workspace);
+                view.reloadToolbox(workspace);
+            },
+            addEcnlTask: function () {
+                var identifier = WebMrbc.Collections.ClassWorkspaces.uniqueName("EcnlTask");
+                var view = WebMrbc.Views.MainMenuView.newBlocklyView(identifier);
+                var workspace = new WebMrbc.EcnlTaskWorkspace(view);
+                WebMrbc.Collections.EcnlTaskWorkspace = workspace;
+                WebMrbc.Collections.ClassWorkspaces.add(workspace);
+                WebMrbc.Views.ClassSelectorView.selectClassWorkspace(workspace);
+                view.reloadToolbox(workspace);
+            },
+            addENode: function () {
+                var $t;
+                var identifier = WebMrbc.Collections.ClassWorkspaces.uniqueName("LocalNode");
+                var localNode = new WebMrbc.JsonNodeInfo(WebMrbc.App.nodeProfileClass, identifier, "local");
+                var properties = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
+                $t = Bridge.getEnumerator(localNode.type.properties);
+                while ($t.moveNext()) {
+                    var item = $t.getCurrent();
+                    if ((item.required.length > 0) && (!Bridge.referenceEquals(item.required[0], "NONE"))) {
+                        properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(item));
+                    }
+                }
+                localNode.properties = properties;
+                var view = WebMrbc.Views.MainMenuView.newBlocklyView(localNode.identifier);
+                var workspace = new WebMrbc.ENodeWorkspace(view, localNode);
+                WebMrbc.Collections.LocalNode = workspace;
+                WebMrbc.Collections.ClassWorkspaces.add(workspace);
+                WebMrbc.Views.ClassSelectorView.selectClassWorkspace(workspace);
+                view.addBlockCreated(Bridge.fn.cacheBind(workspace, workspace.onBlockCreated));
+                view.addBlockDeleted(Bridge.fn.cacheBind(workspace, workspace.onBlockDeleted));
+                view.addBlockChanged(Bridge.fn.cacheBind(workspace, workspace.onBlockChanged));
+                view.addBlockMoveed(Bridge.fn.cacheBind(workspace, workspace.onBlockMoveed));
+                view.reloadToolbox(workspace);
+            },
+            newItem: function (callback) {
+                var $t, $t1;
+                var identifier = WebMrbc.Collections.ClassWorkspaces.uniqueName("Kaden");
+                var eobject = new WebMrbc.JsonObjectInfo(WebMrbc.App.nodeProfileClass, identifier);
+                var properties = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
+                if ((eobject.type.classGroup.classGroupCode !== 14) && (eobject.type.classCode !== 240)) {
+                    $t = Bridge.getEnumerator(WebMrbc.App.baseObjectPropertyList);
+                    while ($t.moveNext()) {
+                        var item = $t.getCurrent();
+                        if ((item.required.length > 0) && (!Bridge.referenceEquals(item.required[0], "NONE"))) {
+                            properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(item));
+                        }
+                    }
+                }
+                $t1 = Bridge.getEnumerator(eobject.type.properties);
+                while ($t1.moveNext()) {
+                    var item1 = $t1.getCurrent();
+                    if ((item1.required.length > 0) && (!Bridge.referenceEquals(item1.required[0], "NONE"))) {
+                        properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(item1));
+                    }
+                }
+                eobject.properties = properties;
+                var view = WebMrbc.Views.MainMenuView.newBlocklyView(eobject.identifier);
+                var workspace = new WebMrbc.EObjectWorkspace(view, eobject);
+                view.addBlockCreated(Bridge.fn.cacheBind(workspace, workspace.onBlockCreated));
+                view.addBlockDeleted(Bridge.fn.cacheBind(workspace, workspace.onBlockDeleted));
+                view.addBlockChanged(Bridge.fn.cacheBind(workspace, workspace.onBlockChanged));
+                view.addBlockMoveed(Bridge.fn.cacheBind(workspace, workspace.onBlockMoveed));
+                callback(workspace);
+            },
+            removeItem: function (item) {
+                WebMrbc.Views.MainMenuView.removeEObjectWorkspace(item);
+            },
+            write: function (text) {
+                WebMrbc.App.term != null ? WebMrbc.App.term.write(System.String.replaceAll(text, "\n", "\r\n")) : null;
+            },
+            writeLine: function (text) {
+                WebMrbc.App.term != null ? WebMrbc.App.term.write(System.String.concat(System.String.replaceAll(text, "\n", "\r\n"), "\r\n")) : null;
+            }
+        },
+        $entryPoint: true
+    });
+
+    Bridge.ns("WebMrbc.App", $asm.$);
+
+    Bridge.apply($asm.$.WebMrbc.App, {
+        f1: function (data) {
+            if (WebMrbc.App.module != null && WebMrbc.App.module.stdin != null) {
+                WebMrbc.App.module.stdin(data);
+            }
+        },
+        f2: function (title) {
+            document.title = title;
+        },
+        f3: function () {
+            if (!WebMrbc.App.translating) {
+                WebMrbc.App.changedAfterTranslating = true;
+            }
+        },
+        f4: function (result1) {
+            WebMrbc.App.initEcnlToolbox(function (result2) {
+                if (result1 && result2) {
+                    WebMrbc.App.addMainLoop();
+                    WebMrbc.App.addEcnlTask();
+                    WebMrbc.App.addENode();
+                }
+            });
+        },
+        f5: function (result) {
+            if (result) {
+                WebMrbc.Views.EObjectModalView.initClassGroups();
+            }
+            WebMrbc.App.initArduinoToolbox($asm.$.WebMrbc.App.f4);
+        },
+        f6: function () {
+            WebMrbc.App.initClassGroups($asm.$.WebMrbc.App.f5);
+        },
+        f7: function (e) {
+            if (e == null) {
+                e = Bridge.cast(window["Event"], jQuery.Event);
+            }
+            if (e.keyCode === 13) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.args_t", {
+        p: null,
+        name: 0,
+        arg: null,
+        ctor: function (p) {
+            this.$initialize();
+            this.p = p;
+        },
+        toString: function () {
+            return System.String.format("({0} {1})", this.p.WebMrbc$IMrbParser$sym2name(this.name), this.arg);
+        },
+        to_ruby: function (cond) {
+            cond.write(this.p.WebMrbc$IMrbParser$sym2name(this.name));
+            if (this.arg != null) {
+                cond.write(" = ");
+                this.arg.to_ruby(cond);
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.Value");
+
+    Bridge.define("WebMrbc.BlocklyView", {
+        statics: {
+            ctor: function () {
                 Blockly.Blocks[WebMrbc.ColourPickerBlock.type_name] = new WebMrbc.ColourPickerBlock();
                 Blockly.Blocks[WebMrbc.ColourRandomBlock.type_name] = new WebMrbc.ColourRandomBlock();
                 Blockly.Blocks[WebMrbc.ColourRGBBlock.type_name] = new WebMrbc.ColourRGBBlock();
@@ -641,6 +928,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 Blockly.Blocks[WebMrbc.TextPromptBlock.type_name] = new WebMrbc.TextPromptBlock();
                 Blockly.Blocks[WebMrbc.VariablesGetBlock.type_name] = new WebMrbc.VariablesGetBlock();
                 Blockly.Blocks[WebMrbc.VariablesSetBlock.type_name] = new WebMrbc.VariablesSetBlock();
+                Blockly.Blocks[WebMrbc.ENodeInitializeBlock.type_name] = new WebMrbc.ENodeInitializeBlock();
+                Blockly.Blocks[WebMrbc.EObjectInitializeBlock.type_name] = new WebMrbc.EObjectInitializeBlock();
                 Blockly.Blocks[WebMrbc.EPropertyFixLenBlock.type_name] = new WebMrbc.EPropertyFixLenBlock();
                 Blockly.Blocks[WebMrbc.EPropertyFixLenContainerBlock.type_name] = new WebMrbc.EPropertyFixLenContainerBlock();
                 Blockly.Blocks[WebMrbc.EPropertyFixLenConstBlock.type_name] = new WebMrbc.EPropertyFixLenConstBlock();
@@ -678,506 +967,137 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 Blockly.Blocks[WebMrbc.SvctaskRecvMsgBlock.type_name] = new WebMrbc.SvctaskRecvMsgBlock();
                 Blockly.Blocks[WebMrbc.SvctaskCallTimeoutBlock.type_name] = new WebMrbc.SvctaskCallTimeoutBlock();
                 Blockly.Blocks[WebMrbc.SvctaskIsMatchBlock.type_name] = new WebMrbc.SvctaskIsMatchBlock();
-                Blockly.Blocks[WebMrbc.CallBlock.type_name] = new WebMrbc.CallBlock();
-                Blockly.Blocks[WebMrbc.PinModeBlock.type_name] = new WebMrbc.PinModeBlock();
-                Blockly.Blocks[WebMrbc.DigitalWriteBlock.type_name] = new WebMrbc.DigitalWriteBlock();
-                Blockly.Blocks[WebMrbc.DigitalReadBlock.type_name] = new WebMrbc.DigitalReadBlock();
-                Blockly.Blocks[WebMrbc.AnalogReadBlock.type_name] = new WebMrbc.AnalogReadBlock();
-                Blockly.Blocks[WebMrbc.PwmBlock.type_name] = new WebMrbc.PwmBlock();
-                Blockly.Blocks[WebMrbc.PwmValueBlock.type_name] = new WebMrbc.PwmValueBlock();
-                Blockly.Blocks[WebMrbc.AnalogReferenceBlock.type_name] = new WebMrbc.AnalogReferenceBlock();
-                Blockly.Blocks[WebMrbc.InitDacBlock.type_name] = new WebMrbc.InitDacBlock();
-                Blockly.Blocks[WebMrbc.AnalogDacBlock.type_name] = new WebMrbc.AnalogDacBlock();
-                Blockly.Blocks[WebMrbc.DacValueBlock.type_name] = new WebMrbc.DacValueBlock();
-                Blockly.Blocks[WebMrbc.DelayBlock.type_name] = new WebMrbc.DelayBlock();
-                Blockly.Blocks[WebMrbc.MillisBlock.type_name] = new WebMrbc.MillisBlock();
-                Blockly.Blocks[WebMrbc.MicrosBlock.type_name] = new WebMrbc.MicrosBlock();
-                Blockly.Blocks[WebMrbc.LedBlock.type_name] = new WebMrbc.LedBlock();
-                Blockly.Blocks[WebMrbc.BitBlock.type_name] = new WebMrbc.BitBlock();
-                Blockly.Blocks[WebMrbc.ToneBlock.type_name] = new WebMrbc.ToneBlock();
-                Blockly.Blocks[WebMrbc.ToneValueBlock.type_name] = new WebMrbc.ToneValueBlock();
-                Blockly.Blocks[WebMrbc.NoToneBlock.type_name] = new WebMrbc.NoToneBlock();
-                Blockly.Blocks[WebMrbc.RandomSeedBlock.type_name] = new WebMrbc.RandomSeedBlock();
-                Blockly.Blocks[WebMrbc.RandomBlock.type_name] = new WebMrbc.RandomBlock();
-                Blockly.Blocks[WebMrbc.I2cNewBlock.type_name] = new WebMrbc.I2cNewBlock();
-                Blockly.Blocks[WebMrbc.I2cWriteBlock.type_name] = new WebMrbc.I2cWriteBlock();
-                Blockly.Blocks[WebMrbc.I2cReadBlock.type_name] = new WebMrbc.I2cReadBlock();
-                Blockly.Blocks[WebMrbc.I2cBeginBlock.type_name] = new WebMrbc.I2cBeginBlock();
-                Blockly.Blocks[WebMrbc.I2cLwriteBlock.type_name] = new WebMrbc.I2cLwriteBlock();
-                Blockly.Blocks[WebMrbc.I2cEndBlock.type_name] = new WebMrbc.I2cEndBlock();
-                Blockly.Blocks[WebMrbc.I2cRequestBlock.type_name] = new WebMrbc.I2cRequestBlock();
-                Blockly.Blocks[WebMrbc.I2cLreadBlock.type_name] = new WebMrbc.I2cLreadBlock();
-                Blockly.Blocks[WebMrbc.I2cAvailableBlock.type_name] = new WebMrbc.I2cAvailableBlock();
-                Blockly.Blocks[WebMrbc.I2cFrequencyBlock.type_name] = new WebMrbc.I2cFrequencyBlock();
-                Blockly.Blocks[WebMrbc.MemFileOpenBlock.type_name] = new WebMrbc.MemFileOpenBlock();
-                Blockly.Blocks[WebMrbc.MemFileCloseBlock.type_name] = new WebMrbc.MemFileCloseBlock();
-                Blockly.Blocks[WebMrbc.MemFileReadBlock.type_name] = new WebMrbc.MemFileReadBlock();
-                Blockly.Blocks[WebMrbc.MemFileWriteBlock.type_name] = new WebMrbc.MemFileWriteBlock();
-                Blockly.Blocks[WebMrbc.MemFileSeekBlock.type_name] = new WebMrbc.MemFileSeekBlock();
-                Blockly.Blocks[WebMrbc.MemFileCpBlock.type_name] = new WebMrbc.MemFileCpBlock();
-                Blockly.Blocks[WebMrbc.MemFileRmBlock.type_name] = new WebMrbc.MemFileRmBlock();
-                Blockly.Blocks[WebMrbc.RtcYearBlock.type_name] = new WebMrbc.RtcYearBlock();
-                Blockly.Blocks[WebMrbc.RtcMonthBlock.type_name] = new WebMrbc.RtcMonthBlock();
-                Blockly.Blocks[WebMrbc.RtcDayBlock.type_name] = new WebMrbc.RtcDayBlock();
-                Blockly.Blocks[WebMrbc.RtcHourBlock.type_name] = new WebMrbc.RtcHourBlock();
-                Blockly.Blocks[WebMrbc.RtcMinuteBlock.type_name] = new WebMrbc.RtcMinuteBlock();
-                Blockly.Blocks[WebMrbc.RtcSecondBlock.type_name] = new WebMrbc.RtcSecondBlock();
-                Blockly.Blocks[WebMrbc.RtcWeekDayBlock.type_name] = new WebMrbc.RtcWeekDayBlock();
-                Blockly.Blocks[WebMrbc.RtcDateTimeBlock.type_name] = new WebMrbc.RtcDateTimeBlock();
-                Blockly.Blocks[WebMrbc.RtcDateTimeItemBlock.type_name] = new WebMrbc.RtcDateTimeItemBlock();
-                Blockly.Blocks[WebMrbc.RtcSetDateTimeItemBlock.type_name] = new WebMrbc.RtcSetDateTimeItemBlock();
-                Blockly.Blocks[WebMrbc.RtcGetTimeBlock.type_name] = new WebMrbc.RtcGetTimeBlock();
-                Blockly.Blocks[WebMrbc.RtcSettimeBlock.type_name] = new WebMrbc.RtcSettimeBlock();
-                Blockly.Blocks[WebMrbc.RtcDeinitBlock.type_name] = new WebMrbc.RtcDeinitBlock();
-                Blockly.Blocks[WebMrbc.RtcInitBlock.type_name] = new WebMrbc.RtcInitBlock();
-                Blockly.Blocks[WebMrbc.SdExistsBlock.type_name] = new WebMrbc.SdExistsBlock();
-                Blockly.Blocks[WebMrbc.SdMkdirBlock.type_name] = new WebMrbc.SdMkdirBlock();
-                Blockly.Blocks[WebMrbc.SdRemoveBlock.type_name] = new WebMrbc.SdRemoveBlock();
-                Blockly.Blocks[WebMrbc.SdCopyBlock.type_name] = new WebMrbc.SdCopyBlock();
-                Blockly.Blocks[WebMrbc.SdRmdirBlock.type_name] = new WebMrbc.SdRmdirBlock();
-                Blockly.Blocks[WebMrbc.SdOpenBlock.type_name] = new WebMrbc.SdOpenBlock();
-                Blockly.Blocks[WebMrbc.SdCloseBlock.type_name] = new WebMrbc.SdCloseBlock();
-                Blockly.Blocks[WebMrbc.SdReadBlock.type_name] = new WebMrbc.SdReadBlock();
-                Blockly.Blocks[WebMrbc.SdSeekBlock.type_name] = new WebMrbc.SdSeekBlock();
-                Blockly.Blocks[WebMrbc.SdWriteBlock.type_name] = new WebMrbc.SdWriteBlock();
-                Blockly.Blocks[WebMrbc.SdFlushBlock.type_name] = new WebMrbc.SdFlushBlock();
-                Blockly.Blocks[WebMrbc.SdSizeBlock.type_name] = new WebMrbc.SdSizeBlock();
-                Blockly.Blocks[WebMrbc.SdPositionBlock.type_name] = new WebMrbc.SdPositionBlock();
-                Blockly.Blocks[WebMrbc.BpsValueBlock.type_name] = new WebMrbc.BpsValueBlock();
-                Blockly.Blocks[WebMrbc.SerialNewBlock.type_name] = new WebMrbc.SerialNewBlock();
-                Blockly.Blocks[WebMrbc.SerialBpsBlock.type_name] = new WebMrbc.SerialBpsBlock();
-                Blockly.Blocks[WebMrbc.SerialPrintBlock.type_name] = new WebMrbc.SerialPrintBlock();
-                Blockly.Blocks[WebMrbc.SerialPrintlnBlock.type_name] = new WebMrbc.SerialPrintlnBlock();
-                Blockly.Blocks[WebMrbc.SerialAvailableBlock.type_name] = new WebMrbc.SerialAvailableBlock();
-                Blockly.Blocks[WebMrbc.SerialReadBlock.type_name] = new WebMrbc.SerialReadBlock();
-                Blockly.Blocks[WebMrbc.SerialWriteBlock.type_name] = new WebMrbc.SerialWriteBlock();
-                Blockly.Blocks[WebMrbc.SerialFlashBlock.type_name] = new WebMrbc.SerialFlashBlock();
-                Blockly.Blocks[WebMrbc.ServoAttachBlock.type_name] = new WebMrbc.ServoAttachBlock();
-                Blockly.Blocks[WebMrbc.ServoWriteBlock.type_name] = new WebMrbc.ServoWriteBlock();
-                Blockly.Blocks[WebMrbc.ServoAngleBlock.type_name] = new WebMrbc.ServoAngleBlock();
-                Blockly.Blocks[WebMrbc.ServoUsBlock.type_name] = new WebMrbc.ServoUsBlock();
-                Blockly.Blocks[WebMrbc.ServoUsValueBlock.type_name] = new WebMrbc.ServoUsValueBlock();
-                Blockly.Blocks[WebMrbc.ServoReadBlock.type_name] = new WebMrbc.ServoReadBlock();
-                Blockly.Blocks[WebMrbc.ServoAttachedBlock.type_name] = new WebMrbc.ServoAttachedBlock();
-                Blockly.Blocks[WebMrbc.ServoDetachBlock.type_name] = new WebMrbc.ServoDetachBlock();
-                Blockly.Blocks[WebMrbc.SystemExitBlock.type_name] = new WebMrbc.SystemExitBlock();
-                Blockly.Blocks[WebMrbc.SystemSetRunBlock.type_name] = new WebMrbc.SystemSetRunBlock();
-                Blockly.Blocks[WebMrbc.SystemVersionBlock.type_name] = new WebMrbc.SystemVersionBlock();
-                Blockly.Blocks[WebMrbc.SystemPushBlock.type_name] = new WebMrbc.SystemPushBlock();
-                Blockly.Blocks[WebMrbc.SystemPopBlock.type_name] = new WebMrbc.SystemPopBlock();
-                Blockly.Blocks[WebMrbc.SystemFileLoadBlock.type_name] = new WebMrbc.SystemFileLoadBlock();
-                Blockly.Blocks[WebMrbc.SystemResetBlock.type_name] = new WebMrbc.SystemResetBlock();
-                Blockly.Blocks[WebMrbc.SystemUseSdBlock.type_name] = new WebMrbc.SystemUseSdBlock();
-                Blockly.Blocks[WebMrbc.SystemUseWifiBlock.type_name] = new WebMrbc.SystemUseWifiBlock();
-                Blockly.Blocks[WebMrbc.SystemGetMrbPathBlock.type_name] = new WebMrbc.SystemGetMrbPathBlock();
-                Blockly.Blocks[WebMrbc.HexadecimalBlock.type_name] = new WebMrbc.HexadecimalBlock();
                 Blockly.Procedures = new WebMrbc.Procedures();
                 Blockly.Variables = new WebMrbc.Variables();
                 Blockly.Names = new WebMrbc.Names("");
-
-                var termElement = document.getElementById("term");
-                WebMrbc.App.term = new Terminal(new $asm.$AnonymousType$1(80, 24, true, true, false));
-                WebMrbc.App.term.on("data", $asm.$.WebMrbc.App.f1);
-                WebMrbc.App.term.on("title", $asm.$.WebMrbc.App.f2);
-
-                WebMrbc.App.term.open(termElement);
-
-                Blockly.HSV_SATURATION = 1.0;
-                Blockly.HSV_VALUE = 0.8;
-                Blockly.mainWorkspace = Blockly.inject("blockly-div", new $asm.$AnonymousType$2(document.getElementById("toolbox"), true, true, true, Infinity, true, false, "start", true, false, true, false, false, new $asm.$AnonymousType$3(true, true, 0.8, 3, 0.3)));
-
-                WebMrbc.App.hideEmptyCategory();
-
-                Blockly.mainWorkspace.addChangeListener(WebMrbc.App.workspace_Changed);
-
-                var textEditor = ace.edit("text-editor");
-                window["textEditor"] = textEditor;
-                textEditor.setTheme("ace/theme/vibrant_ink");
-                textEditor.setShowInvisibles(true);
-                textEditor.gotoLine(0, 0);
-                textEditor.on("change", $asm.$.WebMrbc.App.f3);
-                var session = textEditor.getSession();
-                session.setMode("ace/mode/ruby");
-                session.setTabSize(2);
-                session.setUseSoftTabs(false);
-
-                WebMrbc.App.applyPreferences();
-
-                var statusElement = document.getElementById("status");
-                var progressElement = document.getElementById("progress");
-                var spinnerElement = document.getElementById("spinner");
-
-                statusElement.innerHTML = "Downloading...";
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function (e) {
-                    window["textEditor"].setValue(xhr.responseText);
-                    textEditor.moveCursorTo(0, 0);
-                };
-                xhr.open("GET", "src/main.rb", true);
-                xhr.send(null);
-
-                statusElement.innerHTML = "";
-                spinnerElement.style.display = "none";
-
-                WebMrbc.Collections.MainLoopWorkspace = new WebMrbc.MainLoopWorkspace("MainLoop");
-                WebMrbc.Collections.ClassWorkspaces.add(WebMrbc.Collections.MainLoopWorkspace);
-                WebMrbc.Collections.EcnlTaskWorkspace = new WebMrbc.EcnlTaskWorkspace("EchonetTask");
-                WebMrbc.Collections.ClassWorkspaces.add(WebMrbc.Collections.EcnlTaskWorkspace);
-
-                $($asm.$.WebMrbc.App.f4);
             },
-            workspace_Changed: function (e) {
-                WebMrbc.App.changedAfterTranslating = true;
-                window["changed"] = true;
-
-                var block = Blockly.mainWorkspace.getBlockById(e.blockId);
-                var eobject = Bridge.as(WebMrbc.Views.ClassSelectorView.getCurrent(), WebMrbc.EObjectWorkspace);
-
-                switch (e.type) {
-                    case Blockly.Events.CREATE: 
-                        var cre = Bridge.cast(e, Blockly.Events.Create);
-                        if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
-                            var propertyBlock = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
-                            propertyBlock.onCreate(eobject, cre);
-                        } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
-                            var propertyBlock1 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
-                            propertyBlock1.onCreate(eobject, cre);
-                        }
-                        break;
-                    case Blockly.Events.DELETE: 
-                        var del = Bridge.cast(e, Blockly.Events.Delete);
-                        if (block != null) {
-                            if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
-                                var propertyBlock2 = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
-                                propertyBlock2.onDelete(eobject, del);
-                            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
-                                var propertyBlock3 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
-                                propertyBlock3.onDelete(eobject, del);
-                            }
-                        }
-                        break;
-                    case Blockly.Events.CHANGE: 
-                        var chg = Bridge.cast(e, Blockly.Events.Change);
-                        if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
-                            var propertyBlock4 = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
-                            propertyBlock4.onChange(eobject, chg);
-                        } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
-                            var propertyBlock5 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
-                            propertyBlock5.onChange(eobject, chg);
-                        }
-                        break;
-                    case Blockly.Events.MOVE: 
-                        var mov = Bridge.cast(e, Blockly.Events.Move);
-                        if (block != null) {
-                            if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
-                                var propertyBlock6 = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
-                                propertyBlock6.onMove(eobject, mov);
-                            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
-                                var propertyBlock7 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
-                                propertyBlock7.onMove(eobject, mov);
-                            }
-                        }
-                        break;
-                    case Blockly.Events.UI: 
-                        var ui = Bridge.cast(e, Blockly.Events.Ui);
-                        WebMrbc.App.onUi(ui);
-                        break;
-                }
+            no: 1
+        },
+        flyoutCategoryHandlers: null,
+        changed: false,
+        _Workspace: null,
+        _WorkspaceElementId: null,
+        _IdNo: 0,
+        config: {
+            events: {
+                BlockCreated: null,
+                BlockDeleted: null,
+                BlockChanged: null,
+                BlockMoveed: null,
+                UiEvent: null
             },
-            onUi: function (ui) {
-                switch (ui.element) {
-                    case "selected": 
-                        if (ui.newValue != null) {
-                            var block = Blockly.mainWorkspace.getBlockById(ui.newValue.toString());
-                        }
-                        break;
-                    case "category": 
-                        break;
-                    case "click": 
-                        break;
-                    case "commentOpen": 
-                        break;
-                    case "mutatorOpen": 
-                        break;
-                    case "warningOpen": 
-                        break;
-                }
+            properties: {
+                Identifier: null
             },
-            initClassGroups: function (ele) {
-                $.ajax({ url: "echonet_objects.json", success: WebMrbc.App.classGroupsSuccess, error: WebMrbc.App.ajaxError });
-            },
-            classGroupsSuccess: function (data, textStatus, request) {
-                var $t, $t1, $t2, $t3, $t4;
-                var _deviceInfo = (Bridge.referenceEquals(Bridge.getType(data), String)) ? $.parseJSON(Bridge.cast(data, String)) : data;
-                var profProps = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
-                $t = Bridge.getEnumerator(_deviceInfo.baseProfilePropertyList);
-                while ($t.moveNext()) {
-                    var property = $t.getCurrent();
-                    profProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property));
-                }
-                var objProps = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
-                $t1 = Bridge.getEnumerator(_deviceInfo.baseObjectPropertyList);
-                while ($t1.moveNext()) {
-                    var property1 = $t1.getCurrent();
-                    objProps.push(new WebMrbc.JsonPropertyInfo.$ctor1(property1));
-                }
-                WebMrbc.App.baseObjectPropertyList = objProps;
-
-                var classGroups = System.Array.init(0, null, WebMrbc.JsonClassGroupInfo);
-                $t2 = Bridge.getEnumerator(_deviceInfo.classGroupList);
-                while ($t2.moveNext()) {
-                    var _item = $t2.getCurrent();
-                    var item = new WebMrbc.JsonClassGroupInfo(_item);
-                    classGroups.push(item);
-                    var classes = System.Array.init(0, null, WebMrbc.JsonClassInfo);
-                    $t3 = Bridge.getEnumerator(_item.classList);
-                    while ($t3.moveNext()) {
-                        var _cls = $t3.getCurrent();
-                        var cls = new WebMrbc.JsonClassInfo(_cls);
-                        cls.classGroup = item;
-                        classes.push(cls);
-                        var properties = System.Array.init(0, null, WebMrbc.JsonPropertyInfo);
-                        $t4 = Bridge.getEnumerator(_cls.propertyList);
-                        while ($t4.moveNext()) {
-                            var property2 = $t4.getCurrent();
-                            properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(property2));
-                        }
-                        if ((item.classGroupCode === 14) && (cls.classCode === 240)) {
-                            cls.properties = Bridge.cast(profProps.concat.apply(profProps, properties), System.Array.type(WebMrbc.JsonPropertyInfo));
-                            WebMrbc.App.nodeProfileClass = cls;
-                        } else {
-                            cls.properties = properties;
-                        }
-                    }
-                    item.classes = classes;
-                }
-                WebMrbc.App.classGroups = classGroups;
-
-                WebMrbc.Views.EObjectModalView.initClassGroups();
-
-                WebMrbc.App.addEObjectFromBeginning();
-            },
-            ajaxError: function (request, textStatus, error) {
-            },
-            loadXml: function (data, workspace) {
-                if (workspace === void 0) { workspace = null; }
-                var xmlChild;
-                if (workspace == null) {
-                    workspace = Blockly.mainWorkspace;
-                }
-                var xml = Blockly.Xml.textToDom(data);
-                workspace.clear();
-                var eobjs = System.Array.init(0, null, WebMrbc.EObjectWorkspace);
-                for (var i = 0; ((xmlChild = Bridge.cast(xml.childNodes[i], Element))) != null; i = (i + 1) | 0) {
-                    if (Bridge.referenceEquals("eobject", xmlChild.nodeName.toLowerCase())) {
-                        var type = WebMrbc.App.getClass(parseInt(xmlChild.getAttribute("classGroupCode")), parseInt(xmlChild.getAttribute("classCode"), 10));
-                        if (type == null) {
-                            continue;
-                        }
-
-                        var c = Bridge.merge(new WebMrbc.JsonObjectInfo(type, xmlChild.getAttribute("identifier")), {
-                            attribute: xmlChild.getAttribute("attribute"),
-                            instanceCode: ((parseInt(xmlChild.getAttribute("instanceCode"))) & 255),
-                            properties: System.Linq.Enumerable.from((WebMrbc.App.getProperties(type, xmlChild.getAttribute("propertys").split(",")))).toArray()
-                        } );
-                        eobjs.push(new WebMrbc.EObjectWorkspace(c));
-                    }
-                }
-                WebMrbc.Collections.ClassWorkspaces.reset$1(eobjs);
-                Blockly.Xml.domToWorkspace(xml, workspace);
-            },
-            getClass: function (classGroupCode, classCode) {
-                var t = System.Linq.Enumerable.from(WebMrbc.App.classGroups).firstOrDefault(function (cg) {
-                        return cg.classGroupCode === classGroupCode;
-                    }, null);
-                if (t == null) {
-                    return null;
-                }
-                return System.Linq.Enumerable.from(t.classes).firstOrDefault(function (c) {
-                        return c.classCode === classCode;
-                    }, null);
-            },
-            getProperties: function (type, properties) {
-                var pcs = System.Linq.Enumerable.from(properties).select($asm.$.WebMrbc.App.f5);
-                var ps = System.Linq.Enumerable.from(type.properties).where(function (p) {
-                        return pcs.contains(p.propertyCode);
-                    });
-                return ps;
-            },
-            dumpXml: function (workspace, models) {
-                if (workspace == null) {
-                    workspace = Blockly.mainWorkspace;
-                }
-                if (models == null) {
-                    models = WebMrbc.Collections.ClassWorkspaces;
-                }
-                var xmlDom = Blockly.Xml.workspaceToDom(workspace);
-                var blocklyDom = xmlDom.firstChild;
-                models.each(function (c) {
-                    var e = goog.dom.createDom("eobject");
-                    e.setAttribute("x", c.get("x"));
-                    e.setAttribute("y", c.get("y"));
-                    e.setAttribute("name", c.get("name"));
-                    e.setAttribute("epropertys", c.epropertysWithName().join(","));
-                    var epropertyIndex = c.get("epropertyIndex");
-                    if (!Bridge.referenceEquals(epropertyIndex, 0)) {
-                        e.setAttribute("eproperty_index", epropertyIndex);
-                    }
-                    e.setAttribute("attribute", c.get("attribute"));
-                    var rotationStyle = c.get("rotationStyle");
-                    if (!Bridge.referenceEquals(rotationStyle, "free")) {
-                        e.setAttribute("rotation_style", rotationStyle);
-                    }
-                    xmlDom.insertBefore(e, blocklyDom);
-                });
-                return Blockly.Xml.domToPrettyText(xmlDom);
-            },
-            /**
-             * テキスト入力欄のEnter(Return)キーを無視する
-             *
-             * @static
-             * @private
-             * @this WebMrbc.App
-             * @memberof WebMrbc.App
-             * @param   {$}    el
-             * @return  {$}
-             */
-            ignoreEnterKey: function (el) {
-                return el.find("input[type=text]").keypress($asm.$.WebMrbc.App.f6);
-            },
-            removeBackdropOnHidden: function (el) {
-                return el.on("hidden", $asm.$.WebMrbc.App.f7);
-            },
-            reset: function () {
-                Blockly.mainWorkspace.clear();
-                WebMrbc.Collections.ClassWorkspaces.reset();
-                $("#filename").val("");
-                window["textEditor"].getSession().getDocument().setValue("");
-                window["textEditor"].moveCursorTo(0, 0);
-                WebMrbc.App.addEObjectFromBeginning();
-                window["changed"] = false;
-            },
-            addEObjectFromBeginning: function () {
-                var $t;
-                if (!WebMrbc.App.isEnabled("disabled_add_eobject_from_beginning")) {
-                    var identifier = WebMrbc.Collections.ClassWorkspaces.uniqueName("LocalNode");
-                    var localNode = new WebMrbc.JsonNodeInfo(WebMrbc.App.nodeProfileClass, identifier, "local");
-                    $t = Bridge.getEnumerator(localNode.type.properties);
-                    while ($t.moveNext()) {
-                        var item = $t.getCurrent();
-                        if ((item.required.length > 0) && (!Bridge.referenceEquals(item.required[0], "NONE"))) {
-                            localNode.properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(item));
-                        }
-                    }
-                    var enode = new WebMrbc.ENodeWorkspace(localNode);
-                    WebMrbc.Collections.LocalNode = enode;
-                    WebMrbc.Collections.ClassWorkspaces.add(enode);
-                    WebMrbc.Views.ClassSelectorView.selectItem(enode);
-                    window["changed"] = false;
-                }
-            },
-            applyPreferences: function () {
-                window["textEditor"].setReadOnly(WebMrbc.App.isEnabled("enabled_readonly_ruby_mode"));
-
-                if (WebMrbc.App.isEnabled("disabled_new_eobject")) {
-                    $("#add-eobject-item").hide();
-                } else {
-                    $("#add-eobject-item").show();
-                }
-            },
-            setPreferences: function (preferences) {
-                WebMrbc.App.preferences = preferences;
-                WebMrbc.App.applyPreferences();
-                WebMrbc.App.changedAfterTranslating = true;
-                WebMrbc.App.reloadToolbox();
-            },
-            isEnabled: function (name) {
-                var e = { };
-                if (!WebMrbc.App.preferences.tryGetValue(name, e)) {
-                    return false;
-                }
-                if (Bridge.is(e.v, Boolean)) {
-                    return System.Nullable.getValue(Bridge.cast(e.v, Boolean));
-                }
-                var s = e.v.toString();
-                return Bridge.referenceEquals(s, "true") || Bridge.referenceEquals(s, "1");
-            },
-            reloadToolbox: function () {
-                Blockly.hideChaff();
-
-                var workspace = WebMrbc.Views.ClassSelectorView.getCurrent();
-                var toolbox = document.getElementById("toolbox");
-                workspace.WebMrbc$IClassWorkspace$reloadToolbox(toolbox);
-
-                Blockly.mainWorkspace.updateToolbox(toolbox);
-            },
-            hideEmptyCategory: function () {
-                var $t;
-                var i = 1;
-                $t = Bridge.getEnumerator(Blockly.getMainWorkspace().options.languageTree.childNodes);
-                while ($t.moveNext()) {
-                    var node = $t.getCurrent();
-                    var element = Bridge.as(node, Element);
-                    if (element == null) {
-                        continue;
-                    }
-
-                    if ((element.getElementsByTagName("block").length === 0) && (element.getAttribute("custom") == null)) {
-                        $("div.blocklyTreeRoot > div:nth-child(2) > div:nth-child(" + i + ")[aria-level='1']").hide();
-                    }
-                    i = (i + 1) | 0;
-                }
+            init: function () {
+                this.flyoutCategoryHandlers = new (System.Collections.Generic.Dictionary$2(String,Function))();
             }
         },
-        $entryPoint: true
-    });
+        ctor: function (identifier) {
+            this.$initialize();
+            this.setIdentifier(identifier);
 
-    Bridge.define("$AnonymousType$1", $asm, {
-        $kind: "anonymous",
-        ctor: function (cols, rows, useStyle, screenKeys, cursorBlink) {
-            this.cols = cols;
-            this.rows = rows;
-            this.useStyle = useStyle;
-            this.screenKeys = screenKeys;
-            this.cursorBlink = cursorBlink;
+            this.flyoutCategoryHandlers.add(Blockly.Procedures.NAME_TYPE, Bridge.fn.cacheBind(Blockly.Procedures, Blockly.Procedures.flyoutCategory));
+            this.flyoutCategoryHandlers.add(Blockly.Variables.NAME_TYPE, Bridge.fn.cacheBind(Blockly.Variables, Blockly.Variables.flyoutCategory));
         },
-        getcols : function () {
-            return this.cols;
-        },
-        getrows : function () {
-            return this.rows;
-        },
-        getuseStyle : function () {
-            return this.useStyle;
-        },
-        getscreenKeys : function () {
-            return this.screenKeys;
-        },
-        getcursorBlink : function () {
-            return this.cursorBlink;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$1)) {
-                return false;
+        init: function () {
+            var $t;
+            var tab = $("#block-tab-right-pane");
+            // <div dir="LTR" id="blockly-div"></div>
+            var div = $("<div>");
+            div.attr("dir", "LTR");
+            div.attr("class", "blockly-div");
+            this._IdNo = Bridge.identity(WebMrbc.BlocklyView.no, ($t = (WebMrbc.BlocklyView.no + 1) | 0, WebMrbc.BlocklyView.no = $t, $t));
+            this._WorkspaceElementId = "blockly-div" + this._IdNo;
+            div.attr("id", this._WorkspaceElementId);
+            div.attr("style", "z-index: " + this._IdNo);
+            tab.append(div);
+
+            Blockly.HSV_SATURATION = 1.0;
+            Blockly.HSV_VALUE = 0.8;
+            this._Workspace = Blockly.inject(this._WorkspaceElementId, new $asm.$AnonymousType$1(document.getElementById("toolbox"), true, true, true, Infinity, true, false, "start", true, false, true, false, false, new $asm.$AnonymousType$2(true, true, 0.8, 3, 0.3)));
+
+            if (WebMrbc.BlocklyView.no !== 2) {
+                this.hide();
+            } else {
+                this.show();
             }
-            return Bridge.equals(this.cols, o.cols) && Bridge.equals(this.rows, o.rows) && Bridge.equals(this.useStyle, o.useStyle) && Bridge.equals(this.screenKeys, o.screenKeys) && Bridge.equals(this.cursorBlink, o.cursorBlink);
+
+            this._Workspace["toolbox_"]["flyout_"]["flyoutCategory"] = Bridge.fn.cacheBind(this, this.flyoutCategory);
+
+            this._Workspace.addChangeListener(Bridge.fn.cacheBind(this, this.workspace_Changed));
+
+            return this._Workspace;
         },
-        getHashCode: function () {
-            var h = Bridge.addHash([7550196186, this.cols, this.rows, this.useStyle, this.screenKeys, this.cursorBlink]);
-            return h;
+        dispose: function () {
+            $(System.String.concat("#", this._WorkspaceElementId)).remove();
+            this._Workspace.clear();
+            this._Workspace.dispose();
         },
-        toJSON: function () {
-            return {
-                cols : this.cols,
-                rows : this.rows,
-                useStyle : this.useStyle,
-                screenKeys : this.screenKeys,
-                cursorBlink : this.cursorBlink
-            };
+        show: function () {
+            var div = $(System.String.concat("#", this._WorkspaceElementId));
+            div.attr("style", "z-index: " + (((this._IdNo + 100) | 0)));
+
+            Blockly.mainWorkspace = this._Workspace;
+        },
+        hide: function () {
+            var div = $(System.String.concat("#", this._WorkspaceElementId));
+            div.attr("style", "z-index: " + this._IdNo);
+        },
+        workspace_Changed: function (e) {
+            this.changed = true;
+
+            switch (e.type) {
+                case Blockly.Events.CREATE: 
+                    var cre = Bridge.cast(e, Blockly.Events.Create);
+                    !Bridge.staticEquals(this.BlockCreated, null) ? this.BlockCreated(this, cre) : null;
+                    break;
+                case Blockly.Events.DELETE: 
+                    var del = Bridge.cast(e, Blockly.Events.Delete);
+                    !Bridge.staticEquals(this.BlockDeleted, null) ? this.BlockDeleted(this, del) : null;
+                    break;
+                case Blockly.Events.CHANGE: 
+                    var chg = Bridge.cast(e, Blockly.Events.Change);
+                    !Bridge.staticEquals(this.BlockChanged, null) ? this.BlockChanged(this, chg) : null;
+                    break;
+                case Blockly.Events.MOVE: 
+                    var mov = Bridge.cast(e, Blockly.Events.Move);
+                    !Bridge.staticEquals(this.BlockMoveed, null) ? this.BlockMoveed(this, mov) : null;
+                    break;
+                case Blockly.Events.UI: 
+                    var ui = Bridge.cast(e, Blockly.Events.Ui);
+                    !Bridge.staticEquals(this.UiEvent, null) ? this.UiEvent(this, ui) : null;
+                    break;
+            }
+        },
+        reloadToolbox: function (workspace) {
+            if (!Bridge.referenceEquals(this._Workspace, workspace.WebMrbc$IClassWorkspace$getWorkspace())) {
+                throw new System.Exception();
+            }
+
+            Blockly.mainWorkspace = this._Workspace;
+            Blockly.hideChaff();
+
+            var toolbox = document.createElement("xml");
+            toolbox.innerHTML = document.getElementById("toolbox").innerHTML;
+            workspace.WebMrbc$IClassWorkspace$reloadToolbox(toolbox);
+
+            this._Workspace.updateToolbox(toolbox);
+        },
+        flyoutCategory: function (name, workspace) {
+            if (!Bridge.is(name, String)) {
+                return Bridge.cast(name, System.Array.type(Element));
+            }
+
+            var handler = { };
+            if (this.flyoutCategoryHandlers.tryGetValue(Bridge.cast(name, String), handler)) {
+                return handler.v(workspace);
+            }
+            return System.Array.init(0, null, Element);
         }
     });
 
-    Bridge.define("$AnonymousType$2", $asm, {
+    Bridge.define("$AnonymousType$1", $asm, {
         $kind: "anonymous",
         ctor: function (toolbox, collapse, comments, disable, maxBlocks, trashcan, horizontalLayout, toolboxPosition, css, rtl, scrollbars, sounds, oneBasedIndex, zoom) {
             this.toolbox = toolbox;
@@ -1238,13 +1158,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.zoom;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$2)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$1)) {
                 return false;
             }
             return Bridge.equals(this.toolbox, o.toolbox) && Bridge.equals(this.collapse, o.collapse) && Bridge.equals(this.comments, o.comments) && Bridge.equals(this.disable, o.disable) && Bridge.equals(this.maxBlocks, o.maxBlocks) && Bridge.equals(this.trashcan, o.trashcan) && Bridge.equals(this.horizontalLayout, o.horizontalLayout) && Bridge.equals(this.toolboxPosition, o.toolboxPosition) && Bridge.equals(this.css, o.css) && Bridge.equals(this.rtl, o.rtl) && Bridge.equals(this.scrollbars, o.scrollbars) && Bridge.equals(this.sounds, o.sounds) && Bridge.equals(this.oneBasedIndex, o.oneBasedIndex) && Bridge.equals(this.zoom, o.zoom);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196187, this.toolbox, this.collapse, this.comments, this.disable, this.maxBlocks, this.trashcan, this.horizontalLayout, this.toolboxPosition, this.css, this.rtl, this.scrollbars, this.sounds, this.oneBasedIndex, this.zoom]);
+            var h = Bridge.addHash([7550196186, this.toolbox, this.collapse, this.comments, this.disable, this.maxBlocks, this.trashcan, this.horizontalLayout, this.toolboxPosition, this.css, this.rtl, this.scrollbars, this.sounds, this.oneBasedIndex, this.zoom]);
             return h;
         },
         toJSON: function () {
@@ -1267,7 +1187,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$3", $asm, {
+    Bridge.define("$AnonymousType$2", $asm, {
         $kind: "anonymous",
         ctor: function (controls, wheel, startScale, maxcale, minScale) {
             this.controls = controls;
@@ -1292,13 +1212,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.minScale;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$3)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$2)) {
                 return false;
             }
             return Bridge.equals(this.controls, o.controls) && Bridge.equals(this.wheel, o.wheel) && Bridge.equals(this.startScale, o.startScale) && Bridge.equals(this.maxcale, o.maxcale) && Bridge.equals(this.minScale, o.minScale);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196188, this.controls, this.wheel, this.startScale, this.maxcale, this.minScale]);
+            var h = Bridge.addHash([7550196187, this.controls, this.wheel, this.startScale, this.maxcale, this.minScale]);
             return h;
         },
         toJSON: function () {
@@ -1311,66 +1231,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             };
         }
     });
-
-    Bridge.ns("WebMrbc.App", $asm.$);
-
-    Bridge.apply($asm.$.WebMrbc.App, {
-        f1: function (data) {
-            if (WebMrbc.App.module != null && WebMrbc.App.module.stdin != null) {
-                WebMrbc.App.module.stdin(data);
-            }
-        },
-        f2: function (title) {
-            document.title = title;
-        },
-        f3: function () {
-            if (!WebMrbc.App.translating) {
-                window["changed"] = true;
-                WebMrbc.App.changedAfterTranslating = true;
-            }
-        },
-        f4: function () {
-            WebMrbc.App.initClassGroups($("#eobject-modal").get(0));
-        },
-        f5: function (pc) {
-            return parseInt(pc, 16);
-        },
-        f6: function (e) {
-            if (e == null) {
-                e = Bridge.cast(window["Event"], jQuery.Event);
-            }
-            if (e.keyCode === 13) {
-                return false;
-            } else {
-                return true;
-            }
-        },
-        f7: function () {
-            $(".modal-backdrop").remove();
-        }
-    });
-
-    Bridge.define("WebMrbc.args_t", {
-        p: null,
-        name: 0,
-        arg: null,
-        ctor: function (p) {
-            this.$initialize();
-            this.p = p;
-        },
-        toString: function () {
-            return System.String.format("({0} {1})", this.p.WebMrbc$IMrbParser$sym2name(this.name), this.arg);
-        },
-        to_ruby: function (cond) {
-            cond.write(this.p.WebMrbc$IMrbParser$sym2name(this.name));
-            if (this.arg != null) {
-                cond.write(" = ");
-                this.arg.to_ruby(cond);
-            }
-        }
-    });
-
-    Bridge.define("WebMrbc.Value");
 
     Bridge.define("WebMrbc.case_node.when_t", {
         value: null,
@@ -1393,15 +1253,24 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
     });
 
     Bridge.define("WebMrbc.ClassSelectorView", {
-        collection: null,
+        m_Collection: null,
         el: null,
         templateText: null,
         m_ClassWorkspace: null,
-        ctor: function (collection) {
-            this.$initialize();
+        config: {
+            events: {
+                Selected: null,
+                Removed: null,
+                MarkClicked: null
+            }
+        },
+        getCurrent: function () {
+            return this.m_ClassWorkspace;
+        },
+        setCollection: function (collection) {
             this.el = $("#class-selector-tab");
 
-            this.collection = collection;
+            this.m_Collection = collection;
             collection.onAdd = Bridge.fn.combine(collection.onAdd, Bridge.fn.cacheBind(this, this.onChange));
             collection.onRemove = Bridge.fn.combine(collection.onRemove, Bridge.fn.cacheBind(this, this.onChange));
             collection.onReset = Bridge.fn.combine(collection.onReset, Bridge.fn.cacheBind(this, this.onChange));
@@ -1412,164 +1281,128 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
 
             this.templateText = $("#class-selector-template").text();
-            $("#add-eobject-button").click(Bridge.fn.bind(this, function (e) {
-                var $t;
-                e.preventDefault();
-                this.m_ClassWorkspace.WebMrbc$IClassWorkspace$loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
-                Blockly.mainWorkspace.clear();
-
-                var eobject = new WebMrbc.JsonObjectInfo(WebMrbc.App.nodeProfileClass, collection.uniqueName("Kaden"));
-                this.m_ClassWorkspace = new WebMrbc.EObjectWorkspace(eobject);
-                $t = Bridge.getEnumerator(eobject.type.properties);
-                while ($t.moveNext()) {
-                    var item = $t.getCurrent();
-                    if ((item.required.length > 0) && (!Bridge.referenceEquals(item.required[0], "NONE"))) {
-                        eobject.properties.push(new WebMrbc.JsonPropertyInfo.$ctor1(item));
-                    }
-                }
-                this.m_ClassWorkspace.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, function (ok) {
-                    if (ok) {
-                        collection.add(this.m_ClassWorkspace);
-                    }
-                }));
-            }));
+            $("#add-celltype-button").click(null, Bridge.fn.cacheBind(this, this.onAddBtnClick));
             this.render();
         },
-        getCurrent: function () {
-            return this.m_ClassWorkspace;
-        },
         render: function () {
-            var charsEl = $("#class-selector-eobject-set");
+            var $t;
+            var charsEl = $("#class-selector-celltype-set");
             charsEl.children().remove();
-            this.collection.each(Bridge.fn.bind(this, function (eobject) {
-                var html = $(eobject.WebMrbc$IClassWorkspace$template(this.templateText));
+            $t = Bridge.getEnumerator(this.m_Collection);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                var html = $(item.WebMrbc$IClassWorkspace$template(this.templateText));
                 charsEl.append(html);
                 var selectedMark = html.find("a.selected-mark");
-                if (Bridge.referenceEquals(this.m_ClassWorkspace, eobject)) {
+                if (Bridge.referenceEquals(this.m_ClassWorkspace, item)) {
                     selectedMark.show();
                 } else {
                     selectedMark.hide();
                 }
-                html.find("a.eobject").click(Bridge.fn.bind(this, function (e) {
-                    e.preventDefault();
-                    if (!Bridge.referenceEquals(this.m_ClassWorkspace, eobject)) {
-                        this.selectItem(eobject);
-                    }
-                }));
-                html.find("a.modify-button").click(Bridge.fn.bind(this, function (e) {
-                    e.preventDefault();
-                    this.m_ClassWorkspace = eobject;
-                    this.m_ClassWorkspace.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, $asm.$.WebMrbc.ClassSelectorView.f1));
-                }));
+                selectedMark.click(item, Bridge.fn.cacheBind(this, this.onSelectedMarkClick));
+                html.find("a.celltype").click(item, Bridge.fn.cacheBind(this, this.onSelectBtnClick));
+                html.find("a.modify-button").click(item, Bridge.fn.cacheBind(this, this.onModifyBtnClick));
                 var removeButton = html.find("a.remove-button");
-                removeButton.click(Bridge.fn.bind(this, function (e) {
-                    e.preventDefault();
-                    this.m_ClassWorkspace = null;
-                    this.removeEObject_(eobject);
-                }));
-                if ((WebMrbc.App.isEnabled("disabled_new_eobject")) || eobject.WebMrbc$IClassWorkspace$isPreset()) {
+                removeButton.click(item, Bridge.fn.cacheBind(this, this.onRemoveBtnClick));
+                if (item.WebMrbc$IClassWorkspace$isPreset()) {
                     removeButton.hide();
                 }
                 var img = html.find("img");
-                img.on("dragstart", $asm.$.WebMrbc.ClassSelectorView.f2);
-            }));
+                img.on("dragstart", $asm.$.WebMrbc.ClassSelectorView.f1);
+            }
         },
-        selectItem: function (model) {
+        onSelectedMarkClick: function (obj) {
+            !Bridge.staticEquals(this.MarkClicked, null) ? this.MarkClicked(this, Object.empty) : null;
+        },
+        selectClassWorkspace: function (model) {
             var html, selectedMark;
-            var charsEl = $("#class-selector-eobject-set");
+            var charsEl = $("#class-selector-celltype-set");
 
             if (this.m_ClassWorkspace != null) {
                 html = charsEl.find(System.String.concat("#", this.m_ClassWorkspace.WebMrbc$IModel$getIdentifier()));
                 selectedMark = html.find("a.selected-mark");
                 selectedMark.hide();
-                this.m_ClassWorkspace.WebMrbc$IClassWorkspace$loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
+                this.m_ClassWorkspace.WebMrbc$IClassWorkspace$inactivate();
             }
 
             this.m_ClassWorkspace = model;
-            WebMrbc.App.reloadToolbox();
-            Blockly.mainWorkspace.clear();
-
-            if ((this.m_ClassWorkspace == null) && (this.collection.getLength() > 0)) {
-                this.m_ClassWorkspace = this.collection.at(0);
+            if ((this.m_ClassWorkspace == null) && (this.m_Collection.getLength() > 0)) {
+                this.m_ClassWorkspace = this.m_Collection.at(0);
             }
 
             if (this.m_ClassWorkspace != null) {
-                Blockly.Xml.domToWorkspace(this.m_ClassWorkspace.WebMrbc$IClassWorkspace$toDom(), Blockly.mainWorkspace);
+                this.m_ClassWorkspace.WebMrbc$IClassWorkspace$activate();
 
                 html = charsEl.find(System.String.concat("#", this.m_ClassWorkspace.WebMrbc$IModel$getIdentifier()));
                 selectedMark = html.find("a.selected-mark");
                 selectedMark.show();
             }
+            !Bridge.staticEquals(this.Selected, null) ? this.Selected(this, Object.empty) : null;
         },
-        onChange: function (sender, e) {
-            this.render();
-        },
-        removeEObject_: function (model) {
-            if (WebMrbc.App.isEnabled("disabled_new_eobject") || model.WebMrbc$IClassWorkspace$isPreset()) {
+        removeClassWorkspace: function (item) {
+            if (item.WebMrbc$IClassWorkspace$isPreset()) {
                 return;
             }
 
-            if (Bridge.referenceEquals(this.m_ClassWorkspace, model)) {
+            if (Bridge.referenceEquals(this.m_ClassWorkspace, item)) {
                 this.m_ClassWorkspace = null;
             }
 
-            this.collection.remove(model);
+            this.m_Collection.remove(item);
+            !Bridge.staticEquals(this.Removed, null) ? this.Removed(this, new WebMrbc.ItemRemovedEventArgs(item)) : null;
+        },
+        onSelectBtnClick: function (e) {
+            var item = Bridge.cast(e.data, WebMrbc.IClassWorkspace);
+            e.preventDefault();
+            if (!Bridge.referenceEquals(this.m_ClassWorkspace, item)) {
+                this.selectClassWorkspace(item);
+            }
+        },
+        onModifyBtnClick: function (e) {
+            var item = Bridge.cast(e.data, WebMrbc.IClassWorkspace);
+            e.preventDefault();
+            this.m_ClassWorkspace = item;
+            this.m_ClassWorkspace.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, $asm.$.WebMrbc.ClassSelectorView.f2));
+        },
+        onAddBtnClick: function (e) {
+            e.preventDefault();
+
+            WebMrbc.App.newItem(Bridge.fn.bind(this, $asm.$.WebMrbc.ClassSelectorView.f3));
+        },
+        onRemoveBtnClick: function (e) {
+            var item = Bridge.cast(e.data, WebMrbc.IClassWorkspace);
+            e.preventDefault();
+            this.m_ClassWorkspace = null;
+            this.removeClassWorkspace(item);
+        },
+        onChange: function (sender, e) {
+            this.render();
         }
     });
 
     Bridge.ns("WebMrbc.ClassSelectorView", $asm.$);
 
     Bridge.apply($asm.$.WebMrbc.ClassSelectorView, {
-        f1: function (ok) {
+        f1: function (e) {
+            e.preventDefault();
+        },
+        f2: function (ok) {
             this.render();
         },
-        f2: function (e) {
-            e.preventDefault();
+        f3: function (item) {
+            item.WebMrbc$IClassWorkspace$openModifyView(Bridge.fn.bind(this, function (ok) {
+                if (ok) {
+                    this.m_Collection.add(item);
+                    this.selectClassWorkspace(item);
+                } else {
+                    WebMrbc.App.removeItem(item);
+                }
+            }));
         }
     });
 
     Bridge.define("WebMrbc.CodeGenerator", {
         statics: {
-            getClassIdentifier: function (ci) {
-                var $t;
-                var cls = ci;
-                var result = "";
-                var up = true;
-                $t = Bridge.getEnumerator(ci.identifier.toLowerCase());
-                while ($t.moveNext()) {
-                    var c = $t.getCurrent();
-                    if (c === 95) {
-                        up = true;
-                        continue;
-                    }
-                    result = System.String.concat(result, (up ? String.fromCharCode(c).toUpperCase() : String.fromCharCode(c)));
-                    up = false;
-                }
-
-                if (!new RegExp("^[A-Za-z_][A-Za-z0-9_]+$").test(result)) {
-                    result = System.String.format("ecn_cls{0:X2}{1:X2}_t", cls.type.classGroup.classGroupCode, cls.type.classCode);
-                } else {
-                    var ms = new RegExp("[A-Z][a-z]+", "g");
-                    var m;
-                    if (((m = ms.exec(result))) != null) {
-                        var blocks = System.Array.init(0, null, String);
-                        var pos = 0;
-                        do {
-                            var len = (m.index - pos) | 0;
-                            blocks.push(result.substr(pos, len).toLowerCase());
-                            pos = (pos + len) | 0;
-                        } while (((m = ms.exec(result))) != null);
-                        if (Bridge.referenceEquals(blocks[((blocks.length - 1) | 0)], "type")) {
-                            blocks[((blocks.length - 1) | 0)] = "t";
-                        } else {
-                            blocks.push("t");
-                        }
-                        result = blocks.join("_");
-                    }
-                }
-
-                return result;
-            },
             getPropertyIdentifier: function (pi) {
                 var cls = pi.classInfo;
                 var fi = pi;
@@ -1626,89 +1459,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
                 return System.String.concat("@", result);
             },
-            getObjectIdentifier: function (ci) {
-                var name = ci.identifier;
-
-                if (System.String.endsWith(name, "_EOBJ")) {
-                    name = name.substr(0, ((name.length - 5) | 0));
-                }
-
-                if (System.String.startsWith(name, "0x")) {
-                    return System.String.concat("eobj_", name.substr(2, ((name.length - 2) | 0)), "_data");
-                }
-
-                return System.String.concat(name.toLowerCase(), "_data");
-            },
-            getEobjAttribute: function (eci) {
-                switch (eci.attribute) {
-                    case "local": 
-                        return "EOBJ_LOCAL_NODE";
-                    case "sync": 
-                        return "EOBJ_SYNC_REMOTE_NODE";
-                    case "async": 
-                        return "EOBJ_ASYNC_REMOTE_NODE";
-                    case "device": 
-                        return "EOBJ_DEVICE";
-                    default: 
-                        return "EOBJ_NONE";
-                }
-            },
-            getNode: function (eci) {
-                var parent = eci.parent;
-
-                if (parent == null) {
-                    return "EOBJ_NULL";
-                } else {
-                    return parent.identifier;
-                }
-            },
-            getEpc: function (epi) {
-                return System.String.format("0x{0:X2}", epi.propertyCode);
-            },
-            getAccess: function (epi) {
-                var result = System.Array.init(0, null, String);
-
-                var access = System.Linq.Enumerable.from(epi.access).toArray();
-
-                if (System.Array.contains(access, "RULE_ANNO", String)) {
-                    result.push("EPC_RULE_ANNO");
-                }
-
-                if (System.Array.contains(access, "RULE_SET", String)) {
-                    result.push("EPC_RULE_SET");
-                }
-
-                if (System.Array.contains(access, "RULE_GET", String)) {
-                    result.push("EPC_RULE_GET");
-                }
-
-                if (System.Array.contains(access, "ANNOUNCE", String)) {
-                    result.push("EPC_ANNOUNCE");
-                }
-
-                if (System.Array.contains(access, "VARIABLE", String)) {
-                    result.push("EPC_VARIABLE");
-                }
-
-                if (result.length === 0) {
-                    return "EPC_NONE";
-                }
-
-                return result.join(" | ");
-            },
-            getSize: function (epi) {
-                return (((((epi.arrayCount === 0) ? 1 : epi.arrayCount) * epi.size) | 0)).toString();
-            },
-            getExinf: function (epi) {
-                switch (epi.propertyCode) {
-                    case 151: 
-                    case 152: 
-                        // 現在年月日設定
-                        return "nil";
-                    default: 
-                        return System.String.concat("@", WebMrbc.CodeGenerator.getPropertyIdentifier(epi));
-                }
-            },
             hasPropSetter: function (epi, valueRange) {
                 valueRange.v = null;
 
@@ -1723,89 +1473,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
                 valueRange.v = null;
                 return false;
-            },
-            getSetter: function (epi) {
-                switch (epi.propertyCode) {
-                    case 128: 
-                        return "onoff_prop_set";
-                    case 136: 
-                        return "alarm_prop_set";
-                    case 151: 
-                        return "time_prop_set";
-                    case 152: 
-                        return "date_prop_set";
-                    default: 
-                        var valueRange = { };
-                        if (WebMrbc.CodeGenerator.hasPropSetter(epi, valueRange)) {
-                            var clsName = WebMrbc.CodeGenerator.getClassIdentifier(epi.classInfo);
-                            if (System.String.endsWith(clsName, "_t")) {
-                                clsName = clsName.substr(0, ((clsName.length - 2) | 0));
-                            }
-                            return System.String.concat(clsName, "_", WebMrbc.CodeGenerator.getPropertyIdentifier(epi), "_set");
-                        }
-                        return "ecn_data_prop_set";
-                }
-            },
-            getGetter: function (epi) {
-                switch (epi.propertyCode) {
-                    case 151: 
-                        return "time_prop_get";
-                    case 152: 
-                        return "date_prop_get";
-                    default: 
-                        return "ecn_data_prop_get";
-                }
-            },
-            getInitialValue$1: function (body, emi, description, valRng, indent, recursive) {
-                var $t;
-                var pluse = "";
-                body.appendLine(System.String.concat(indent, "# ", description));
-                if (recursive) {
-                    body.append(indent);
-                    pluse = " +";
-                } else {
-                    body.append(System.String.concat(indent, WebMrbc.CodeGenerator.getFieldIdentifier(emi), " = "));
-                }
-
-                if (Bridge.referenceEquals(emi.type, "manufacturer_code_t")) {
-                    body.appendLine(System.String.concat("$MAKER_CODE", pluse));
-                    return;
-                }
-
-                if (Bridge.referenceEquals(emi.type, "version_information_t")) {
-                    body.appendLine(System.String.concat("\"\\x01\\x0A\\x01\\x00\"", pluse));
-                    return;
-                }
-
-                if (Bridge.referenceEquals(emi.type, "standard_version_information_t")) {
-                    body.appendLine(System.String.concat("\"\\x00\\x00C\\x00\"", pluse));
-                    return;
-                }
-
-                if (emi.primitive) {
-                    var count = emi.arrayCount;
-                    if (count === 0) {
-                        body.appendLine(System.String.concat("\"", WebMrbc.CodeGenerator.getInitialValue(valRng, emi), "\"", pluse));
-                    } else {
-                        body.append("\"");
-                        for (var i = 0; i < count; i = (i + 1) | 0) {
-                            body.append(WebMrbc.CodeGenerator.getInitialValue(valRng, emi));
-                        }
-                        body.appendLine(System.String.concat("\"", pluse));
-                    }
-                } else {
-                    if (!recursive) {
-                        body.appendLine();
-                    }
-                    $t = Bridge.getEnumerator(emi.fields);
-                    while ($t.moveNext()) {
-                        var efi = $t.getCurrent();
-                        WebMrbc.CodeGenerator.getInitialValue$1(body, efi, efi.description, efi.valueDescription, System.String.concat(indent, "\t"), true);
-                    }
-                    if (!recursive) {
-                        body.appendLine(System.String.concat(indent, "\t\"\""));
-                    }
-                }
             },
             getInitialValue: function (valRng, pi) {
                 var valueRange = WebMrbc.ValueRange.parse(valRng, pi);
@@ -1841,65 +1508,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
                 return false;
             }
-        },
-        _ClassInfo: null,
-        _PropertyInfos: null,
-        ctor: function (cls) {
-            this.$initialize();            var $t;
-
-            this._ClassInfo = cls;
-            $t = Bridge.getEnumerator(cls.properties);
-            while ($t.moveNext()) {
-                var prp = $t.getCurrent();
-                prp.classInfo = cls;
-            }
-            this._PropertyInfos = cls.properties;
-    },
-    defineEchonetObject: function (indent) {
-        var $t;
-        var body = new System.Text.StringBuilder();
-
-        $t = Bridge.getEnumerator(this._PropertyInfos);
-        while ($t.moveNext()) {
-            var pi = $t.getCurrent();
-            if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
-                continue;
-            }
-
-            WebMrbc.CodeGenerator.getInitialValue$1(body, pi, pi.description, pi.valueDescription, indent, false);
-        }
-
-        return body.toString();
-    },
-    configEchonetObject: function (indent) {
-        var $t;
-        var body = new System.Text.StringBuilder();
-
-        body.appendLine(System.String.concat(indent, "# プロパティ定義"));
-        body.appendLine(System.String.concat(indent, "eprpinib_table = ["));
-        $t = Bridge.getEnumerator(this._PropertyInfos);
-        while ($t.moveNext()) {
-            var epi = $t.getCurrent();
-            if (WebMrbc.CodeGenerator.isExtractProperty(epi)) {
-                continue;
-            }
-
-            body.appendLine(System.String.concat(indent, System.String.format("\tECNL::EProperty.new({0}, {1}, {2}, {3}, :{4}, :{5}),", WebMrbc.CodeGenerator.getEpc(epi), WebMrbc.CodeGenerator.getAccess(epi), WebMrbc.CodeGenerator.getSize(epi), WebMrbc.CodeGenerator.getExinf(epi), WebMrbc.CodeGenerator.getSetter(epi), WebMrbc.CodeGenerator.getGetter(epi))));
-        }
-        body.appendLine(System.String.concat(indent, "]"));
-
-        return body.toString();
-    }
-    });
-
-    Bridge.define("WebMrbc.CodeGenWorkArea", {
-        setterDefs: null,
-        getterDefs: null,
-        config: {
-            init: function () {
-                this.setterDefs = System.Array.init(0, null, String);
-                this.getterDefs = System.Array.init(0, null, String);
-            }
         }
     });
 
@@ -1928,189 +1536,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         callback: null
     });
 
-    Bridge.define("WebMrbc.EmModule", {
-        preRun: null,
-        postRun: null,
-        _Term: null,
-        canvas: null,
-        setStatus: null,
-        _last: null,
-        _text: null,
-        totalDependencies: 0,
-        config: {
-            init: function () {
-                this.preRun = System.Array.init(0, null, Object);
-                this.postRun = System.Array.init(0, null, Object);
-            }
-        },
-        ctor: function (term) {
-            this.$initialize();
-            this._Term = term;
-            this.canvas = document.getElementById("canvas");
-
-            // As a default initial behavior, pop up an alert when webgl context is lost. To make your
-            // application robust, you may want to override this behavior before shipping!
-            // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-            this.canvas.addEventListener("webglcontextlost", $asm.$.WebMrbc.EmModule.f1, false);
-            this.setStatus = Bridge.fn.cacheBind(this, this._setStatus);
-        },
-        print: function (arg) {
-            var $t;
-            var text;
-            var args;
-            if (Bridge.referenceEquals(Bridge.getType(arg), String)) {
-                text = Bridge.cast(arg, String);
-            } else {
-                if (Bridge.is(Bridge.getType(arg), Array) && ((args = Bridge.cast(arg, Array))).length > 1) {
-                    var texts = System.Array.init(0, null, String);
-                    $t = Bridge.getEnumerator(args);
-                    while ($t.moveNext()) {
-                        var ele = $t.getCurrent();
-                        texts.push(ele.toString());
-                    }
-                    text = texts.join(" ");
-                } else {
-                    text = arg.toString();
-                }
-            }
-
-            Bridge.Console.log(text);
-            if (this._Term != null) {
-                this._Term.write(System.String.concat(text, "\r\n"));
-            }
-        },
-        printErr: function (arg) {
-            var $t;
-            var text;
-            var args;
-            if (Bridge.referenceEquals(Bridge.getType(arg), String)) {
-                text = Bridge.cast(arg, String);
-            } else {
-                if (Bridge.is(Bridge.getType(arg), Array) && ((args = Bridge.cast(arg, Array))).length > 1) {
-                    var texts = System.Array.init(0, null, String);
-                    $t = Bridge.getEnumerator(args);
-                    while ($t.moveNext()) {
-                        var ele = $t.getCurrent();
-                        texts.push(ele.toString());
-                    }
-                    text = texts.join(" ");
-                } else {
-                    text = arg.toString();
-                }
-            }
-
-            Bridge.Console.log(text);
-            if (this._Term != null) {
-                this._Term.write(System.String.concat(text, "\r\n"));
-            }
-        },
-        _setStatus: function (text) {
-            if (this._last == null) {
-                this._last = new $asm.$AnonymousType$4(System.Int64((new Date()).getTime()).mul(10000), "");
-            }
-            if (Bridge.referenceEquals(text, this._text)) {
-                return;
-            }
-            this._text = text;
-            var progressElement = Bridge.cast(document.getElementById("progress"), HTMLProgressElement);
-            var spinnerElement = Bridge.cast(document.getElementById("spinner"), HTMLDivElement);
-            var m = text.match(new RegExp("([^(]+)\\((\\d+(\\.\\d+)?)\\/(\\d+)\\)"));
-            var now = System.Int64((new Date()).getTime()).mul(10000);
-            if (m != null && now.sub(System.Int64((new Date()).getTime()).mul(10000)).lt(System.Int64(30))) {
-                return;
-            } // if this is a progress update, skip it if too soon
-            if (m != null) {
-                text = m[1];
-                progressElement.value = (parseInt(m[2]) * 100) | 0;
-                progressElement.max = (parseInt(m[4]) * 100) | 0;
-                progressElement.setAttribute("hidden", "false");
-                spinnerElement.setAttribute("hidden", "false");
-            } else {
-                progressElement.value = 0.0;
-                progressElement.max = 0.0;
-                progressElement.setAttribute("hidden", "true");
-                if (!System.String.isNullOrEmpty(text)) {
-                    spinnerElement.style.display = "none";
-                }
-            }
-            var statusElement = Bridge.cast(document.getElementById("status"), HTMLDivElement);
-            statusElement.innerHTML = text;
-        },
-        monitorRunDependencies: function (left) {
-            this.totalDependencies = Math.max(this.totalDependencies, left);
-            this.setStatus((left !== 0) ? "Preparing... (" + (((this.totalDependencies - left) | 0)) + "/" + this.totalDependencies + ")" : "All downloads complete.");
-        },
-        UTF8StringToArray: function (str) {
-            var len = this.lengthBytesUTF8(str);
-            var result = new Uint8Array(len);
-            this.stringToUTF8Array(str, result, 0, len);
-            return result;
-        },
-        getFileSystem: function () {
-            return this.FS;
-        }
-    });
-
-    Bridge.define("$AnonymousType$4", $asm, {
-        $kind: "anonymous",
-        ctor: function (time, text) {
-            this.time = time;
-            this.text = text;
-        },
-        gettime : function () {
-            return this.time;
-        },
-        gettext : function () {
-            return this.text;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$4)) {
-                return false;
-            }
-            return Bridge.equals(this.time, o.time) && Bridge.equals(this.text, o.text);
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([7550196189, this.time, this.text]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-                time : this.time,
-                text : this.text
-            };
-        }
-    });
-
-    Bridge.ns("WebMrbc.EmModule", $asm.$);
-
-    Bridge.apply($asm.$.WebMrbc.EmModule, {
-        f1: function (e) {
-            window.alert("WebGL context lost. You will need to reload the page.");
-            e.preventDefault();
-        }
-    });
-
     Bridge.define("WebMrbc.EObjectModalView", {
-        statics: {
-            initProperty: function (div, p) {
-                var label = document.createElement("label");
-                label.setAttribute("class", "btn btn-default");
-
-                var input = document.createElement("input");
-                input.setAttribute("type", "checkbox");
-                input.setAttribute("autocomplete", "off");
-
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(p.description));
-                label.setAttribute("data-ecnl-epc", p.propertyCode.toString());
-
-                div.appendChild(label);
-
-                if ((p.required.length > 0) && (!Bridge.referenceEquals(p.required[0], "NONE"))) {
-                    ($(label)).button('toggle');
-                }
-            }
-        },
         el: null,
         model: null,
         target: null,
@@ -2231,64 +1657,82 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         initClassGroups: function () {
             var $t;
-            var ul = $("#eobject_classGroups").get(0);
+            var ul = $("#eobject_classGroups");
 
-            ul.innerHTML = "";
+            ul.html("");
 
             $t = Bridge.getEnumerator(WebMrbc.App.classGroups);
             while ($t.moveNext()) {
                 var cg = $t.getCurrent();
-                var li = document.createElement("li");
-                li.setAttribute("role", "presentation");
+                var li = $("<li>");
+                li.attr("role", "presentation");
 
-                var a = document.createElement("a");
-                a.setAttribute("role", "menuitem");
-                a.appendChild(document.createTextNode(cg.description));
-                ($(a)).click(cg, Bridge.fn.cacheBind(this, this.onSelectClassGroupCode));
+                var a = $("<a>");
+                a.attr("role", "menuitem");
+                a.append(cg.description);
+                a.click(cg, Bridge.fn.cacheBind(this, this.onSelectClassGroupCode));
 
-                li.appendChild(a);
-                ul.appendChild(li);
+                li.append(a);
+                ul.append(li);
             }
         },
         initClasss: function (cg) {
             var $t;
-            var ul = $("#eobject_classs").get(0);
+            var ul = $("#eobject_classs");
 
-            ul.innerHTML = "";
+            ul.html("");
 
             $t = Bridge.getEnumerator(cg.classes);
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
-                var li = document.createElement("li");
-                li.setAttribute("role", "presentation");
+                var li = $("<li>");
+                li.attr("role", "presentation");
 
-                var a = document.createElement("a");
-                a.setAttribute("role", "menuitem");
-                a.appendChild(document.createTextNode(c.description));
-                ($(a)).click(c, Bridge.fn.cacheBind(this, this.onSelectClassCode));
+                var a = $("<a>");
+                a.attr("role", "menuitem");
+                a.append(c.description);
+                a.click(c, Bridge.fn.cacheBind(this, this.onSelectClassCode));
 
-                li.appendChild(a);
-                ul.appendChild(li);
+                li.append(a);
+                ul.append(li);
             }
         },
         initProperties: function (c) {
             var $t, $t1;
-            var div = $("#eobject_properties").get(0);
+            var div = $("#eobject_properties");
 
-            div.innerHTML = "";
+            div.html("");
 
             if (c.classGroup.classGroupCode !== 14 || c.classCode !== 240) {
                 $t = Bridge.getEnumerator(WebMrbc.App.baseObjectPropertyList);
                 while ($t.moveNext()) {
                     var p = $t.getCurrent();
-                    WebMrbc.EObjectModalView.initProperty(div, p);
+                    this.initProperty(div, p);
                 }
             }
 
             $t1 = Bridge.getEnumerator(c.properties);
             while ($t1.moveNext()) {
                 var p1 = $t1.getCurrent();
-                WebMrbc.EObjectModalView.initProperty(div, p1);
+                this.initProperty(div, p1);
+            }
+        },
+        initProperty: function (div, p) {
+            var label = $("<label>");
+            label.attr("class", "btn btn-default");
+
+            var input = $("<input>");
+            input.attr("type", "checkbox");
+            input.attr("autocomplete", "off");
+
+            label.append(input);
+            label.append(p.description);
+            label.attr("data-ecnl-epc", p.propertyCode.toString());
+
+            div.append(label);
+
+            if ((p.required.length > 0) && (!Bridge.referenceEquals(p.required[0], "NONE"))) {
+                label.button('toggle');
             }
         },
         updateProperties: function () {
@@ -2594,14 +2038,20 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         workspaceToCode: function (workspace) {
             if (workspace == null) {
                 // Backwards compatibility from before there could be multiple workspaces.
-                Bridge.Console.log("No workspace specified in workspaceToCode call.  Guessing.");
+                WebMrbc.App.writeLine("No workspace specified in workspaceToCode call.  Guessing.");
                 workspace = Blockly.getMainWorkspace();
             }
-            var codes = System.Array.init(0, null, WebMrbc.node);
             this.init(workspace);
+            var codes = this.workspaceToNodes(workspace);
+            return this.finish(codes);
+        },
+        workspaceToNodes: function (workspace) {
+            var $t;
+            var nodes = System.Array.init(0, null, WebMrbc.node);
             var blocks = workspace.getTopBlocks(true);
-            var block;
-            for (var x = 0; ((block = blocks[x])) != null; x = (x + 1) | 0) {
+            $t = Bridge.getEnumerator(blocks);
+            while ($t.moveNext()) {
+                var block = $t.getCurrent();
                 var line = this.blockToCode(block);
                 if (line != null) {
                     if (block.outputConnection != null) {
@@ -2609,10 +2059,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                         // it wants to append a semicolon, or something.
                         line = this.scrubNakedValue(line);
                     }
-                    codes = Bridge.cast(codes.concat.apply(codes, line), System.Array.type(WebMrbc.node));
+                    nodes = Bridge.cast(nodes.concat.apply(nodes, line), System.Array.type(WebMrbc.node));
                 }
             }
-            return this.finish(codes);
+            return nodes;
         },
         /**
          * Prepend a common prefix onto each line of code.
@@ -2692,6 +2142,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     result.push(c);
                 } while (((code = Bridge.as(code.getcdr(), WebMrbc.node))) != null);
             } else {
+                code.block_id = block.id;
                 result.push(code);
             }
             this.scrub_(block, result);
@@ -3111,15 +2562,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         text: null,
         ctor: function (bytes, width) {
             this.$initialize();
-            var sb = new System.Text.StringBuilder();
+            var sb = System.Array.init(0, null, String);
 
             for (var index = 0; index < bytes.length; index = (index + width) | 0) {
-                sb.appendFormat("{0:X4} : ", index);
-                sb.append(this.binBump(bytes, index, width));
-                sb.appendLine(this.asciiDump(bytes, index, width));
+                sb.push(System.String.concat(System.String.format("{0:X4} : ", index), this.binBump(bytes, index, width), this.asciiDump(bytes, index, width)));
             }
 
-            this.text = sb.toString();
+            this.text = sb.join("\n");
         },
         binBump: function (bytes, offset, width) {
             var sb = new System.Text.StringBuilder();
@@ -3135,24 +2584,25 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return sb.toString();
         },
         asciiDump: function (bytes, index, width) {
-            var sb = new System.Text.StringBuilder();
+            var sb = "";
 
             if (index < bytes.length) {
                 width = Math.min(width, ((bytes.length - index) | 0));
 
-                sb.append(": ");
+                sb = System.String.concat(sb, ": ");
                 for (var i = 0; i < width; i = (i + 1) | 0) {
                     var b = bytes[((i + index) | 0)];
                     if (b < 32) {
-                        b = 32;
+                        sb = System.String.concat(sb, (System.String.concat("\u001b[1;3;31m", String.fromCharCode(((b + 64) | 0)), "\u001b[0m")));
+                    } else {
+                        sb = System.String.concat(sb, (String.fromCharCode(b)));
                     }
-                    sb.append(String.fromCharCode(b));
                 }
             } else {
-                sb.append(":         ");
+                sb = System.String.concat(sb, ":         ");
             }
 
-            return sb.toString();
+            return sb;
         },
         toString: function () {
             return this.text;
@@ -3161,6 +2611,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
     Bridge.define("WebMrbc.IMrbParser", {
         $kind: "interface"
+    });
+
+    Bridge.define("WebMrbc.ItemRemovedEventArgs", {
+        config: {
+            properties: {
+                Item: null
+            }
+        },
+        ctor: function (item) {
+            this.$initialize();
+            this.setItem(item);
+        }
     });
 
     Bridge.define("WebMrbc.JsonClassGroupInfo", {
@@ -3203,7 +2665,32 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         isArray: false,
         arrayCount: 0,
         size: 0,
-        fields: null
+        fields: null,
+        ctor: function () {
+            this.$initialize();
+
+        },
+        $ctor1: function (f) {
+            this.$initialize();            var $t;
+
+            this.description = f.description;
+            this.valueDescription = f.valueDescription;
+            this.unitDescription = f.unitDescription;
+            this.initialValue = f.initialValue;
+            this.type = f.type;
+            this.identifier = f.identifier;
+            this.primitive = f.primitive;
+            this.isArray = f.isArray;
+            this.arrayCount = Bridge.cast(f.arrayCount, System.Int32);
+            this.size = Bridge.cast(f.size, System.Int32);
+            var list = System.Array.init(0, null, WebMrbc.JsonFieldInfo);
+            $t = Bridge.getEnumerator(f.fields);
+            while ($t.moveNext()) {
+                var field = $t.getCurrent();
+                list.push(new WebMrbc.JsonFieldInfo.$ctor1(field));
+            }
+            this.fields = list;
+    }
     });
 
     Bridge.define("WebMrbc.JsonObjectInfo", {
@@ -3320,7 +2807,30 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
     });
 
     Bridge.define("WebMrbc.MainMenuView", {
+        statics: {
+            selectBlockTab: function () {
+                $("#tabs a[href='#block-tab']").tab("show");
+                //jQuery.Select(".blocklyToolboxDiv").Show();
+            },
+            selectRubyTab: function () {
+                $("#tabs a[href='#ruby-tab']").tab("show");
+                //jQuery.Select(".blocklyToolboxDiv").Hide();
+            },
+            selectOutputTab: function () {
+                $("#tabs a[href='#output-tab']").tab("show");
+                //jQuery.Select(".blocklyToolboxDiv").Hide();
+            }
+        },
+        _BlockIds: null,
+        _Files: null,
+        filename: null,
         el: null,
+        current: null,
+        config: {
+            init: function () {
+                this._Files = new (System.Collections.Generic.Dictionary$2(String,String))();
+            }
+        },
         ctor: function () {
             this.$initialize();
             this.el = $("#main-menu");
@@ -3329,179 +2839,212 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
             // HACK: if don't do below, can't open submenu on Chromium on Raspberry Pi
             $(".dropdown-toggle").dropdown();
+
+            WebMrbc.Views.ClassSelectorView.addSelected(Bridge.fn.cacheBind(this, this.classSelectorView1_Selected));
+            WebMrbc.Views.ClassSelectorView.addRemoved(Bridge.fn.cacheBind(this, this.classSelectorView1_Removed));
+            WebMrbc.Views.ClassSelectorView.addMarkClicked(Bridge.fn.cacheBind(this, this.classSelectorView1_MarkClicked));
+
+            this.current = WebMrbc.Views.ClassSelectorView.getCurrent();
+        },
+        getCompileArgs: function (rubyfiles, path, ext, outfile) {
+            var $t, $t1;
+            var i = rubyfiles.length;
+            rubyfiles.push("placeholder.out");
+
+            if (!System.String.endsWith(path, "/")) {
+                path = System.String.concat(path, "/");
+            }
+
+            var list = System.Array.init(0, null, WebMrbc.IClassWorkspace);
+            list.push(WebMrbc.Collections.LocalNode);
+            $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                if ((Bridge.referenceEquals(item, WebMrbc.Collections.LocalNode)) || (Bridge.referenceEquals(item, WebMrbc.Collections.EcnlTaskWorkspace)) || (Bridge.referenceEquals(item, WebMrbc.Collections.MainLoopWorkspace))) {
+                    continue;
+                }
+                list.push(item);
+            }
+            list.push(WebMrbc.Collections.EcnlTaskWorkspace);
+            list.push(WebMrbc.Collections.MainLoopWorkspace);
+
+            $t1 = Bridge.getEnumerator(list);
+            while ($t1.moveNext()) {
+                var item1 = $t1.getCurrent();
+                var rubyfile;
+                var view = item1.WebMrbc$IClassWorkspace$getView();
+                if (view.changed || item1.WebMrbc$IClassWorkspace$getRubyCode() == null) {
+                    rubyfile = System.String.concat(path, item1.WebMrbc$IModel$getIdentifier(), ".rb");
+                    var workspace = item1.WebMrbc$IClassWorkspace$getWorkspace();
+                    var code = item1.WebMrbc$IClassWorkspace$toCode(rubyfile);
+
+                    this._Files.set(rubyfile, code);
+                } else {
+                    rubyfile = item1.WebMrbc$IClassWorkspace$getRubyCode().getfilename();
+                }
+                rubyfiles.push(rubyfile);
+            }
+            outfile.v = rubyfiles[((i + 1) | 0)].replace(new RegExp(".rb$", "g"), System.String.startsWith(ext, ".") ? ext : (System.String.concat(".", ext)));
+            rubyfiles[i] = outfile.v;
         },
         onHelp: function () {
-            WebMrbc.App.module = WebMrbc.App.initModule();
+            WebMrbc.App.module = WebMrbc.App.initMruby();
 
-            var args = "--help";
-            if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
-            }
-            WebMrbc.App.module.arguments = args.split(" ");
-            mrbc(WebMrbc.App.module);
+            var args = System.Array.init(["mrbc", "--help"], String);
+            WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
         onVersion: function () {
-            WebMrbc.App.module = WebMrbc.App.initModule();
+            WebMrbc.App.module = WebMrbc.App.initMruby();
 
-            var args = "--version";
-            if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
-            }
-            WebMrbc.App.module.arguments = args.split(" ");
-            mrbc(WebMrbc.App.module);
+            var args = System.Array.init(["mrbc", "--version"], String);
+            WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
         onCompileToC: function () {
-            WebMrbc.App.module = WebMrbc.App.initModule();
-            WebMrbc.App.module.preRun.push(WebMrbc.App.preRun);
+            var args = System.Array.init(["mrbc", "-Bmain_rb_code", "-e", "-o"], String);
+            var mrbfile = { };
+            this.getCompileArgs(args, "/src/", "c", mrbfile);
+            args[4] = "/build/main_rb.c";
+
+            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
+                var $t;
+                var FS = WebMrbc.App.module.getFileSystem();
+
+                FS.createFolder("/", "src", true, false);
+                FS.createFolder("/", "build", true, true);
+
+                $t = Bridge.getEnumerator(this._Files);
+                while ($t.moveNext()) {
+                    var f = $t.getCurrent();
+                    FS.writeFile(f.key, f.value);
+                }
+            }));
             WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f2);
 
-            var args = "-Bmain_rb_code -o build/main_rb.c src/main.rb";
-            if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
-            }
-            WebMrbc.App.module.arguments = args.split(" ");
-            mrbc(WebMrbc.App.module);
+            WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
-        onCompileToBin: function () {
-            WebMrbc.App.module = WebMrbc.App.initModule();
-            WebMrbc.App.module.preRun.push(WebMrbc.App.preRun);
+        onCompileToMrb: function () {
+            var args = System.Array.init(["mrbc", "-e", "-o"], String);
+            var mrbfile = { };
+            this.getCompileArgs(args, "/src/", "mrb", mrbfile);
+            args[3] = "/build/main_rb.mrb";
+
+            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
+                var $t;
+                var FS = WebMrbc.App.module.getFileSystem();
+
+                FS.createFolder("/", "src", true, false);
+                FS.createFolder("/", "build", true, true);
+
+                $t = Bridge.getEnumerator(this._Files);
+                while ($t.moveNext()) {
+                    var f = $t.getCurrent();
+                    FS.writeFile(f.key, f.value);
+                }
+            }));
             WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f3);
 
-            var args = "-o build/main_rb.bin src/main.rb";
-            if (WebMrbc.App.term != null) {
-                WebMrbc.App.term.write(System.String.concat("$ mrbc ", args, "\r\n"));
-            }
-            WebMrbc.App.module.arguments = args.split(" ");
-            mrbc(WebMrbc.App.module);
+            WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
         onBlockMode: function () {
-            var textEditor = window["textEditor"];
-
-            $("#tabs a[href='#block-tab']").tab("show");
-            $(".blocklyToolboxDiv").show();
+            WebMrbc.MainMenuView.selectBlockTab();
         },
         onRubyMode: function () {
-            WebMrbc.Views.ClassSelectorView.getCurrent().WebMrbc$IClassWorkspace$loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
+            this.updateCode();
 
-            var code = new System.Text.StringBuilder();
-            WebMrbc.Collections.ClassWorkspaces.each(function (e) {
-                if (Bridge.is(e, WebMrbc.EObjectWorkspace)) {
-                    code.append(e.WebMrbc$IClassWorkspace$toCode(new WebMrbc.Ruby(System.String.concat(e.WebMrbc$IModel$getIdentifier(), ".rb"))));
-                }
-            });
-            {
-                var e = WebMrbc.Collections.EcnlTaskWorkspace;
-                code.append(e.toCode(new WebMrbc.Ruby(System.String.concat(e.getIdentifier(), ".rb"))));
-            }
-            {
-                var e1 = WebMrbc.Collections.MainLoopWorkspace;
-                code.append(e1.toCode(new WebMrbc.Ruby(System.String.concat(e1.getIdentifier(), ".rb"))));
-            }
-
-            var textEditor = window["textEditor"];
-            textEditor.setValue(code.toString());
-            textEditor.moveCursorTo(0, 0);
-
-            $("#tabs a[href='#ruby-tab']").tab("show");
-            $(".blocklyToolboxDiv").hide();
+            WebMrbc.MainMenuView.selectRubyTab();
         },
         onOutputMode: function () {
-            $("#tabs a[href='#output-tab']").tab("show");
-            $(".blocklyToolboxDiv").hide();
+            WebMrbc.MainMenuView.selectOutputTab();
+            WebMrbc.App.term.fit();
         },
         onRun: function () {
         },
         onLoadLocal: function () {
         },
         onSave: function () {
-            WebMrbc.Views.ClassSelectorView.getCurrent().WebMrbc$IClassWorkspace$loadDom(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
+            var $t;
+            var item = WebMrbc.Views.ClassSelectorView.getCurrent();
+            if (item == null) {
+                return;
+            }
 
             var zip = new JSZip();
             var i = 1;
-            WebMrbc.Collections.ClassWorkspaces.each(function (e) {
+            $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
+            while ($t.moveNext()) {
+                var e = $t.getCurrent();
                 var xml = Blockly.Xml.workspaceToDom(e.WebMrbc$IClassWorkspace$getWorkspace());
                 zip.file("ClassWorkspace" + i + ".xml", xml.outerHTML);
                 i = (i + 1) | 0;
-            });
+            }
             var blob = zip.generate({ type: "blob" });
             saveAs(blob, "Workspace.zip");
         },
-        onCheck: function () {
-        },
-        onReset: function () {
-        },
-        onPreference: function () {
-        },
-        load: function (info) {
-            if (info.error != null) {
-                window["errorMessage"].call(null, goog.getMsg(Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_ERROR, new $asm.$AnonymousType$5(info.filename, info.error)));
+        classSelectorView1_Selected: function (sender, e) {
+            var $t;
+            var item = WebMrbc.Views.ClassSelectorView.getCurrent();
+            if (item == null) {
+                this.updateCode();
+
+                WebMrbc.MainMenuView.selectRubyTab();
             } else {
-                clearMessages();
+                var view = item.WebMrbc$IClassWorkspace$getView();
+                view.show();
 
-                var filename = info.filename;
-                if (filename.match(new RegExp("\\.xml$")) != null) {
-                    if (Bridge.referenceEquals(window["blockMode"], undefined)) {
-                        window["blockMode"] = true;
-                    }
-                    $("#tabs a[href='#block-tab']").tab("show");
+                WebMrbc.MainMenuView.selectBlockTab();
 
-                    filename = filename.replace(new RegExp("(\\.rb)?\\.xml$"), ".rb");
-                    WebMrbc.App.loadXml(info.data);
-                    info.data = (new WebMrbc.Ruby("load.rb")).workspaceToCode(Blockly.mainWorkspace);
-                } else {
-                    WebMrbc.Collections.ClassWorkspaces.reset();
-                    Blockly.mainWorkspace.clear();
-
-                    if (window["blockMode"]) {
-                        window["blockMode"] = false;
-                        $("#tabs a[href='#ruby-tab']").tab("show");
-
-                        window["textEditor"].focus();
+                $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
+                while ($t.moveNext()) {
+                    var i = $t.getCurrent();
+                    if (!Bridge.referenceEquals(i, item)) {
+                        i.WebMrbc$IClassWorkspace$getView().hide();
                     }
                 }
-
-                $("#filename").val(filename);
-                window["textEditor"].getSession().getDocument().setValue(info.data);
-                window["textEditor"].moveCursorTo(0, 0);
-                // TODO: Window.changed -> Smalruby.Models.SourceCode.changed
-                window["changed"] = false;
-                WebMrbc.App.changedAfterTranslating = true;
-                window["successMessage"].call(null, Blockly.Msg.VIEWS_MAIN_MENU_VIEW_LOAD_SUCCEEDED);
             }
-        }
-    });
 
-    Bridge.define("$AnonymousType$5", $asm, {
-        $kind: "anonymous",
-        ctor: function (filename, error) {
-            this.filename = filename;
-            this.error = error;
-        },
-        getfilename : function () {
-            return this.filename;
-        },
-        geterror : function () {
-            return this.error;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$5)) {
-                return false;
+            if (!Bridge.referenceEquals(this.current, item)) {
+                this.current != null ? this.current.WebMrbc$IClassWorkspace$getView().hide() : null;
             }
-            return Bridge.equals(this.filename, o.filename) && Bridge.equals(this.error, o.error);
+            this.current = item;
         },
-        getHashCode: function () {
-            var h = Bridge.addHash([7550196190, this.filename, this.error]);
-            return h;
+        classSelectorView1_Removed: function (sender, e) {
+            var view = e.getItem().WebMrbc$IClassWorkspace$getView();
+            view.dispose();
         },
-        toJSON: function () {
-            return {
-                filename : this.filename,
-                error : this.error
-            };
+        classSelectorView1_MarkClicked: function (sender, e) {
+        },
+        updateCode: function () {
+            var code = "";
+            var item = WebMrbc.Views.ClassSelectorView.getCurrent();
+            if (item != null) {
+                var view = item.WebMrbc$IClassWorkspace$getView();
+                if (view.changed || item.WebMrbc$IClassWorkspace$getRubyCode() == null) {
+                    var rubyfile = System.String.concat(item.WebMrbc$IModel$getIdentifier(), ".rb");
+                    var workspace = item.WebMrbc$IClassWorkspace$getWorkspace();
+                    code = item.WebMrbc$IClassWorkspace$toCode(rubyfile);
+
+                    this._Files.set(rubyfile, code);
+                    this.filename = rubyfile;
+                } else {
+                    code = this._Files.get(item.WebMrbc$IClassWorkspace$getRubyCode().getfilename());
+                    this.filename = item.WebMrbc$IClassWorkspace$getRubyCode().getfilename();
+                }
+            }
+            WebMrbc.App.codeEditor.setValue(code);
+            WebMrbc.App.codeEditor.gotoLine(0, 0);
+        },
+        newBlocklyView: function (identifier) {
+            return new WebMrbc.BlocklyView(identifier);
+        },
+        removeEObjectWorkspace: function (item) {
+            var view = item.WebMrbc$IClassWorkspace$getView();
+            view.dispose();
         }
     });
 
@@ -3522,28 +3065,24 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         f2: function () {
             var FS = WebMrbc.App.module.getFileSystem();
 
-            var stt = FS.stat("build/main_rb.c");
-            var stream = FS.open("build/main_rb.c", "r");
+            var stt = FS.stat("/build/main_rb.c");
+            var stream = FS.open("/build/main_rb.c", "r");
             var buf = new Uint8Array(stt.size);
             FS.read(stream, buf, 0, stt.size, 0);
             FS.close(stream);
 
-            var element = Bridge.cast(document.getElementById("output"), HTMLTextAreaElement);
-            element.value = System.String.concat(WebMrbc.App.module.UTF8ArrayToString(buf, 0), "\n");
-            element.scrollTop = element.scrollHeight; // focus on bottom
+            WebMrbc.App.writeLine(WebMrbc.App.module.UTF8ArrayToString(buf, 0));
         },
         f3: function () {
             var FS = WebMrbc.App.module.getFileSystem();
 
-            var stt = FS.stat("build/main_rb.bin");
-            var stream = FS.open("build/main_rb.bin", "r");
+            var stt = FS.stat("/build/main_rb.mrb");
+            var stream = FS.open("/build/main_rb.mrb", "r");
             var buf = new Uint8Array(stt.size);
             FS.read(stream, buf, 0, stt.size, 0);
             FS.close(stream);
 
-            var element = Bridge.cast(document.getElementById("output"), HTMLTextAreaElement);
-            element.value = (new WebMrbc.HexDump(buf, 16)).toString();
-            element.scrollTop = element.scrollHeight; // focus on bottom
+            WebMrbc.App.writeLine((new WebMrbc.HexDump(buf, 16)).toString());
         }
     });
 
@@ -3864,6 +3403,160 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             tUMINUS_NUM: 372,
             tLAST_TOKEN: 373,
             yyErrorCode: 256
+        }
+    });
+
+    Bridge.define("WebMrbc.Mruby", {
+        preRun: null,
+        postRun: null,
+        canvas: null,
+        setStatus: null,
+        _last: null,
+        _text: null,
+        totalDependencies: 0,
+        config: {
+            init: function () {
+                this.preRun = System.Array.init(0, null, Object);
+                this.postRun = System.Array.init(0, null, Object);
+            }
+        },
+        ctor: function () {
+            this.$initialize();
+            /* canvas = Document.GetElementById("canvas");
+
+			// As a default initial behavior, pop up an alert when webgl context is lost. To make your
+			// application robust, you may want to override this behavior before shipping!
+			// See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+			canvas.AddEventListener("webglcontextlost", new Action<Event>((Event e) => {
+				Window.Alert("WebGL context lost. You will need to reload the page."); e.PreventDefault();
+			}), false);*/
+            this.setStatus = Bridge.fn.cacheBind(this, this._setStatus);
+        },
+        print: function (arg) {
+            var $t;
+            var text;
+            var args;
+            if (Bridge.referenceEquals(Bridge.getType(arg), String)) {
+                text = Bridge.cast(arg, String);
+            } else {
+                if (Bridge.is(Bridge.getType(arg), Array) && ((args = Bridge.cast(arg, Array))).length > 1) {
+                    var texts = System.Array.init(0, null, String);
+                    $t = Bridge.getEnumerator(args);
+                    while ($t.moveNext()) {
+                        var ele = $t.getCurrent();
+                        texts.push(ele.toString());
+                    }
+                    text = texts.join(" ");
+                } else {
+                    text = arg.toString();
+                }
+            }
+
+            WebMrbc.App.writeLine(text);
+        },
+        printErr: function (arg) {
+            var $t;
+            var text;
+            var args;
+            if (Bridge.referenceEquals(Bridge.getType(arg), String)) {
+                text = Bridge.cast(arg, String);
+            } else {
+                if (Bridge.is(Bridge.getType(arg), Array) && ((args = Bridge.cast(arg, Array))).length > 1) {
+                    var texts = System.Array.init(0, null, String);
+                    $t = Bridge.getEnumerator(args);
+                    while ($t.moveNext()) {
+                        var ele = $t.getCurrent();
+                        texts.push(ele.toString());
+                    }
+                    text = texts.join(" ");
+                } else {
+                    text = arg.toString();
+                }
+            }
+
+            WebMrbc.App.writeLine(text);
+        },
+        run: function (args) {
+            WebMrbc.App.write(System.String.concat("$ ", args.join(" "), "\r\n"));
+
+            var exe = Bridge.cast(args.shift(), String);
+            this.arguments = args;
+            eval(System.String.concat(exe, "(this)"));
+        },
+        _setStatus: function (text) {
+            if (this._last == null) {
+                this._last = new $asm.$AnonymousType$3(System.Int64((new Date()).getTime()).mul(10000), "");
+            }
+            if (Bridge.referenceEquals(text, this._text)) {
+                return;
+            }
+            this._text = text;
+            var progressElement = Bridge.cast(document.getElementById("progress"), HTMLProgressElement);
+            var spinnerElement = Bridge.cast(document.getElementById("spinner"), HTMLDivElement);
+            var m = text.match(new RegExp("([^(]+)\\((\\d+(\\.\\d+)?)\\/(\\d+)\\)"));
+            var now = System.Int64((new Date()).getTime()).mul(10000);
+            if (m != null && now.sub(System.Int64((new Date()).getTime()).mul(10000)).lt(System.Int64(30))) {
+                return;
+            } // if this is a progress update, skip it if too soon
+            if (m != null) {
+                text = m[1];
+                progressElement.value = (parseInt(m[2]) * 100) | 0;
+                progressElement.max = (parseInt(m[4]) * 100) | 0;
+                progressElement.setAttribute("hidden", "false");
+                spinnerElement.setAttribute("hidden", "false");
+            } else {
+                progressElement.value = 0.0;
+                progressElement.max = 0.0;
+                progressElement.setAttribute("hidden", "true");
+                if (!System.String.isNullOrEmpty(text)) {
+                    spinnerElement.style.display = "none";
+                }
+            }
+            var statusElement = Bridge.cast(document.getElementById("status"), HTMLDivElement);
+            statusElement.innerHTML = text;
+        },
+        monitorRunDependencies: function (left) {
+            this.totalDependencies = Math.max(this.totalDependencies, left);
+            this.setStatus((left !== 0) ? "Preparing... (" + (((this.totalDependencies - left) | 0)) + "/" + this.totalDependencies + ")" : "All downloads complete.");
+        },
+        UTF8StringToArray: function (str) {
+            var len = this.lengthBytesUTF8(str);
+            var result = new Uint8Array(len);
+            this.stringToUTF8Array(str, result, 0, len);
+            return result;
+        },
+        getFileSystem: function () {
+            return this.FS;
+        }
+    });
+
+    Bridge.define("$AnonymousType$3", $asm, {
+        $kind: "anonymous",
+        ctor: function (time, text) {
+            this.time = time;
+            this.text = text;
+        },
+        gettime : function () {
+            return this.time;
+        },
+        gettext : function () {
+            return this.text;
+        },
+        equals: function (o) {
+            if (!Bridge.is(o, $asm.$AnonymousType$3)) {
+                return false;
+            }
+            return Bridge.equals(this.time, o.time) && Bridge.equals(this.text, o.text);
+        },
+        getHashCode: function () {
+            var h = Bridge.addHash([7550196188, this.time, this.text]);
+            return h;
+        },
+        toJSON: function () {
+            return {
+                time : this.time,
+                text : this.text
+            };
         }
     });
 
@@ -4763,7 +4456,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                         var index = (pos + m.index) | 0;
                         if (index === pos) {
                             tokens.push(new WebMrbc.TokenInfo(m[0], WebMrbc.TokenType.Separetor));
-                            pos = (pos + 1) | 0;
+                            pos = (pos + m.length) | 0;
                         } else {
                             tokens.push(new WebMrbc.TokenInfo(input.substr(pos, ((index - pos) | 0)), WebMrbc.TokenType.String));
                             tokens.push(new WebMrbc.TokenInfo(m[0], WebMrbc.TokenType.Separetor));
@@ -5289,7 +4982,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         allVariables: function (root) {
             if (root instanceof Blockly.Block) {
                 // Root is Block.
-                Bridge.Console.log("Deprecated call to Variables.allVariables with a block instead of a workspace.  You may want Variables.allUsedVariables");
+                WebMrbc.App.writeLine("Deprecated call to Variables.allVariables with a block instead of a workspace.  You may want Variables.allUsedVariables");
             }
             return root.variableList;
         },
@@ -5513,9 +5206,21 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
     Bridge.define("WebMrbc.Views", {
         statics: {
-            ClassSelectorView: null,
             MainMenuView: null,
+            ClassSelectorView: null,
             EObjectModalView: null
+        }
+    });
+
+    Bridge.define("WebMrbc.xml_code_cond", {
+        ctor: function () {
+            this.$initialize();
+        },
+        createElement: function (tagname) {
+            return document.createElement(tagname);
+        },
+        createTextNode: function (text) {
+            return document.createTextNode(text);
         }
     });
 
@@ -5535,7 +5240,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getold: function () {
             return this._old;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -5622,23 +5327,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getb: function () {
             return this._b;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_operation");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "OP");
-            field.appendChild(document.createTextNode("AND"));
+            field.appendChild(cond.createTextNode("AND"));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "A");
-            value.appendChild(this._a.to_xml());
+            value.appendChild(this._a.to_xml(cond));
             block.appendChild(value);
 
-            value = document.createElement("value");
+            value = cond.createElement("value");
             value.setAttribute("name", "B");
-            value.appendChild(this._b.to_xml());
+            value.appendChild(this._b.to_xml(cond));
             block.appendChild(value);
 
             return block;
@@ -5664,7 +5369,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -5678,6 +5383,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
     Bridge.define("WebMrbc.array_node", {
         inherits: [WebMrbc.node],
         _array: null,
+        _item_per_line: false,
         config: {
             init: function () {
                 this._array = System.Array.init(0, null, WebMrbc.node);
@@ -5688,20 +5394,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_ARRAY);
             WebMrbc.node.dump_recur(WebMrbc.node, this._array, a);
         },
-        $ctor1: function (p, a) {
+        $ctor1: function (p, a, item_per_line) {
+            if (item_per_line === void 0) { item_per_line = false; }
+
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_ARRAY);
             this._array = Bridge.cast(this._array.concat.apply(this._array, a), System.Array.type(WebMrbc.node));
+            this._item_per_line = item_per_line;
         },
         getarray: function () {
             return this._array;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var $t;
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "lists_create_with");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("items", this._array.length.toString());
             block.appendChild(mutation);
 
@@ -5709,9 +5418,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             $t = Bridge.getEnumerator(this._array);
             while ($t.moveNext()) {
                 var item = $t.getCurrent();
-                var value = document.createElement("value");
+                var value = cond.createElement("value");
                 value.setAttribute("name", System.String.format("ADD{0}", i));
-                value.appendChild(this._array[i].to_xml());
+                value.appendChild(this._array[i].to_xml(cond));
                 block.appendChild(value);
                 i = (i + 1) | 0;
             }
@@ -5722,6 +5431,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var $t;
             cond.increment_nest();
             cond.write("[");
+            if (this._item_per_line) {
+                cond.separate_line();
+                cond.increment_indent();
+            }
             var i = this._array.length;
             $t = Bridge.getEnumerator(this._array);
             while ($t.moveNext()) {
@@ -5729,7 +5442,15 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 item.to_ruby(cond);
                 i = (i - 1) | 0;
                 if (i > 0) {
-                    cond.write(", ");
+                    if (this._item_per_line) {
+                        cond.write(",");
+                        cond.separate_line();
+                    } else {
+                        cond.write(", ");
+                    }
+                } else if (this._item_per_line) {
+                    cond.decrement_indent();
+                    cond.separate_line();
                 }
             }
             cond.write("]");
@@ -5763,37 +5484,37 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getrhs: function () {
             return this._rhs;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_set");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
             switch (System.Nullable.getValue(Bridge.cast(this._lhs.getcar(), System.Int32))) {
                 case WebMrbc.node_type.NODE_GVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.gvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.gvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_CVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.cvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.cvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_IVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.ivar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.ivar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_LVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.lvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._lhs, WebMrbc.lvar_node).getname())));
                     break;
                 default: 
                     // TODO: list[0] = ...？
-                    field.appendChild(this._lhs.to_xml());
+                    field.appendChild(this._lhs.to_xml(cond));
                     break;
             }
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "VALUE");
             block.appendChild(value);
 
-            value.appendChild(this._rhs.to_xml());
+            value.appendChild(this._rhs.to_xml(cond));
 
             return block;
         },
@@ -5821,7 +5542,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getn: function () {
             return this._n;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -5863,18 +5584,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         append: function (b) {
             this._progs.push(Bridge.cast(b.getcar(), WebMrbc.node));
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             switch (this._progs.length) {
                 case 0: 
                     return null;
                 case 1: 
-                    return this._progs[0].to_xml();
+                    return this._progs[0].to_xml(cond);
             }
-            var b = this._progs[0].to_xml();
+            var b = this._progs[0].to_xml(cond);
             var p = b;
             for (var i = 1; i < this._progs.length; i = (i + 1) | 0) {
-                var n = document.createElement("next");
-                var q = this._progs[i].to_xml();
+                var n = cond.createElement("next");
+                var q = this._progs[i].to_xml(cond);
                 n.appendChild(q);
                 p.appendChild(n);
                 p = q;
@@ -6072,7 +5793,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -6173,7 +5894,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -6287,13 +6008,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getretval: function () {
             return this._retval;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_flow_statements");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "FLOW");
-            field.appendChild(document.createTextNode("BREAK"));
+            field.appendChild(cond.createTextNode("BREAK"));
             block.appendChild(field);
 
             return block;
@@ -6384,31 +6105,31 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 this._block = b;
             }
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var method = this.getp().WebMrbc$IMrbParser$sym2name(this._method);
             switch (method) {
                 case "==": 
-                    return this.logic_compare("EQ");
+                    return this.logic_compare(cond, "EQ");
                 case "!=": 
-                    return this.logic_compare("NEQ");
+                    return this.logic_compare(cond, "NEQ");
                 case "<": 
-                    return this.logic_compare("LT");
+                    return this.logic_compare(cond, "LT");
                 case "<=": 
-                    return this.logic_compare("LTE");
+                    return this.logic_compare(cond, "LTE");
                 case ">": 
-                    return this.logic_compare("GT");
+                    return this.logic_compare(cond, "GT");
                 case ">=": 
-                    return this.logic_compare("GTE");
+                    return this.logic_compare(cond, "GTE");
             }
 
-            return this.procedures_callreturn(method);
+            return this.procedures_callreturn(cond, method);
         },
-        procedures_callreturn: function (method) {
+        procedures_callreturn: function (cond, method) {
             var $t;
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("name", method);
             block.appendChild(mutation);
 
@@ -6416,34 +6137,34 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = document.createElement("arg");
+                var arg = cond.createElement("arg");
                 // TODO: 引数名を持ってくkる
                 arg.setAttribute("name", i.toString());
-                arg.appendChild(a.to_xml());
+                arg.appendChild(a.to_xml(cond));
                 block.appendChild(arg);
                 i = (i + 1) | 0;
             }
 
             return block;
         },
-        logic_compare: function (op) {
-            var block = document.createElement("block");
+        logic_compare: function (cond, op) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_compare");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "OP");
-            field.appendChild(document.createTextNode(op));
+            field.appendChild(cond.createTextNode(op));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "A");
-            value.appendChild(this._obj.to_xml());
+            value.appendChild(this._obj.to_xml(cond));
             block.appendChild(value);
 
             // argsは１つ
-            value = document.createElement("value");
+            value = cond.createElement("value");
             value.setAttribute("name", "B");
-            value.appendChild(this.getargs()[0].to_xml());
+            value.appendChild(this.getargs()[0].to_xml(cond));
             block.appendChild(value);
 
             return block;
@@ -6668,9 +6389,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getwhen: function () {
             return this._when;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var $t, $t1, $t2;
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "switch_case_number");
 
             var c = 0, d = 0;
@@ -6686,7 +6407,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
             }
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("case", c.toString());
             mutation.setAttribute("default", d.toString());
             block.appendChild(mutation);
@@ -6699,19 +6420,19 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     continue;
                 }
 
-                var field = document.createElement("field");
+                var field = cond.createElement("field");
                 field.setAttribute("name", "CONST" + i);
                 // TODO:whenの値が複数の場合
-                field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(Bridge.cast(w1.value[0], WebMrbc.int_node).getnum(), 0)));
+                field.appendChild(cond.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(Bridge.cast(w1.value[0], WebMrbc.int_node).getnum(), 0)));
                 block.appendChild(field);
                 i = (i + 1) | 0;
             }
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "SWITCH");
             block.appendChild(value);
 
-            value.appendChild(this._arg.to_xml());
+            value.appendChild(this._arg.to_xml(cond));
 
             $t2 = Bridge.getEnumerator(this._when);
             while ($t2.moveNext()) {
@@ -6720,16 +6441,16 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     continue;
                 }
 
-                var statement = document.createElement("statement");
+                var statement = cond.createElement("statement");
                 statement.setAttribute("name", "DO" + i);
-                statement.appendChild(w2.body.to_xml());
+                statement.appendChild(w2.body.to_xml(cond));
                 block.appendChild(statement);
             }
 
             if (default_node != null) {
-                var statement1 = document.createElement("statement");
+                var statement1 = cond.createElement("statement");
                 statement1.setAttribute("name", "DEFAULT");
-                statement1.appendChild(default_node.body.to_xml());
+                statement1.appendChild(default_node.body.to_xml(cond));
                 block.appendChild(statement1);
             }
 
@@ -6791,7 +6512,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         _super: null,
         _arg: 0,
         _body: null,
-        ctor: function (p, c, s, b) {
+        $ctor1: function (p, c, s, b) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CLASS);
             if (Bridge.is(c.getcar(), System.Int32)) {
@@ -6813,6 +6534,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this._arg = (a.length === 0) ? 0 : a[0];
             this._body = b;
         },
+        ctor: function (p, name, s, b) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_CLASS);
+            this._prefix = "";
+            this._name = name;
+            this._super = s;
+            this._body = b;
+        },
         getprefix: function () {
             return this._prefix;
         },
@@ -6825,21 +6554,21 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             // TODO:クラス？
-            var block = document.createElement("class");
+            var block = cond.createElement("class");
             block.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._name));
 
             if (this._super != null) {
-                var field = document.createElement("field");
+                var field = cond.createElement("field");
                 field.setAttribute("name", "SUPER");
-                field.appendChild(this._super.to_xml());
+                field.appendChild(this._super.to_xml(cond));
                 block.appendChild(field);
             }
 
-            var statement = document.createElement("statement");
+            var statement = cond.createElement("statement");
             statement.setAttribute("name", "BODY");
-            statement.appendChild(this._body.to_xml());
+            statement.appendChild(this._body.to_xml(cond));
             block.appendChild(statement);
 
             return block;
@@ -6870,17 +6599,24 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
     });
 
     Bridge.define("WebMrbc.Collection$1", function (T) { return {
+        inherits: [System.Collections.Generic.IEnumerable$1(T)],
         list: null,
         onAdd: null,
         onRemove: null,
         onReset: null,
         onChange: null,
         config: {
+            alias: [
+            "getEnumerator", "System$Collections$Generic$IEnumerable$1$" + Bridge.getTypeAlias(T) + "$getEnumerator"
+            ],
             init: function () {
                 this.list = System.Array.init(0, function (){
         return Bridge.getDefaultValue(T);
     }, T);
             }
+        },
+        ctor: function () {
+            this.$initialize();
         },
         getLastModel: function () {
             var i = this.list.length;
@@ -6892,15 +6628,15 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getLength: function () {
             return this.list.length;
         },
-        add: function (eobject) {
-            this.list.push(eobject);
+        add: function (item) {
+            this.list.push(item);
 
             if (!Bridge.staticEquals(this.onAdd, null)) {
                 this.onAdd(this, Object.empty);
             }
         },
-        remove: function (eobject) {
-            var i = Bridge.Linq.Enumerable.from(this.list).indexOf(eobject);
+        remove: function (item) {
+            var i = Bridge.Linq.Enumerable.from(this.list).indexOf(item);
             if (i >= 0) {
                 this.list.splice(i, 1);
             }
@@ -6929,9 +6665,17 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         uniqueName: function (identifier) {
             var $t;
-            var prefix = identifier;
+            var prefix = "";
+            if ((identifier.charCodeAt(0) >= 97) && (identifier.charCodeAt(0) <= 122)) {
+                prefix = String.fromCharCode(identifier.charCodeAt(0)).toUpperCase();
+            } else {
+                if ((identifier.charCodeAt(0) < 65) || (identifier.charCodeAt(0) > 90)) {
+                    prefix = "C";
+                }
+            }
+
             var max = 0;
-            var n = new RegExp(System.String.concat("^", prefix, "([0-9]+)$"));
+            var n = new RegExp(System.String.concat("^", identifier, "([0-9]+)$"));
             $t = Bridge.getEnumerator(this.list);
             while ($t.moveNext()) {
                 var c = $t.getCurrent();
@@ -6941,7 +6685,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 break;
             }
-            return System.String.concat("", prefix, (((max + 1) | 0)));
+            if (max === 0) {
+                return System.String.concat(prefix, identifier);
+            } else {
+                return System.String.concat(prefix, identifier, max);
+            }
         },
         findWhere: function (p) {
             var $t;
@@ -6954,13 +6702,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
             return Bridge.getDefaultValue(T);
         },
-        each: function (cb) {
-            var $t;
-            $t = Bridge.getEnumerator(this.list);
-            while ($t.moveNext()) {
-                var c = $t.getCurrent();
-                cb(c);
-            }
+        getEnumerator: function () {
+            return Bridge.getEnumerator(this.list);
+        },
+        System$Collections$IEnumerable$getEnumerator: function () {
+            return Bridge.getEnumerator(this.list);
         }
     }; });
 
@@ -6980,9 +6726,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getc: function () {
             return this._c;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             // TODO:？？？
-            var block = document.createElement("class");
+            var block = cond.createElement("class");
             block.setAttribute("const", this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(this._b, WebMrbc.const_node).getname()));
             block.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._c));
 
@@ -7008,7 +6754,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getc: function () {
             return this._c;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -7049,7 +6795,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ColourPickerBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$6("%1", System.Array.init([new $asm.$AnonymousType$7("field_colour", "COLOUR", "#ff0000")], Object), "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_PICKER_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$4("%1", System.Array.init([new $asm.$AnonymousType$5("field_colour", "COLOUR", "#ff0000")], Object), "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_PICKER_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             // Colour block is trivial.  Use tooltip of parent block if it exists.
@@ -7060,7 +6806,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$6", $asm, {
+    Bridge.define("$AnonymousType$4", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, output, colour, helpUrl) {
             this.message0 = message0;
@@ -7085,13 +6831,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$6)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$4)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196191, this.message0, this.args0, this.output, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550196189, this.message0, this.args0, this.output, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -7105,7 +6851,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$7", $asm, {
+    Bridge.define("$AnonymousType$5", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, colour) {
             this.type = type;
@@ -7122,13 +6868,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.colour;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$7)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$5)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.colour, o.colour);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196192, this.type, this.name, this.colour]);
+            var h = Bridge.addHash([7550196190, this.type, this.name, this.colour]);
             return h;
         },
         toJSON: function () {
@@ -7150,11 +6896,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ColourRandomBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.COLOUR_RANDOM_TITLE, "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_RANDOM_TOOLTIP, Blockly.Msg.COLOUR_RANDOM_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6(Blockly.Msg.COLOUR_RANDOM_TITLE, "Colour", WebMrbc.Colour.HUE, Blockly.Msg.COLOUR_RANDOM_TOOLTIP, Blockly.Msg.COLOUR_RANDOM_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$8", $asm, {
+    Bridge.define("$AnonymousType$6", $asm, {
         $kind: "anonymous",
         ctor: function (message0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -7179,13 +6925,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$8)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$6)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196193, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550196191, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -7230,13 +6976,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             return block;
@@ -7320,7 +7066,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsForBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$9(Blockly.Msg.CONTROLS_FOR_TITLE, System.Array.init([new $asm.$AnonymousType$10("field_variable", "VAR", null), new $asm.$AnonymousType$11("input_value", "FROM", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "TO", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "BY", "Number", "RIGHT")], Object), true, null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOR_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$7(Blockly.Msg.CONTROLS_FOR_TITLE, System.Array.init([new $asm.$AnonymousType$8("field_variable", "VAR", null), new $asm.$AnonymousType$9("input_value", "FROM", "Number", "RIGHT"), new $asm.$AnonymousType$9("input_value", "TO", "Number", "RIGHT"), new $asm.$AnonymousType$9("input_value", "BY", "Number", "RIGHT")], Object), true, null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOR_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOR_INPUT_DO);
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
@@ -7345,7 +7091,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$9", $asm, {
+    Bridge.define("$AnonymousType$7", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, previousStatement, nextStatement, colour, helpUrl) {
             this.message0 = message0;
@@ -7378,13 +7124,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$9)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$7)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550196194, this.message0, this.args0, this.inputsInline, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550196192, this.message0, this.args0, this.inputsInline, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -7400,7 +7146,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$10", $asm, {
+    Bridge.define("$AnonymousType$8", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, variable) {
             this.type = type;
@@ -7417,13 +7163,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.variable;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$10)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$8)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208474, this.type, this.name, this.variable]);
+            var h = Bridge.addHash([7550196193, this.type, this.name, this.variable]);
             return h;
         },
         toJSON: function () {
@@ -7435,7 +7181,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$11", $asm, {
+    Bridge.define("$AnonymousType$9", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check, align) {
             this.type = type;
@@ -7456,13 +7202,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.align;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$11)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$9)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check) && Bridge.equals(this.align, o.align);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208730, this.type, this.name, this.check, this.align]);
+            var h = Bridge.addHash([7550196194, this.type, this.name, this.check, this.align]);
             return h;
         },
         toJSON: function () {
@@ -7485,7 +7231,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsForEachBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.CONTROLS_FOREACH_TITLE, System.Array.init([new $asm.$AnonymousType$10("field_variable", "VAR", null), new $asm.$AnonymousType$13("input_value", "LIST", "Array")], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOREACH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$10(Blockly.Msg.CONTROLS_FOREACH_TITLE, System.Array.init([new $asm.$AnonymousType$8("field_variable", "VAR", null), new $asm.$AnonymousType$11("input_value", "LIST", "Array")], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_FOREACH_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_FOREACH_INPUT_DO);
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
@@ -7510,7 +7256,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$12", $asm, {
+    Bridge.define("$AnonymousType$10", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, previousStatement, nextStatement, colour, helpUrl) {
             this.message0 = message0;
@@ -7539,13 +7285,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$12)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$10)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208986, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550208474, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -7560,7 +7306,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$13", $asm, {
+    Bridge.define("$AnonymousType$11", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check) {
             this.type = type;
@@ -7577,13 +7323,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.check;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$13)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$11)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209242, this.type, this.name, this.check]);
+            var h = Bridge.addHash([7550208730, this.type, this.name, this.check]);
             return h;
         },
         toJSON: function () {
@@ -7645,8 +7391,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return container;
         },
         domToMutation: function (xmlElement) {
-            this.elseifCount_ = parseInt(xmlElement.getAttribute("elseif"), 10);
-            this.elseCount_ = parseInt(xmlElement.getAttribute("else"), 10);
+            var count = xmlElement.getAttribute("elseif");
+            this.elseifCount_ = count == null ? 0 : parseInt(count, 10);
+            count = xmlElement.getAttribute("else");
+            this.elseCount_ = count == null ? 0 : parseInt(count, 10);
             this.updateShape_();
         },
         decompose: function (workspace) {
@@ -7678,12 +7426,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 switch (clauseBlock.type) {
                     case WebMrbc.ControlsIfElseIfBlock.type_name: 
                         this.elseifCount_ = (this.elseifCount_ + 1) | 0;
-                        valueConnections.push(Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).valueConnection_);
-                        statementConnections.push(Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).statementConnection_);
+                        valueConnections.push(clauseBlock.valueConnection_);
+                        statementConnections.push(clauseBlock.statementConnection_);
                         break;
                     case WebMrbc.ControlsIfElseBlock.type_name: 
                         this.elseCount_ = (this.elseCount_ + 1) | 0;
-                        elseStatementConnection = Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseBlock).statementConnection_;
+                        elseStatementConnection = clauseBlock.statementConnection_;
                         break;
                     default: 
                         throw new System.Exception("Unknown block type.");
@@ -7707,15 +7455,15 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                         {
                             var inputIf = this.getInput("IF" + i);
                             var inputDo = this.getInput("DO" + i);
-                            Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).valueConnection_ = (inputIf != null) ? inputIf.connection.targetConnection : null;
-                            Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseIfBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
+                            clauseBlock.valueConnection_ = (inputIf != null) ? inputIf.connection.targetConnection : null;
+                            clauseBlock.statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
                             i = (i + 1) | 0;
                         }
                         break;
                     case WebMrbc.ControlsIfElseBlock.type_name: 
                         {
                             var inputDo1 = this.getInput("ELSE");
-                            Bridge.cast(clauseBlock, WebMrbc.ControlsIfElseBlock).statementConnection_ = (inputDo1 != null) ? inputDo1.connection.targetConnection : null;
+                            clauseBlock.statementConnection_ = (inputDo1 != null) ? inputDo1.connection.targetConnection : null;
                         }
                         break;
                     default: 
@@ -7814,12 +7562,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsRepeatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$15("field_number", "TIMES", 10, 0, 1)], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.CONTROLS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$13("field_number", "TIMES", 10, 0, 1)], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
         }
     });
 
-    Bridge.define("$AnonymousType$14", $asm, {
+    Bridge.define("$AnonymousType$12", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -7852,13 +7600,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$14)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$12)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209498, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550208986, this.message0, this.args0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -7874,7 +7622,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$15", $asm, {
+    Bridge.define("$AnonymousType$13", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, value, min, precision) {
             this.type = type;
@@ -7899,13 +7647,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.precision;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$15)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$13)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.value, o.value) && Bridge.equals(this.min, o.min) && Bridge.equals(this.precision, o.precision);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209754, this.type, this.name, this.value, this.min, this.precision]);
+            var h = Bridge.addHash([7550209242, this.type, this.name, this.value, this.min, this.precision]);
             return h;
         },
         toJSON: function () {
@@ -7929,7 +7677,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ControlsRepeatExtBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.CONTROLS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$13("input_value", "TIMES", "Number")], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.CONTROLS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$11("input_value", "TIMES", "Number")], Object), null, null, WebMrbc.Loops.HUE, Blockly.Msg.CONTROLS_REPEAT_TOOLTIP, Blockly.Msg.CONTROLS_REPEAT_HELPURL));
             this.appendStatementInput("DO").appendField(Blockly.Msg.CONTROLS_REPEAT_INPUT_DO);
         }
     });
@@ -7975,11 +7723,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.CreateEsvGetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "TYPE", System.Array.init([System.Array.init(["読み出し要求", "esv_get"], String), System.Array.init(["通知要求", "esv_inf_req"], String)], System.Array.type(String))), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT")], Object), "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 電文の作成 %2 プロパティコード %3", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "TYPE", System.Array.init([System.Array.init(["読み出し要求", "esv_get"], String), System.Array.init(["通知要求", "esv_inf_req"], String)], System.Array.type(String))), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$9("input_value", "EPC", "Number", "RIGHT")], Object), "EData", 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$16", $asm, {
+    Bridge.define("$AnonymousType$14", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -8008,13 +7756,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$16)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$14)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550210010, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550209498, this.message0, this.args0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -8029,7 +7777,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$17", $asm, {
+    Bridge.define("$AnonymousType$15", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, options) {
             this.type = type;
@@ -8046,13 +7794,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.options;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$17)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$15)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.options, o.options);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550210266, this.type, this.name, this.options]);
+            var h = Bridge.addHash([7550209754, this.type, this.name, this.options]);
             return h;
         },
         toJSON: function () {
@@ -8064,7 +7812,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$18", $asm, {
+    Bridge.define("$AnonymousType$16", $asm, {
         $kind: "anonymous",
         ctor: function (type) {
             this.type = type;
@@ -8073,13 +7821,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.type;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$18)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$16)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550210522, this.type]);
+            var h = Bridge.addHash([7550210010, this.type]);
             return h;
         },
         toJSON: function () {
@@ -8099,7 +7847,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.CreateEsvSetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "TYPE", System.Array.init([System.Array.init(["書き込み要求（応答不要）", "esv_set_i"], String), System.Array.init(["書き込み要求（応答要）", "esv_set_c"], String), System.Array.init(["書き込み・読み出し要求", "esv_set_get"], String), System.Array.init(["通知（応答要）", "esv_infc"], String)], System.Array.type(String))), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number", "RIGHT"), new $asm.$AnonymousType$11("input_value", "EDT", "String", "RIGHT")], Object), "EData", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 電文の作成 %2 プロパティコード %3 プロパティ値 %4", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "TYPE", System.Array.init([System.Array.init(["書き込み要求（応答不要）", "esv_set_i"], String), System.Array.init(["書き込み要求（応答要）", "esv_set_c"], String), System.Array.init(["書き込み・読み出し要求", "esv_set_get"], String), System.Array.init(["通知（応答要）", "esv_infc"], String)], System.Array.type(String))), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$9("input_value", "EPC", "Number", "RIGHT"), new $asm.$AnonymousType$9("input_value", "EDT", "String", "RIGHT")], Object), "EData", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -8114,13 +7862,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             return block;
@@ -8214,7 +7962,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return container;
         },
         domToMutation: function (xmlElement) {
-            this.itemCount_ = parseInt(xmlElement.getAttribute("items"), 10);
+            var count = xmlElement.getAttribute("items");
+            this.itemCount_ = count == null ? 0 : parseInt(count, 10);
             this.updateShape_();
         },
         decompose: function (workspace) {
@@ -8230,11 +7979,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return containerBlock;
         },
         compose: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.DataCreateJoinItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             var connections = System.Array.init(0, null, Blockly.Connection);
             while (itemBlock != null) {
                 connections.push(itemBlock.valueConnection_);
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.DataCreateJoinItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
                 var connection = this.getInput("ADD" + i).connection.targetConnection;
@@ -8249,13 +7998,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
         },
         saveConnections: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.DataCreateJoinItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             var i = 0;
             while (itemBlock != null) {
                 var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.DataCreateJoinItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
         },
         updateShape_: function () {
@@ -8369,18 +8118,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
-            block.setAttribute("type", WebMrbc.ProceduresDefreturnBlock.type_name);
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
+            block.setAttribute("type", "procedures_defreturn");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "NAME");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             var bxml;
-            if (this._body != null && ((bxml = this._body.to_xml())) != null) {
-                var statement = document.createElement("statement");
+            if (this._body != null && ((bxml = this._body.to_xml(cond))) != null) {
+                var statement = cond.createElement("statement");
                 statement.setAttribute("name", "STACK");
                 statement.appendChild(bxml);
                 block.appendChild(statement);
@@ -8549,7 +8298,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getb: function () {
             return this._b;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8578,7 +8327,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getb: function () {
             return this._b;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8617,7 +8366,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         gettail: function () {
             return this._tail;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8658,7 +8407,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8704,7 +8453,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a.geta();
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8732,7 +8481,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8859,6 +8608,34 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         $kind: "interface"
     });
 
+    Bridge.define("WebMrbc.ENodeInitializeBlock", {
+        inherits: [WebMrbc.Block],
+        statics: {
+            type_name: "enode_initialize"
+        },
+        workspace_: null,
+        ctor: function () {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, WebMrbc.ENodeInitializeBlock.type_name);
+        },
+        init: function () {
+            this.appendDummyInput().appendField("初期化処理");
+            this.appendStatementInput("DO").setCheck(null);
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("");
+        },
+        onCreate: function (workspace, cre) {
+            this.workspace_ = workspace;
+        },
+        onChange: function (workspace, chg) {
+        },
+        onDelete: function (workspace, del) {
+        },
+        onMove: function (workspace, mov) {
+        }
+    });
+
     Bridge.define("WebMrbc.ensure_node", {
         inherits: [WebMrbc.node],
         _body: null,
@@ -8879,7 +8656,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getensure: function () {
             return this._ensure;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -8902,393 +8679,25 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("WebMrbc.EPropertyFixLenBlock", {
+    Bridge.define("WebMrbc.EObjectInitializeBlock", {
         inherits: [WebMrbc.Block],
         statics: {
-            type_name: "eproperty_fixlen"
+            type_name: "eobject_initialize"
         },
-        propertyInfo: null,
         workspace_: null,
-        identifier_: null,
-        description_: null,
-        property_code_: 0,
-        property_size_: 0,
-        cases_: null,
-        defaultCount_: 0,
-        userGetter_: false,
-        statementConnection_: null,
-        retvalConnection_: null,
         ctor: function () {
             this.$initialize();
-            WebMrbc.Block.ctor.call(this, WebMrbc.EPropertyFixLenBlock.type_name);
+            WebMrbc.Block.ctor.call(this, WebMrbc.EObjectInitializeBlock.type_name);
         },
         init: function () {
-            this.setHelpUrl("http://www.example.com/");
+            this.appendDummyInput().appendField("初期化処理");
+            this.appendStatementInput("DO").setCheck(null);
             this.setColour(230);
-            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
-            this.setMutator(new Blockly.Mutator(System.Array.init([WebMrbc.EPropertyFixLenConstBlock.type_name, WebMrbc.EPropertyFixLenRangeBlock.type_name, WebMrbc.EPropertyFixLenDefaultBlock.type_name], String)));
-            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.EPropertyFixLenBlock.f1));
-            this.cases_ = System.Array.init(0, null, Object);
-            this.defaultCount_ = 0;
-            this.userGetter_ = true;
-            this.updateSetter_();
-            this.updateGetter_(this.userGetter_);
-        },
-        /**
-         * Create XML to represent the number of else-if and else inputs.
-         *
-         * @instance
-         * @public
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @param   {boolean}    opt_caseIds
-         * @return  {Element}                   XML storage element.
-         */
-        mutationToDom: function (opt_caseIds) {
-            if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
-                return null;
-            }
-            var container = document.createElement("mutation");
-            for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
-                var caseInfo = document.createElement("case");
-                caseInfo.appendChild(document.createTextNode(this.cases_[i].item1));
-                if (this.cases_[i].item3 == null) {
-                    caseInfo.setAttribute("value", this.cases_[i].item2);
-                } else {
-                    caseInfo.setAttribute("minimum", this.cases_[i].item2);
-                    caseInfo.setAttribute("maximum", this.cases_[i].item3);
-                }
-                container.appendChild(caseInfo);
-            }
-            if (this.defaultCount_ !== 0) {
-                container.setAttribute("default", "1");
-            }
-            if (this.userGetter_) {
-                container.setAttribute("user_getter", "1");
-            }
-            container.setAttribute("property_code", System.Int32.format(this.property_code_, "X2"));
-            container.setAttribute("identifier", this.identifier_);
-            container.setAttribute("description", this.description_);
-            container.setAttribute("property_size", this.property_size_.toString());
-            return container;
-        },
-        /**
-         * Parse XML to restore the else-if and else inputs.
-         *
-         * @instance
-         * @public
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @param   {Element}    xmlElement    XML storage element.
-         * @return  {void}
-         */
-        domToMutation: function (xmlElement) {
-            this.cases_ = System.Array.init(0, null, Object);
-            var childNode;
-            for (var i = 0; ((childNode = xmlElement.childNodes[i])) != null; i = (i + 1) | 0) {
-                if (Bridge.referenceEquals(childNode.nodeName.toLowerCase(), "case")) {
-                    var description = (childNode.childNodes.length !== 0) ? childNode.childNodes[0].nodeValue : "";
-                    var value = childNode.getAttribute("value");
-                    if (value != null) {
-                        this.cases_.push({ item1: description, item2: value, item3: null });
-                    } else {
-                        var min = childNode.getAttribute("minimum");
-                        var max = childNode.getAttribute("maximum");
-                        if ((min != null) && (max != null)) {
-                            this.cases_.push({ item1: description, item2: min, item3: max });
-                        }
-                    }
-                }
-            }
-            this.defaultCount_ = parseInt(xmlElement.getAttribute("default"), 10) || 0;
-            this.userGetter_ = parseInt(xmlElement.getAttribute("user_getter"), 10) || 0 !== 0;
-            this.property_code_ = parseInt(xmlElement.getAttribute("property_code"), 16) || 0;
-            if (this.workspace_ != null) {
-                this.initPropertyInfo(this.workspace_);
-            }
-            this.identifier_ = xmlElement.getAttribute("identifier");
-            this.description_ = xmlElement.getAttribute("description");
-            this.property_size_ = parseInt(xmlElement.getAttribute("property_size"), 10) || 0;
-            this.updateSetter_();
-            this.updateGetter_(this.userGetter_);
-        },
-        /**
-         * Populate the mutator's dialog with this block's components.
-         *
-         * @instance
-         * @public
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @param   {Blockly.Workspace}    workspace    Mutator's workspace.
-         * @return  {WebMrbc.Block}                     Root block in mutator.
-         */
-        decompose: function (workspace) {
-            var containerBlock = workspace.newBlock(WebMrbc.EPropertyFixLenContainerBlock.type_name);
-            containerBlock.initSvg();
-            var connection = containerBlock.getInput("STACK").connection;
-            for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
-                var caseBlock;
-                var description = this.getFieldValue("CASE_DESCRIPTION" + i);
-                var value = this.getFieldValue("CASE_VALUE" + i);
-                if (value != null) {
-                    caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenConstBlock.type_name);
-                    caseBlock.setFieldValue(description, "DESCRIPTION");
-                    caseBlock.setFieldValue(value, "CONST");
-                } else {
-                    var min = this.getFieldValue("CASE_MIN" + i);
-                    var max = this.getFieldValue("CASE_MAX" + i);
-                    if ((min != null) && (max != null)) {
-                        caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenRangeBlock.type_name);
-                        caseBlock.setFieldValue(description, "DESCRIPTION");
-                        caseBlock.setFieldValue(min, "RANGE_MIN");
-                        caseBlock.setFieldValue(max, "RANGE_MAX");
-                    } else {
-                        continue;
-                    }
-                }
-                caseBlock.initSvg();
-                connection.connect(caseBlock.previousConnection);
-                connection = caseBlock.nextConnection;
-            }
-            if (this.defaultCount_ !== 0) {
-                var defaultBlock = workspace.newBlock(WebMrbc.EPropertyFixLenDefaultBlock.type_name);
-                defaultBlock.initSvg();
-                connection.connect(defaultBlock.previousConnection);
-            }
-            containerBlock.setFieldValue(this.userGetter_ ? "TRUE" : "FALSE", "USER_GETTER");
-            return containerBlock;
-        },
-        /**
-         * Reconfigure this block based on the mutator dialog's components.
-         *
-         * @instance
-         * @public
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @param   {WebMrbc.Block}    containerBlock    Root block in mutator.
-         * @return  {void}
-         */
-        compose: function (containerBlock) {
-            var clauseBlock = containerBlock.getInputTargetBlock("STACK");
-            // Count number of inputs.
-            this.cases_ = System.Array.init(0, null, Object);
-            this.defaultCount_ = 0;
-            var statementConnections = System.Array.init(0, null, Blockly.Connection);
-            var defaultStatementConnection = null;
-            while (clauseBlock != null) {
-                switch (clauseBlock.type) {
-                    case WebMrbc.EPropertyFixLenConstBlock.type_name: 
-                        {
-                            var description = clauseBlock.getFieldValue("DESCRIPTION");
-                            var value = clauseBlock.getFieldValue("CONST");
-                            this.cases_.push({ item1: description, item2: value, item3: null });
-                            statementConnections.push(Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenConstBlock).statementConnection_);
-                        }
-                        break;
-                    case WebMrbc.EPropertyFixLenRangeBlock.type_name: 
-                        {
-                            var description1 = clauseBlock.getFieldValue("DESCRIPTION");
-                            var range_min = clauseBlock.getFieldValue("RANGE_MIN");
-                            var range_max = clauseBlock.getFieldValue("RANGE_MAX");
-                            this.cases_.push({ item1: description1, item2: range_min, item3: range_max });
-                            statementConnections.push(Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenRangeBlock).statementConnection_);
-                        }
-                        break;
-                    case WebMrbc.EPropertyFixLenDefaultBlock.type_name: 
-                        {
-                            this.defaultCount_ = (this.defaultCount_ + 1) | 0;
-                            defaultStatementConnection = Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenDefaultBlock).statementConnection_;
-                        }
-                        break;
-                    default: 
-                        throw new System.Exception("Unknown block type.");
-                }
-                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
-            }
-            this.updateSetter_();
-            // Reconnect any child blocks.
-            for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
-                Blockly.Mutator.reconnect(statementConnections[i], this, "SET" + i);
-            }
-            Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_SET");
-            var userGetter_ = containerBlock.getFieldValue("USER_GETTER");
-            if (userGetter_ != null) {
-                var userGetter = Bridge.referenceEquals(userGetter_, "TRUE");
-                if (this.userGetter_ !== userGetter) {
-                    if (userGetter) {
-                        this.updateGetter_(true);
-                        // Restore the stack, if one was saved.
-                        Blockly.Mutator.reconnect(this.statementConnection_, this, "GET");
-                        this.statementConnection_ = null;
-                        Blockly.Mutator.reconnect(this.retvalConnection_, this, "GET_RET");
-                        this.retvalConnection_ = null;
-                    } else {
-                        // Save the stack, then disconnect it.
-                        var getterConnection = this.getInput("GET").connection;
-                        this.statementConnection_ = getterConnection.targetConnection;
-                        var getretConnection = this.getInput("GET_RET").connection;
-                        this.retvalConnection_ = getretConnection.targetConnection;
-                        if (this.statementConnection_ != null) {
-                            var doBlock = getterConnection.targetBlock();
-                            doBlock.unplug();
-                            doBlock.bumpNeighbours_();
-                        }
-                        if (this.retvalConnection_ != null) {
-                            var doBlock1 = getretConnection.targetBlock();
-                            doBlock1.unplug();
-                            doBlock1.bumpNeighbours_();
-                        }
-                        this.updateGetter_(false);
-                    }
-                }
-            }
-        },
-        /**
-         * Store pointers to any connected child blocks.
-         *
-         * @instance
-         * @public
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @param   {WebMrbc.Block}    containerBlock    Root block in mutator.
-         * @return  {void}
-         */
-        saveConnections: function (containerBlock) {
-            var clauseBlock = containerBlock.getInputTargetBlock("STACK");
-            var i = 0;
-            while (clauseBlock != null) {
-                switch (clauseBlock.type) {
-                    case WebMrbc.EPropertyFixLenConstBlock.type_name: 
-                        {
-                            var inputSet = this.getInput("SET" + i);
-                            Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenConstBlock).statementConnection_ = (inputSet != null) ? inputSet.connection.targetConnection : null;
-                            i = (i + 1) | 0;
-                        }
-                        break;
-                    case WebMrbc.EPropertyFixLenRangeBlock.type_name: 
-                        {
-                            var inputSet1 = this.getInput("SET" + i);
-                            Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenRangeBlock).statementConnection_ = (inputSet1 != null) ? inputSet1.connection.targetConnection : null;
-                            i = (i + 1) | 0;
-                        }
-                        break;
-                    case WebMrbc.EPropertyFixLenDefaultBlock.type_name: 
-                        {
-                            var inputDo = this.getInput("DEFAULT_SET");
-                            Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenDefaultBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
-                        }
-                        break;
-                    default: 
-                        throw new System.Exception("Unknown block type.");
-                }
-
-                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
-            }
-            var inputGet = this.getInput("GET");
-            this.statementConnection_ = (inputGet != null) ? inputGet.connection.targetConnection : null;
-            var inputGetRet = this.getInput("GET_RET");
-            this.retvalConnection_ = (inputGetRet != null) ? inputGetRet.connection.targetConnection : null;
-        },
-        /**
-         * Modify this block to have the correct number of inputs.
-         *
-         * @instance
-         * @private
-         * @this WebMrbc.EPropertyFixLenBlock
-         * @memberof WebMrbc.EPropertyFixLenBlock
-         * @return  {void}
-         */
-        updateSetter_: function () {
-            var $t;
-            // Delete everything.
-            if (this.getInput("DEFAULT") != null) {
-                this.removeInput("DEFAULT");
-                this.removeInput("DEFAULT_SET");
-            }
-            var i = 0;
-            while (this.getInput("CASE" + i) != null) {
-                this.removeInput("CASE" + i);
-                this.removeInput("SET" + i);
-                i = (i + 1) | 0;
-            }
-            // Rebuild block.
-            var getLabel = this.getInput("GET_LABEL");
-            i = 0;
-            $t = Bridge.getEnumerator(this.cases_);
-            while ($t.moveNext()) {
-                var c = $t.getCurrent();
-                if (c.item3 == null) {
-                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_VALUE" + i).appendField("の");
-                } else {
-                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_MIN" + i).appendField("から").appendField(c.item3, "CASE_MAX" + i).appendField("の");
-                }
-                if (getLabel != null) {
-                    this.moveInputBefore("CASE" + i, "GET_LABEL");
-                }
-                this.appendStatementInput("SET" + i).appendField("とき");
-                if (getLabel != null) {
-                    this.moveInputBefore("SET" + i, "GET_LABEL");
-                }
-                i = (i + 1) | 0;
-            }
-            if (this.defaultCount_ !== 0) {
-                if (this.cases_.length === 0) {
-                    this.appendDummyInput("DEFAULT").appendField("値が設定される");
-                } else {
-                    this.appendDummyInput("DEFAULT").appendField("設定値が不明の");
-                }
-                if (getLabel != null) {
-                    this.moveInputBefore("DEFAULT", "GET_LABEL");
-                }
-                this.appendStatementInput("DEFAULT_SET").appendField("とき");
-                if (getLabel != null) {
-                    this.moveInputBefore("DEFAULT_SET", "GET_LABEL");
-                }
-            }
-        },
-        updateGetter_: function (userGetter) {
-            this.userGetter_ = userGetter;
-
-            if (this.getInput("GET") != null) {
-                this.removeInput("GET_LABEL");
-                this.removeInput("GET");
-                this.removeInput("GET_RET");
-            }
-            // Rebuild block.
-            if (this.userGetter_) {
-                this.appendDummyInput("GET_LABEL").appendField("値が取得される");
-                this.appendStatementInput("GET").appendField("とき");
-                this.appendValueInput("GET_RET").setCheck("String").setAlign(Blockly.ALIGN_RIGHT).appendField("返す値は");
-            }
-        },
-        initPropertyInfo: function (workspace) {
-            var $t;
-            var c = workspace.eobject;
-            $t = Bridge.getEnumerator(c.properties);
-            while ($t.moveNext()) {
-                var pi = $t.getCurrent();
-                if (pi.propertyCode !== this.property_code_) {
-                    continue;
-                }
-
-                this.propertyInfo = pi;
-                this.identifier_ = WebMrbc.CodeGenerator.getPropertyIdentifier(pi);
-                this.description_ = pi.description;
-                this.property_size_ = pi.size;
-                break;
-            }
+            this.setTooltip("");
+            this.setHelpUrl("");
         },
         onCreate: function (workspace, cre) {
             this.workspace_ = workspace;
-
-            if (this.propertyInfo == null) {
-                this.initPropertyInfo(workspace);
-            }
-
-            this.setFieldValue(System.Int32.format(this.property_code_, "X2"), "PROPERTY_CODE");
-            this.setFieldValue(this.identifier_, "IDENTIFIER");
-            this.setFieldValue(this.description_, "DESCRIPTION");
-            this.setFieldValue(this.property_size_.toString(), "PROPERTY_SIZE");
         },
         onChange: function (workspace, chg) {
         },
@@ -9298,20 +8707,71 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.ns("WebMrbc.EPropertyFixLenBlock", $asm.$);
-
-    Bridge.apply($asm.$.WebMrbc.EPropertyFixLenBlock, {
-        f1: function () {
-            if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
-                return "条件に合うブロックを実行";
-            } else if ((this.cases_.length === 0) && (this.defaultCount_ !== 0)) {
-                return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
-            } else if ((this.cases_.length !== 0) && (this.defaultCount_ === 0)) {
-                return "条件に合うブロックを実行";
-            } else if ((this.cases_.length !== 0) && (this.defaultCount_ !== 0)) {
-                return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
+    Bridge.define("WebMrbc.EPropertyBlock", {
+        inherits: [WebMrbc.Block],
+        config: {
+            properties: {
+                PropertyInfo: null,
+                Workspace: null,
+                Identifier: null,
+                Description: null,
+                PropertyCode: 0,
+                PropertySize: 0
             }
-            return "";
+        },
+        ctor: function (type) {
+            this.$initialize();
+            WebMrbc.Block.ctor.call(this, type);
+        },
+        initPropertyInfo: function (workspace, initial) {
+            var $t;
+            if (initial === void 0) { initial = false; }
+            var c = workspace.eobject;
+            this.setPropertyInfo(null);
+            $t = Bridge.getEnumerator(c.properties);
+            while ($t.moveNext()) {
+                var pi = $t.getCurrent();
+                if (pi.propertyCode !== this.getPropertyCode()) {
+                    continue;
+                }
+
+                if (!initial && !System.Array.contains(WebMrbc.App.baseObjectPropertyList, pi, WebMrbc.JsonPropertyInfo)) {
+                    continue;
+                }
+
+                this.setPropertyInfo(pi);
+                this.setIdentifier(WebMrbc.CodeGenerator.getPropertyIdentifier(pi));
+                this.setDescription(pi.description);
+                this.setPropertySize((((pi.arrayCount === 0) ? 1 : pi.arrayCount) * pi.size) | 0);
+                break;
+            }
+
+            if (this.getPropertyInfo() == null) {
+                this.dispose(true);
+                return false;
+            }
+
+            return true;
+        },
+        onCreate: function (workspace, cre) {
+            this.setWorkspace(workspace);
+
+            if (this.getPropertyInfo() == null) {
+                if (!this.initPropertyInfo(workspace, true)) {
+                    return;
+                }
+            }
+
+            this.setFieldValue(System.Int32.format(this.getPropertyCode(), "X2"), "PROPERTY_CODE");
+            this.setFieldValue(this.getIdentifier(), "IDENTIFIER");
+            this.setFieldValue(this.getDescription(), "DESCRIPTION");
+            this.setFieldValue(this.getPropertySize().toString(), "PROPERTY_SIZE");
+        },
+        onChange: function (workspace, chg) {
+        },
+        onDelete: function (workspace, del) {
+        },
+        onMove: function (workspace, mov) {
         }
     });
 
@@ -9394,75 +8854,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("WebMrbc.EPropertyVarLenBlock", {
-        inherits: [WebMrbc.Block],
-        statics: {
-            type_name: "eproperty_varlen"
-        },
-        propertyInfo: null,
-        ctor: function () {
-            this.$initialize();
-            WebMrbc.Block.ctor.call(this, WebMrbc.EPropertyVarLenBlock.type_name);
-        },
-        init: function () {
-            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
-            this.appendStatementInput("SET").setCheck("EPropertySetHandler").appendField("設定");
-            this.appendValueInput("SET_RET").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField("設定に使用したバイト数");
-            this.appendStatementInput("GET").setCheck("EPropertyGetHandler").appendField("取得");
-            this.appendValueInput("GET_RET").setCheck("String").setAlign(Blockly.ALIGN_RIGHT).appendField("返すデータ");
-            this.setColour(230);
-            this.setTooltip("");
-            this.setHelpUrl("http://www.example.com/");
-
-            this.getField("PROPERTY_CODE").EDITABLE = true;
-        },
-        initPropertyInfo: function (workspace, property_code) {
-            var $t;
-            var c = workspace.eobject;
-            $t = Bridge.getEnumerator(c.properties);
-            while ($t.moveNext()) {
-                var item = $t.getCurrent();
-                if (item.propertyCode !== property_code) {
-                    continue;
-                }
-
-                this.setPropertyInfo(item);
-                break;
-            }
-        },
-        setPropertyInfo: function (pi) {
-            this.propertyInfo = pi;
-
-            this.setFieldValue(WebMrbc.CodeGenerator.getPropertyIdentifier(pi), "IDENTIFIER");
-            this.setFieldValue(pi.description, "DESCRIPTION");
-            this.setFieldValue(System.Byte.format(pi.propertyCode, "X2"), "PROPERTY_CODE");
-            this.setFieldValue(pi.size.toString(), "PROPERTY_SIZE");
-        },
-        onCreate: function (workspace, cre) {
-            if (this.propertyInfo == null) {
-                this.initPropertyInfo(workspace, parseInt(this.getFieldValue("PROPERTY_CODE").toString(), 16));
-            }
-        },
-        onChange: function (workspace, chg) {
-            if (!Bridge.referenceEquals(chg.element, "field")) {
-                return;
-            }
-
-            switch (chg.name) {
-                case "IDENTIFIER": 
-                    this.setFieldValue(chg.newValue.toString(), "IDENTIFIER");
-                    break;
-                case "PROPERTY_CODE": 
-                    this.initPropertyInfo(workspace, parseInt(chg.newValue.toString(), 16));
-                    break;
-            }
-        },
-        onDelete: function (workspace, del) {
-        },
-        onMove: function (workspace, mov) {
-        }
-    });
-
     Bridge.define("WebMrbc.EsvAddEdtBlock", {
         inherits: [WebMrbc.Block],
         statics: {
@@ -9473,42 +8864,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvAddEdtBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 %3 として %4 %5 を追加", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EPC", "Number"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EDT", "String")], Object), null, null, 230, "", "http://www.example.com/"));
-        }
-    });
-
-    Bridge.define("$AnonymousType$19", $asm, {
-        $kind: "anonymous",
-        ctor: function (type, name, variable) {
-            this.type = type;
-            this.name = name;
-            this.variable = variable;
-        },
-        gettype : function () {
-            return this.type;
-        },
-        getname : function () {
-            return this.name;
-        },
-        getvariable : function () {
-            return this.variable;
-        },
-        equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$19)) {
-                return false;
-            }
-            return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.variable, o.variable);
-        },
-        getHashCode: function () {
-            var h = Bridge.addHash([7550210778, this.type, this.name, this.variable]);
-            return h;
-        },
-        toJSON: function () {
-            return {
-                type : this.type,
-                name : this.name,
-                variable : this.variable
-            };
+            this.jsonInit(new $asm.$AnonymousType$12("%1 に %2 %3 として %4 %5 を追加", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "EDT", "String")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -9522,7 +8878,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvAddEpcBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 %3 を追加", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EPC", "Number")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 に %2 %3 を追加", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "EPC", "Number")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -9536,7 +8892,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvGetEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 のサービスコード", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item")], Object), "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 のサービスコード", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item")], Object), "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -9550,11 +8906,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvIterateBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 にある要素で繰り返し %2 %3", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$20("input_statement", "DO")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 にある要素で繰り返し %2 %3", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$17("input_statement", "DO")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$20", $asm, {
+    Bridge.define("$AnonymousType$17", $asm, {
         $kind: "anonymous",
         ctor: function (type, name) {
             this.type = type;
@@ -9567,13 +8923,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.name;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$20)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$17)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208475, this.type, this.name]);
+            var h = Bridge.addHash([7550210266, this.type, this.name]);
             return h;
         },
         toJSON: function () {
@@ -9594,7 +8950,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.EsvIteratorBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "ITEM", System.Array.init([System.Array.init(["プロパティコード", "epc"], String), System.Array.init(["プロパティ値", "edt"], String), System.Array.init(["要素の番号", "state"], String)], System.Array.type(String)))], Object), "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "ITEM", System.Array.init([System.Array.init(["プロパティコード", "epc"], String), System.Array.init(["プロパティ値", "edt"], String), System.Array.init(["要素の番号", "state"], String)], System.Array.type(String)))], Object), "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -9609,13 +8965,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_FALSE);
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_boolean");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "BOOL");
-            field.appendChild(document.createTextNode("FALSE"));
+            field.appendChild(cond.createTextNode("FALSE"));
             block.appendChild(field);
 
             return block;
@@ -9698,12 +9054,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 this._block = b;
             }
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var $t;
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("name", this.getp().WebMrbc$IMrbParser$sym2name(this._method));
             block.appendChild(mutation);
 
@@ -9711,10 +9067,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = document.createElement("arg");
+                var arg = cond.createElement("arg");
                 // TODO: 引数名を持ってくkる
                 arg.setAttribute("name", i.toString());
-                arg.appendChild(a.to_xml());
+                arg.appendChild(a.to_xml(cond));
                 block.appendChild(arg);
                 i = (i + 1) | 0;
             }
@@ -9815,13 +9171,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getlen: function () {
             return this._len;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "text");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "TEXT");
-            field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0)));
+            field.appendChild(cond.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._str, 0)));
             block.appendChild(field);
 
             return block;
@@ -9921,13 +9277,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getnum: function () {
             return this._s;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "math_number");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "NUM");
-            field.appendChild(document.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
+            field.appendChild(cond.createTextNode(WebMrbc.MrbParser.uTF8ArrayToString(this._s, 0)));
             block.appendChild(field);
 
             return block;
@@ -10070,26 +9426,26 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getdo: function () {
             return this._do;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_forEach");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
             // TODO:var？
             var pre = this.getvar().pre[0];
             switch (System.Nullable.getValue(Bridge.cast(pre.getcar(), System.Int32))) {
                 case WebMrbc.node_type.NODE_GVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.gvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.gvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_CVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.cvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.cvar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_IVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.ivar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.ivar_node).getname())));
                     break;
                 case WebMrbc.node_type.NODE_LVAR: 
-                    field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.lvar_node).getname())));
+                    field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(Bridge.cast(pre, WebMrbc.lvar_node).getname())));
                     break;
                 default: 
                     // TODO: ？
@@ -10097,14 +9453,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "LIST");
-            value.appendChild(this._in.to_xml());
+            value.appendChild(this._in.to_xml(cond));
             block.appendChild(value);
 
-            var statement = document.createElement("statement");
+            var statement = cond.createElement("statement");
             statement.setAttribute("name", "DO");
-            statement.appendChild(this._do.to_xml());
+            statement.appendChild(this._do.to_xml(cond));
             block.appendChild(statement);
 
             return block;
@@ -10138,13 +9494,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             return block;
@@ -10182,7 +9538,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getkvs: function () {
             return this._kvs;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -10233,13 +9589,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getinfo: function () {
             return this._info;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "text");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "TEXT");
-            field.appendChild(document.createTextNode(this.getinfo().getString()));
+            field.appendChild(cond.createTextNode(this.getinfo().getString()));
             block.appendChild(field);
 
             return block;
@@ -10507,7 +9863,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getelse: function () {
             return this._else;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var $t;
             var _elsif = System.Array.init(0, null, Object);
             var _else = this._else;
@@ -10516,10 +9872,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 _elsif.push({ item1: c._cond, item2: c._then });
             }
 
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_if");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("elseif", _elsif.length.toString());
             mutation.setAttribute("else", _else != null ? "1" : "0");
             block.appendChild(mutation);
@@ -10528,22 +9884,22 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             $t = Bridge.getEnumerator(_elsif);
             while ($t.moveNext()) {
                 var e = $t.getCurrent();
-                var value = document.createElement("value");
+                var value = cond.createElement("value");
                 value.setAttribute("name", System.String.format("IF{0}", i));
-                value.appendChild(e.item1.to_xml());
+                value.appendChild(e.item1.to_xml(cond));
                 block.appendChild(value);
 
-                var statement = document.createElement("statement");
+                var statement = cond.createElement("statement");
                 statement.setAttribute("name", System.String.format("DO{0}", i));
-                statement.appendChild(e.item2.to_xml());
+                statement.appendChild(e.item2.to_xml(cond));
                 block.appendChild(statement);
                 i = (i + 1) | 0;
             }
 
             if (_else != null) {
-                var statement1 = document.createElement("statement");
+                var statement1 = cond.createElement("statement");
                 statement1.setAttribute("name", "ELSE");
-                statement1.appendChild(_else.to_xml());
+                statement1.appendChild(_else.to_xml(cond));
                 block.appendChild(statement1);
             }
 
@@ -10661,11 +10017,33 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this._s = WebMrbc.MrbParser.strdup(s, 0);
             this._base = base;
         },
-        $ctor1: function (p, i) {
+        $ctor1: function (p, i, base) {
+            if (base === void 0) { base = 10; }
+
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_INT);
-            this._s = WebMrbc.MrbParser.uTF8StringToArray(i.toString());
-            this._base = 10;
+            var str = "";
+            switch (base) {
+                case 2: 
+                    for (var b = 2147483648; b !== 0; b = b >>> 1) {
+                        str = System.String.concat(str, ((System.Int64(b).and(System.Int64(i))).ne(System.Int64(0)) ? "1" : "0"));
+                    }
+                    break;
+                case 8: 
+                    for (var s = 30; s > 0; s = (s - 3) | 0) {
+                        str = System.String.concat(((i << s) & 14).toString(), str);
+                    }
+                    break;
+                case 16: 
+                    str = System.Int32.format(i, "X");
+                    break;
+                default: 
+                    base = 10;
+                    str = i.toString();
+                    break;
+            }
+            this._s = WebMrbc.MrbParser.uTF8StringToArray(str);
+            this._base = base;
         },
         getnum: function () {
             return this._s;
@@ -10673,13 +10051,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbase: function () {
             return this._base;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "math_number");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "NUM");
-            field.appendChild(document.createTextNode(this.getString()));
+            field.appendChild(cond.createTextNode(this.getString()));
             block.appendChild(field);
 
             return block;
@@ -10854,13 +10232,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             return block;
@@ -10896,22 +10274,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         $ctor1: function (p) {
             this.$initialize();
-            WebMrbc.JsonFieldInfo.ctor.call(this);
+            WebMrbc.JsonFieldInfo.$ctor1.call(this, p);
             this.classInfo = p.classInfo;
             this.propertyCode = p.propertyCode;
             this.access = p.access;
             this.required = p.required;
-            this.description = p.description;
-            this.valueDescription = p.valueDescription;
-            this.unitDescription = p.unitDescription;
-            this.initialValue = p.initialValue;
-            this.type = p.type;
-            this.identifier = p.identifier;
-            this.primitive = p.primitive;
-            this.isArray = p.isArray;
-            this.arrayCount = p.arrayCount;
-            this.size = p.size;
-            this.fields = p.fields;
         }
     });
 
@@ -10992,7 +10359,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -11098,7 +10465,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsCreateEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE, "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_CREATE_EMPTY_TOOLTIP, Blockly.Msg.LISTS_CREATE_EMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6(Blockly.Msg.LISTS_CREATE_EMPTY_TITLE, "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_CREATE_EMPTY_TOOLTIP, Blockly.Msg.LISTS_CREATE_EMPTY_HELPURL));
         }
     });
 
@@ -11127,7 +10494,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return container;
         },
         domToMutation: function (xmlElement) {
-            this.itemCount_ = parseInt(xmlElement.getAttribute("items"), 10);
+            var times = xmlElement.getAttribute("items");
+            this.itemCount_ = times == null ? 0 : parseInt(times, 10);
             this.updateShape_();
         },
         decompose: function (workspace) {
@@ -11143,12 +10511,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return containerBlock;
         },
         compose: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.ListsCreateWithItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             // Count number of inputs.
             var connections = System.Array.init(0, null, Blockly.Connection);
             while (itemBlock != null) {
                 connections.push(itemBlock.valueConnection_);
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.ListsCreateWithItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
             // Disconnect any children that don"t belong.
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
@@ -11165,13 +10533,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
         },
         saveConnections: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.ListsCreateWithItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             var i = 0;
             while (itemBlock != null) {
                 var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.ListsCreateWithItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
         },
         updateShape_: function () {
@@ -11392,13 +10760,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         statics: {
             type_name: "lists_getSublist"
         },
+        WHERE_OPTIONS: null,
         ctor: function () {
             this.$initialize();
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsGetSublistBlock.type_name);
         },
         init: function () {
-            this.WHERE_OPTIONS_1 = System.Array.init([System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_START, "FROM_START"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_END, "FROM_END"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FIRST, "FIRST"], String)], System.Array.type(String));
-            this.WHERE_OPTIONS_2 = System.Array.init([System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_START, "FROM_START"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_END, "FROM_END"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_LAST, "LAST"], String)], System.Array.type(String));
+            this.WHERE_OPTIONS = System.Array.init([System.Array.init([System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_START, "FROM_START"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FROM_END, "FROM_END"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_START_FIRST, "FIRST"], String)], System.Array.type(String)), System.Array.init([System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_START, "FROM_START"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_FROM_END, "FROM_END"], String), System.Array.init([Blockly.Msg.LISTS_GET_SUBLIST_END_LAST, "LAST"], String)], System.Array.type(String))], System.Array.type(System.Array.type(String)));
             this.setHelpUrl(Blockly.Msg.LISTS_GET_SUBLIST_HELPURL);
             this.setColour(WebMrbc.Lists.HUE);
             this.appendValueInput("LIST").setCheck("Array").appendField(Blockly.Msg.LISTS_GET_SUBLIST_INPUT_IN_LIST);
@@ -11441,7 +10809,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             } else {
                 this.appendDummyInput("AT" + n);
             }
-            var menu = new Blockly.FieldDropdown(this["WHERE_OPTIONS_" + n], Bridge.fn.bind(this, function (value) {
+            var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS[((n - 1) | 0)], Bridge.fn.bind(this, function (value) {
                 var newAt = (Bridge.referenceEquals(value, "FROM_START")) || (Bridge.referenceEquals(value, "FROM_END"));
                 // The "isAt" variable is available due to this function being a
                 // closure.
@@ -11508,11 +10876,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsIsEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_ISEMPTY_TITLE, System.Array.init([new $asm.$AnonymousType$21("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Boolean", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_ISEMPTY_TOOLTIP, Blockly.Msg.LISTS_ISEMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.LISTS_ISEMPTY_TITLE, System.Array.init([new $asm.$AnonymousType$18("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Boolean", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_ISEMPTY_TOOLTIP, Blockly.Msg.LISTS_ISEMPTY_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$21", $asm, {
+    Bridge.define("$AnonymousType$18", $asm, {
         $kind: "anonymous",
         ctor: function (type, name, check) {
             this.type = type;
@@ -11529,13 +10897,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.check;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$21)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$18)) {
                 return false;
             }
             return Bridge.equals(this.type, o.type) && Bridge.equals(this.name, o.name) && Bridge.equals(this.check, o.check);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208731, this.type, this.name, this.check]);
+            var h = Bridge.addHash([7550210522, this.type, this.name, this.check]);
             return h;
         },
         toJSON: function () {
@@ -11557,7 +10925,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsLengthBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_LENGTH_TITLE, System.Array.init([new $asm.$AnonymousType$21("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Number", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_LENGTH_TOOLTIP, Blockly.Msg.LISTS_LENGTH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.LISTS_LENGTH_TITLE, System.Array.init([new $asm.$AnonymousType$18("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Number", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_LENGTH_TOOLTIP, Blockly.Msg.LISTS_LENGTH_HELPURL));
         }
     });
 
@@ -11571,7 +10939,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsRepeatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$20("input_value", "ITEM"), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], Object), "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_REPEAT_TOOLTIP, Blockly.Msg.LISTS_REPEAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.LISTS_REPEAT_TITLE, System.Array.init([new $asm.$AnonymousType$17("input_value", "ITEM"), new $asm.$AnonymousType$11("input_value", "NUM", "Number")], Object), "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_REPEAT_TOOLTIP, Blockly.Msg.LISTS_REPEAT_HELPURL));
         }
     });
 
@@ -11694,7 +11062,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ListsSortBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LISTS_SORT_TITLE, System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "TYPE", System.Array.init([System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_NUMERIC, "NUMERIC"], String), System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_TEXT, "TEXT"], String), System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_IGNORECASE, "IGNORE_CASE"], String)], System.Array.type(String))), new $asm.$AnonymousType$17("field_dropdown", "DIRECTION", System.Array.init([System.Array.init([Blockly.Msg.LISTS_SORT_ORDER_ASCENDING, "1"], String), System.Array.init([Blockly.Msg.LISTS_SORT_ORDER_DESCENDING, "-1"], String)], System.Array.type(String))), new $asm.$AnonymousType$13("input_value", "LIST", "Array")], Object), "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_SORT_TOOLTIP, Blockly.Msg.LISTS_SORT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.LISTS_SORT_TITLE, System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "TYPE", System.Array.init([System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_NUMERIC, "NUMERIC"], String), System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_TEXT, "TEXT"], String), System.Array.init([Blockly.Msg.LISTS_SORT_TYPE_IGNORECASE, "IGNORE_CASE"], String)], System.Array.type(String))), new $asm.$AnonymousType$15("field_dropdown", "DIRECTION", System.Array.init([System.Array.init([Blockly.Msg.LISTS_SORT_ORDER_ASCENDING, "1"], String), System.Array.init([Blockly.Msg.LISTS_SORT_ORDER_DESCENDING, "-1"], String)], System.Array.type(String))), new $asm.$AnonymousType$11("input_value", "LIST", "Array")], Object), "Array", WebMrbc.Lists.HUE, Blockly.Msg.LISTS_SORT_TOOLTIP, Blockly.Msg.LISTS_SORT_HELPURL));
         }
     });
 
@@ -11755,7 +11123,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_LITERAL_DELIM);
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -11775,7 +11143,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicBooleanBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "BOOL", System.Array.init([System.Array.init([Blockly.Msg.LOGIC_BOOLEAN_TRUE, "TRUE"], String), System.Array.init([Blockly.Msg.LOGIC_BOOLEAN_FALSE, "FALSE"], String)], System.Array.type(String)))], Object), "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP, Blockly.Msg.LOGIC_BOOLEAN_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14("%1", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "BOOL", System.Array.init([System.Array.init([Blockly.Msg.LOGIC_BOOLEAN_TRUE, "TRUE"], String), System.Array.init([Blockly.Msg.LOGIC_BOOLEAN_FALSE, "FALSE"], String)], System.Array.type(String)))], Object), "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP, Blockly.Msg.LOGIC_BOOLEAN_HELPURL));
         }
     });
 
@@ -11851,7 +11219,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicNegateBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.LOGIC_NEGATE_TITLE, System.Array.init([new $asm.$AnonymousType$13("input_value", "BOOL", "Boolean")], Object), "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NEGATE_TOOLTIP, Blockly.Msg.LOGIC_NEGATE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.LOGIC_NEGATE_TITLE, System.Array.init([new $asm.$AnonymousType$11("input_value", "BOOL", "Boolean")], Object), "Boolean", WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NEGATE_TOOLTIP, Blockly.Msg.LOGIC_NEGATE_HELPURL));
         }
     });
 
@@ -11865,11 +11233,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.LogicNullBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$22(Blockly.Msg.LOGIC_NULL, null, WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NULL_TOOLTIP, Blockly.Msg.LOGIC_NULL_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$19(Blockly.Msg.LOGIC_NULL, null, WebMrbc.Logic.HUE, Blockly.Msg.LOGIC_NULL_TOOLTIP, Blockly.Msg.LOGIC_NULL_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$22", $asm, {
+    Bridge.define("$AnonymousType$19", $asm, {
         $kind: "anonymous",
         ctor: function (message0, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -11894,13 +11262,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$22)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$19)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550208987, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550210778, this.message0, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -12002,13 +11370,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
+            field.appendChild(cond.createTextNode(this.getp().WebMrbc$IMrbParser$sym2name(this._name)));
             block.appendChild(field);
 
             return block;
@@ -12061,7 +11429,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getmrhs: function () {
             return this._mrhs;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -12138,7 +11506,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathArithmeticBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$23("%1 %2 %3", System.Array.init([new $asm.$AnonymousType$13("input_value", "A", "Number"), new $asm.$AnonymousType$17("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_ADDITION_SYMBOL, "ADD"], String), System.Array.init([Blockly.Msg.MATH_SUBTRACTION_SYMBOL, "MINUS"], String), System.Array.init([Blockly.Msg.MATH_MULTIPLICATION_SYMBOL, "MULTIPLY"], String), System.Array.init([Blockly.Msg.MATH_DIVISION_SYMBOL, "DIVIDE"], String), System.Array.init([Blockly.Msg.MATH_POWER_SYMBOL, "POWER"], String)], System.Array.type(String))), new $asm.$AnonymousType$13("input_value", "B", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ARITHMETIC_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$20("%1 %2 %3", System.Array.init([new $asm.$AnonymousType$11("input_value", "A", "Number"), new $asm.$AnonymousType$15("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_ADDITION_SYMBOL, "ADD"], String), System.Array.init([Blockly.Msg.MATH_SUBTRACTION_SYMBOL, "MINUS"], String), System.Array.init([Blockly.Msg.MATH_MULTIPLICATION_SYMBOL, "MULTIPLY"], String), System.Array.init([Blockly.Msg.MATH_DIVISION_SYMBOL, "DIVIDE"], String), System.Array.init([Blockly.Msg.MATH_POWER_SYMBOL, "POWER"], String)], System.Array.type(String))), new $asm.$AnonymousType$11("input_value", "B", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ARITHMETIC_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -12160,7 +11528,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$23", $asm, {
+    Bridge.define("$AnonymousType$20", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, output, colour, helpUrl) {
             this.message0 = message0;
@@ -12189,13 +11557,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$23)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$20)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209243, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.helpUrl]);
+            var h = Bridge.addHash([7550208475, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -12220,7 +11588,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathChangeBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.MATH_CHANGE_TITLE, System.Array.init([new $asm.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.MATH_CHANGE_TITLE_ITEM), new $asm.$AnonymousType$13("input_value", "DELTA", "Number")], Object), null, null, Blockly.Variables.HUE, Blockly.Msg.MATH_CHANGE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$10(Blockly.Msg.MATH_CHANGE_TITLE, System.Array.init([new $asm.$AnonymousType$8("field_variable", "VAR", Blockly.Msg.MATH_CHANGE_TITLE_ITEM), new $asm.$AnonymousType$11("input_value", "DELTA", "Number")], Object), null, null, Blockly.Variables.HUE, Blockly.Msg.MATH_CHANGE_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -12239,7 +11607,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathConstantBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "CONSTANT", System.Array.init([System.Array.init(["π", "PI"], String), System.Array.init(["e", "E"], String), System.Array.init(["φ", "GOLDEN_RATIO"], String), System.Array.init(["sqrt(2)", "SQRT2"], String), System.Array.init(["sqrt(½)", "SQRT1_2"], String), System.Array.init(["∞", "INFINITY"], String)], System.Array.type(String)))], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTANT_TOOLTIP, Blockly.Msg.MATH_CONSTANT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14("%1", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "CONSTANT", System.Array.init([System.Array.init(["π", "PI"], String), System.Array.init(["e", "E"], String), System.Array.init(["φ", "GOLDEN_RATIO"], String), System.Array.init(["sqrt(2)", "SQRT2"], String), System.Array.init(["sqrt(½)", "SQRT1_2"], String), System.Array.init(["∞", "INFINITY"], String)], System.Array.type(String)))], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTANT_TOOLTIP, Blockly.Msg.MATH_CONSTANT_HELPURL));
         }
     });
 
@@ -12253,11 +11621,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathConstrainBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_CONSTRAIN_TITLE, System.Array.init([new $asm.$AnonymousType$13("input_value", "VALUE", "Number"), new $asm.$AnonymousType$13("input_value", "LOW", "Number"), new $asm.$AnonymousType$13("input_value", "HIGH", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTRAIN_TOOLTIP, Blockly.Msg.MATH_CONSTRAIN_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$21(Blockly.Msg.MATH_CONSTRAIN_TITLE, System.Array.init([new $asm.$AnonymousType$11("input_value", "VALUE", "Number"), new $asm.$AnonymousType$11("input_value", "LOW", "Number"), new $asm.$AnonymousType$11("input_value", "HIGH", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_CONSTRAIN_TOOLTIP, Blockly.Msg.MATH_CONSTRAIN_HELPURL));
         }
     });
 
-    Bridge.define("$AnonymousType$24", $asm, {
+    Bridge.define("$AnonymousType$21", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, inputsInline, output, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -12290,13 +11658,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$24)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$21)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.inputsInline, o.inputsInline) && Bridge.equals(this.output, o.output) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209499, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550208731, this.message0, this.args0, this.inputsInline, this.output, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -12322,7 +11690,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathModuloBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_MODULO_TITLE, System.Array.init([new $asm.$AnonymousType$13("input_value", "DIVIDEND", "Number"), new $asm.$AnonymousType$13("input_value", "DIVISOR", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_MODULO_TOOLTIP, Blockly.Msg.MATH_MODULO_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$21(Blockly.Msg.MATH_MODULO_TITLE, System.Array.init([new $asm.$AnonymousType$11("input_value", "DIVIDEND", "Number"), new $asm.$AnonymousType$11("input_value", "DIVISOR", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_MODULO_TOOLTIP, Blockly.Msg.MATH_MODULO_HELPURL));
         }
     });
 
@@ -12472,7 +11840,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRandomFloatBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$8(Blockly.Msg.MATH_RANDOM_FLOAT_TITLE_RANDOM, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_FLOAT_TOOLTIP, Blockly.Msg.MATH_RANDOM_FLOAT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$6(Blockly.Msg.MATH_RANDOM_FLOAT_TITLE_RANDOM, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_FLOAT_TOOLTIP, Blockly.Msg.MATH_RANDOM_FLOAT_HELPURL));
         }
     });
 
@@ -12486,7 +11854,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRandomIntBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$24(Blockly.Msg.MATH_RANDOM_INT_TITLE, System.Array.init([new $asm.$AnonymousType$13("input_value", "FROM", "Number"), new $asm.$AnonymousType$13("input_value", "TO", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_INT_TOOLTIP, Blockly.Msg.MATH_RANDOM_INT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$21(Blockly.Msg.MATH_RANDOM_INT_TITLE, System.Array.init([new $asm.$AnonymousType$11("input_value", "FROM", "Number"), new $asm.$AnonymousType$11("input_value", "TO", "Number")], Object), true, "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_RANDOM_INT_TOOLTIP, Blockly.Msg.MATH_RANDOM_INT_HELPURL));
         }
     });
 
@@ -12500,7 +11868,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathRoundBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 %2", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUND, "ROUND"], String), System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDUP, "ROUNDUP"], String), System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDDOWN, "ROUNDDOWN"], String)], System.Array.type(String))), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ROUND_TOOLTIP, Blockly.Msg.MATH_ROUND_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 %2", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUND, "ROUND"], String), System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDUP, "ROUNDUP"], String), System.Array.init([Blockly.Msg.MATH_ROUND_OPERATOR_ROUNDDOWN, "ROUNDDOWN"], String)], System.Array.type(String))), new $asm.$AnonymousType$11("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_ROUND_TOOLTIP, Blockly.Msg.MATH_ROUND_HELPURL));
         }
     });
 
@@ -12514,7 +11882,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathSingleBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$6("%1 %2", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_SINGLE_OP_ROOT, "ROOT"], String), System.Array.init([Blockly.Msg.MATH_SINGLE_OP_ABSOLUTE, "ABS"], String), System.Array.init(["-", "NEG"], String), System.Array.init(["ln", "LN"], String), System.Array.init(["log10", "LOG10"], String), System.Array.init(["e^", "EXP"], String), System.Array.init(["10^", "POW10"], String)], System.Array.type(String))), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_SINGLE_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$4("%1 %2", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_SINGLE_OP_ROOT, "ROOT"], String), System.Array.init([Blockly.Msg.MATH_SINGLE_OP_ABSOLUTE, "ABS"], String), System.Array.init(["-", "NEG"], String), System.Array.init(["ln", "LN"], String), System.Array.init(["log10", "LOG10"], String), System.Array.init(["e^", "EXP"], String), System.Array.init(["10^", "POW10"], String)], System.Array.type(String))), new $asm.$AnonymousType$11("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_SINGLE_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -12549,7 +11917,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.MathTrigBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$6("%1 %2", System.Array.init([new $asm.$AnonymousType$17("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_TRIG_SIN, "SIN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_COS, "COS"], String), System.Array.init([Blockly.Msg.MATH_TRIG_TAN, "TAN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ASIN, "ASIN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ACOS, "ACOS"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ATAN, "ATAN"], String)], System.Array.type(String))), new $asm.$AnonymousType$13("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_TRIG_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$4("%1 %2", System.Array.init([new $asm.$AnonymousType$15("field_dropdown", "OP", System.Array.init([System.Array.init([Blockly.Msg.MATH_TRIG_SIN, "SIN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_COS, "COS"], String), System.Array.init([Blockly.Msg.MATH_TRIG_TAN, "TAN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ASIN, "ASIN"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ACOS, "ACOS"], String), System.Array.init([Blockly.Msg.MATH_TRIG_ATAN, "ATAN"], String)], System.Array.type(String))), new $asm.$AnonymousType$11("input_value", "NUM", "Number")], Object), "Number", WebMrbc.Math.HUE, Blockly.Msg.MATH_TRIG_HELPURL));
             // Assign "this" to a variable for use in the tooltip closure below.
             var thisBlock = this;
             this.setTooltip(function () {
@@ -12792,7 +12160,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -13511,11 +12879,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.yyConsole.WebMrbc$MrbParser$yyConsoleOut$yyWarning(message, expected);
         },
         WebMrbc$MrbParser$yyConsoleOut$yyWarning: function (message, expected) {
-            if (WebMrbc.App.term == null) {
-                return;
-            }
-
-            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): warning {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.write(System.String.format("{0}({1},{2}): warning {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * (syntax) error message.
@@ -13537,11 +12901,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.yyConsole.WebMrbc$MrbParser$yyConsoleOut$yyError(message, expected);
         },
         WebMrbc$MrbParser$yyConsoleOut$yyError: function (message, expected) {
-            if (WebMrbc.App.term == null) {
-                return;
-            }
-
-            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * computes list of expected tokens on error by tracing the tables.
@@ -16239,7 +15599,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return new WebMrbc.fcall_node.ctor(this, b, c);
         },
         new_super: function (c) {
-            return new WebMrbc.super_node(this, c);
+            return new WebMrbc.super_node.ctor(this, c);
         },
         new_zsuper: function () {
             return new WebMrbc.zsuper_node(this);
@@ -16325,7 +15685,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return new WebMrbc.undef_node(this, sym);
         },
         new_class: function (c, s, b) {
-            return new WebMrbc.class_node(this, c, s, b);
+            return new WebMrbc.class_node.$ctor1(this, c, s, b);
         },
         new_sclass: function (o, b) {
             return new WebMrbc.sclass_node(this, o, b);
@@ -18731,18 +18091,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getn: function () {
             return this._n;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "math_single");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "OP");
-            field.appendChild(document.createTextNode("NEG"));
+            field.appendChild(cond.createTextNode("NEG"));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "NUM");
-            value.appendChild(this._n.to_xml());
+            value.appendChild(this._n.to_xml(cond));
             block.appendChild(value);
 
             return block;
@@ -18767,13 +18127,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getretval: function () {
             return this._retval;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_flow_statements");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "FLOW");
-            field.appendChild(document.createTextNode("CONTINUE"));
+            field.appendChild(cond.createTextNode("CONTINUE"));
             block.appendChild(field);
 
             return block;
@@ -18805,8 +18165,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_NIL);
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_null");
             return block;
         },
@@ -18838,11 +18198,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.NotifyInitialEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$25("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$22("インスタンスリスト通知の送信", null, null, 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$25", $asm, {
+    Bridge.define("$AnonymousType$22", $asm, {
         $kind: "anonymous",
         ctor: function (message0, previousStatement, nextStatement, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -18871,13 +18231,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$25)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$22)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.previousStatement, o.previousStatement) && Bridge.equals(this.nextStatement, o.nextStatement) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550209755, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550208987, this.message0, this.previousStatement, this.nextStatement, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -18923,7 +18283,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getn: function () {
             return this._n;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -18955,40 +18315,40 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getrhs: function () {
             return this._rhs;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             // TODO:Rubyの演算は数値だけとは限らない
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "math_arithmetic");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "OP");
             switch (this.getp().WebMrbc$IMrbParser$sym2name(this.getop())) {
                 case "+": 
-                    field.appendChild(document.createTextNode("ADD"));
+                    field.appendChild(cond.createTextNode("ADD"));
                     break;
                 case "-": 
-                    field.appendChild(document.createTextNode("MINUS"));
+                    field.appendChild(cond.createTextNode("MINUS"));
                     break;
                 case "*": 
-                    field.appendChild(document.createTextNode("MULTIPLY"));
+                    field.appendChild(cond.createTextNode("MULTIPLY"));
                     break;
                 case "/": 
-                    field.appendChild(document.createTextNode("DIVIDE"));
+                    field.appendChild(cond.createTextNode("DIVIDE"));
                     break;
                 case "**": 
-                    field.appendChild(document.createTextNode("POWER"));
+                    field.appendChild(cond.createTextNode("POWER"));
                     break;
             }
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "A");
-            value.appendChild(this.getlhs().to_xml());
+            value.appendChild(this.getlhs().to_xml(cond));
             block.appendChild(value);
 
-            value = document.createElement("value");
+            value = cond.createElement("value");
             value.setAttribute("name", "B");
-            value.appendChild(this.getrhs().to_xml());
+            value.appendChild(this.getrhs().to_xml(cond));
             block.appendChild(value);
 
             return block;
@@ -19043,23 +18403,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getb: function () {
             return this._b;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_operation");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "OP");
-            field.appendChild(document.createTextNode("OR"));
+            field.appendChild(cond.createTextNode("OR"));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "A");
-            value.appendChild(this._a.to_xml());
+            value.appendChild(this._a.to_xml(cond));
             block.appendChild(value);
 
-            value = document.createElement("value");
+            value = cond.createElement("value");
             value.setAttribute("name", "B");
-            value.appendChild(this._b.to_xml());
+            value.appendChild(this._b.to_xml(cond));
             block.appendChild(value);
 
             return block;
@@ -19106,7 +18466,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getpostexe: function () {
             return this._postexe;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -19371,7 +18731,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         updateParams_: function () {
             // Check for duplicated arguments.
             var badArg = false;
-            var hash = new $asm.$AnonymousType$26();
+            var hash = new $asm.$AnonymousType$23();
             for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
                 if (hash[System.String.concat("arg_", this.arguments_[i].toLowerCase())]) {
                     badArg = true;
@@ -19447,7 +18807,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             // Parameter list.
             var connection = containerBlock.getInput("STACK").connection;
             for (var i = 0; i < this.arguments_.length; i = (i + 1) | 0) {
-                var paramBlock = Bridge.cast(workspace.newBlock(WebMrbc.ProceduresMutatorargBlock.type_name), WebMrbc.ProceduresMutatorargBlock);
+                var paramBlock = workspace.newBlock(WebMrbc.ProceduresMutatorargBlock.type_name);
                 paramBlock.initSvg();
                 paramBlock.setFieldValue(this.arguments_[i], "NAME");
                 // Store the old location.
@@ -19559,18 +18919,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         }
     });
 
-    Bridge.define("$AnonymousType$26", $asm, {
+    Bridge.define("$AnonymousType$23", $asm, {
         $kind: "anonymous",
         ctor: function () {
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$26)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$23)) {
                 return false;
             }
             return ;
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550210011]);
+            var h = Bridge.addHash([7550209243]);
             return h;
         },
         toJSON: function () {
@@ -19863,7 +19223,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_REDO);
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -19895,7 +19255,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getencp: function () {
             return this._encp;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -19919,7 +19279,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.ReleaseEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 を破棄", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 を破棄", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -19964,9 +19324,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getelse: function () {
             return this._else;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             // TODO:？？？
-            return this.getbody().to_xml();
+            return this.getbody().to_xml(cond);
         },
         to_rb: function (cond) {
             var $t;
@@ -20011,7 +19371,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_RETRY);
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -20033,18 +19393,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getretval: function () {
             return this._retval;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "procedures_return");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("value", (this._retval != null) ? "0" : "1");
             block.appendChild(mutation);
 
             if (this._retval != null) {
-                var value = document.createElement("value");
+                var value = cond.createElement("value");
                 value.setAttribute("name", "VALUE");
-                value.appendChild(this._retval.to_xml());
+                value.appendChild(this._retval.to_xml(cond));
                 block.appendChild(value);
             }
 
@@ -20484,7 +19844,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         digital_write: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
             var dropdown_pin_value = block.getFieldValue("PIN_VALUE");
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinModeNameToNum(dropdown_pin_value))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinValueNameToNum(dropdown_pin_value))], WebMrbc.node);
             return new WebMrbc.fcall_node.$ctor1(this, this.intern("digitalWrite"), p, null);
         },
         digital_read: function (block) {
@@ -20505,7 +19865,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         pwm_value: function (block) {
             var number_pwm_value = block.getFieldValue("PWM_VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(number_pwm_value, 10));
+            return new WebMrbc.int_node.$ctor1(this, number_pwm_value == null ? 0 : parseInt(number_pwm_value, 10));
         },
         analog_reference: function (block) {
             var dropdown_analog_reference_mode = block.getFieldValue("ANALOG_REFERENCE_MODE");
@@ -20523,7 +19883,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         dac_value: function (block) {
             var number_dac_value = block.getFieldValue("ADC_VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(number_dac_value, 10));
+            return new WebMrbc.int_node.$ctor1(this, number_dac_value == null ? 0 : parseInt(number_dac_value, 10));
         },
         delay: function (block) {
             var value_value = this.valueToCode(block, "VALUE");
@@ -20557,7 +19917,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         hexadecimal: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 16));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 16));
         },
         tone: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
@@ -20568,7 +19928,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         tone_value: function (block) {
             var number_tone_value = block.getFieldValue("TONE_VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(number_tone_value, 10));
+            return new WebMrbc.int_node.$ctor1(this, number_tone_value == null ? 0 : parseInt(number_tone_value, 10));
         },
         no_tone: function (block) {
             var dropdown_pin_no = block.getFieldValue("PIN_NO");
@@ -20643,31 +20003,31 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         rtc_year: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_month: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_day: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_hour: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_minute: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_second: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_weekday: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         rtc_datetime: function (block) {
             var array = System.Array.init([this.valueToCode(block, "YEAR"), this.valueToCode(block, "MONTH"), this.valueToCode(block, "DAY"), this.valueToCode(block, "HOUR"), this.valueToCode(block, "MINUTE"), this.valueToCode(block, "SECOND")], WebMrbc.node);
@@ -20677,14 +20037,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var value_array = block.getFieldValue("ARRAY");
             var value_item = block.getFieldValue("ITEM");
             var a = this.new_var_node(this.get_var_name(value_array));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(value_item, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, value_item == null ? 0 : parseInt(value_item, 10))], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, a, this.intern("[]"), p, null);
         },
         rtc_set_datetime_item: function (block) {
             var value_array = block.getFieldValue("ARRAY");
             var value_item = block.getFieldValue("ITEM");
             var a = this.new_var_node(this.get_var_name(value_array));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(value_item, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, value_item == null ? 0 : parseInt(value_item, 10))], WebMrbc.node);
             var b = this.valueToCode(block, "VALUE");
             return new WebMrbc.asgn_node(this, new WebMrbc.call_node.$ctor2(this, a, this.intern("[]"), p, null), b);
         },
@@ -20795,7 +20155,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         bps_value: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         serial_new: function (block) {
             var dropdown_serial_port_no = block.getFieldValue("SERIAL_PORT_NO");
@@ -20854,11 +20214,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         servo_angle: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         servo_us_value: function (block) {
             var value = block.getFieldValue("VALUE");
-            return new WebMrbc.int_node.$ctor1(this, parseInt(value, 10));
+            return new WebMrbc.int_node.$ctor1(this, value == null ? 0 : parseInt(value, 10));
         },
         servo_attach: function (block) {
             var number_ch = block.getFieldValue("CH");
@@ -20866,39 +20226,39 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var text_min = block.getFieldValue("MIN");
             var text_max = block.getFieldValue("MAX");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10)), new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), new WebMrbc.int_node.$ctor1(this, parseInt(text_min, 10)), new WebMrbc.int_node.$ctor1(this, parseInt(text_max, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10)), new WebMrbc.int_node.$ctor1(this, WebMrbc.GrSakura.pinNameToNum(dropdown_pin_no)), new WebMrbc.int_node.$ctor1(this, text_min == null ? 0 : parseInt(text_min, 10)), new WebMrbc.int_node.$ctor1(this, text_max == null ? 0 : parseInt(text_max, 10))], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("attach"), p, null);
         },
         servo_write: function (block) {
             var number_ch = block.getFieldValue("CH");
             var value_angle = this.valueToCode(block, "ANGLE");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10)), value_angle], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10)), value_angle], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("write"), p, null);
         },
         servo_us: function (block) {
             var number_ch = block.getFieldValue("CH");
             var value_us = this.valueToCode(block, "US");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10)), value_us], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10)), value_us], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("us"), p, null);
         },
         servo_read: function (block) {
             var number_ch = block.getFieldValue("CH");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10))], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("read"), p, null);
         },
         servo_attached: function (block) {
             var number_ch = block.getFieldValue("CH");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10))], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("attached"), p, null);
         },
         servo_detach: function (block) {
             var number_ch = block.getFieldValue("CH");
             var c = new WebMrbc.const_node(this, this.intern("Servo"));
-            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, parseInt(number_ch, 10))], WebMrbc.node);
+            var p = System.Array.init([new WebMrbc.int_node.$ctor1(this, number_ch == null ? 0 : parseInt(number_ch, 10))], WebMrbc.node);
             return new WebMrbc.call_node.$ctor2(this, c, this.intern("detach"), p, null);
         },
         system_exit: function (block) {
@@ -21181,13 +20541,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         defineSvcTask: function (workspace, localNode) {
             var $t, $t1;
             this.global = false;
-            var code = this.workspaceToCode(workspace.workspace);
+            var code = this.workspaceToCode(workspace.getWorkspace());
             this.global = true;
 
             var identifier = workspace.getIdentifier();
             var funcs = System.Array.init(0, null, String);
 
-            var blocks = Blockly.mainWorkspace.getTopBlocks(true);
+            var blocks = workspace.getWorkspace().getTopBlocks(true);
             for (var i = 0; i < blocks.length; i = (i + 1) | 0) {
                 var block = blocks[i];
                 var name;
@@ -21224,10 +20584,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
             }
 
-            var wa = new WebMrbc.CodeGenWorkArea();
             var sb = new System.Text.StringBuilder();
 
-            sb.appendLine(System.String.concat("class ", identifier, " ECNL::SvcTask"));
+            sb.appendLine(System.String.concat("class ", identifier, " < ECNL::SvcTask"));
             sb.appendLine("\tdef initialize()");
             sb.appendLine(System.String.concat("\t\t@profile = ", localNode.identifier, ".new(", localNode.instanceCode, ")"));
             switch (localNode.objects.length) {
@@ -21419,174 +20778,334 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         defineENode: function (enode, workspace) {
             var identifier = enode.identifier;
 
-            var cg = new WebMrbc.CodeGenerator(enode);
-            var sb = new System.Text.StringBuilder();
-
-            sb.appendLine(System.String.concat("class ", identifier, " < ECNL::ENode"));
-            sb.appendLine("\tdef initialize(eojx3)");
-            sb.append(cg.defineEchonetObject("\t\t"));
-            sb.appendLine();
-            sb.append(cg.configEchonetObject("\t\t"));
-            sb.appendLine();
-            sb.appendLine("\t\tsuper(eojx3, eprpinib_table)");
-            sb.appendLine("\tend");
-            sb.appendLine();
-
+            var nodes = System.Array.init(0, null, WebMrbc.node);
+            var $super = new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("ENode"));
             this.global = false;
-            var code = this.workspaceToCode(workspace);
+            var lv = this.local_switch();
+            {
+                var body = new WebMrbc.begin_node.$ctor1(this, this.workspaceToNodes(workspace));
+                var cls = new WebMrbc.class_node.ctor(this, this.intern(identifier), $super, body);
+                nodes.push(cls);
+            }
+            this.local_resume(lv);
             this.global = true;
-            sb.append(code);
 
-            sb.appendLine("end");
-
-            return sb.toString();
+            return this.finish(nodes);
         },
         defineEObject: function (eobject, workspace) {
             var identifier = eobject.identifier;
 
-            var cg = new WebMrbc.CodeGenerator(eobject);
-            var sb = new System.Text.StringBuilder();
-
-            sb.appendLine(System.String.concat("class ", identifier, " < ECNL::EObject"));
-            sb.appendLine("\tdef initialize(eojx3, enod)");
-            sb.append(cg.defineEchonetObject("\t\t"));
-            sb.appendLine();
-            sb.append(cg.configEchonetObject("\t\t"));
-            sb.appendLine();
-            sb.appendLine("\t\tsuper(" + eobject.type.classGroup.classGroupCode + ", " + eobject.type.classCode + ", eojx3, enod, eprpinib_table)");
-            sb.appendLine("\tend");
-            sb.appendLine();
-
+            var nodes = System.Array.init(0, null, WebMrbc.node);
+            var $super = new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EObject"));
             this.global = false;
-            var code = this.workspaceToCode(workspace);
+            var lv = this.local_switch();
+            {
+                var body = new WebMrbc.begin_node.$ctor1(this, this.workspaceToNodes(workspace));
+                var cls = new WebMrbc.class_node.ctor(this, this.intern(identifier), $super, body);
+                nodes.push(cls);
+            }
+            this.local_resume(lv);
             this.global = true;
-            sb.append(code);
 
-            sb.appendLine("end");
+            return this.finish(nodes);
+        },
+        enode_initialize: function (block) {
+            var $t, $t1;
+            var workspace = block.workspace_;
+            var enode = workspace.eobject;
+            var properties = workspace.allEProperties(workspace.getWorkspace());
 
-            return sb.toString();
+            var def;
+            var lv = this.local_switch();
+            {
+                var fparams = System.Array.init([new WebMrbc.arg_node(this, this.local_add_f$1("eojx3"))], WebMrbc.arg_node);
+                var statements_do = Bridge.cast(this.statementToCode(block, "DO"), WebMrbc.begin_node);
+
+                {
+                    var eprpinib_table = new WebMrbc.lvar_node(this, this.intern("eprpinib_table"));
+                    var propinis = System.Array.init(0, null, WebMrbc.node);
+                    $t = Bridge.getEnumerator(enode.properties);
+                    while ($t.moveNext()) {
+                        $t1 = (function () {
+                            var pi = $t.getCurrent();
+                            if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
+                                return {jump:1};
+                            }
+
+                            var pb = System.Linq.Enumerable.from(properties).firstOrDefault(function (i) {
+                                    return i.getPropertyCode() === pi.propertyCode;
+                                }, null);
+
+                            var ecnl_eproperty = new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EProperty"));
+                            var args = System.Array.init([new WebMrbc.int_node.$ctor1(this, pi.propertyCode, 16), this.getAccess(pi, pb), this.getSize(pi, pb), this.getExinf(pi, pb), this.getSetter(pb), this.getGetter(pb)], WebMrbc.node);
+                            var propini = new WebMrbc.call_node.$ctor2(this, ecnl_eproperty, this.intern("new"), args);
+                            propinis.push(propini);
+                        }).call(this) || {};
+                        if($t1.jump == 1) continue;
+                    }
+
+                    var asgn = new WebMrbc.asgn_node(this, eprpinib_table, new WebMrbc.array_node.$ctor1(this, propinis, true));
+                    statements_do.getprogs().push(asgn);
+                }
+
+                {
+                    var args1 = System.Array.init([new WebMrbc.lvar_node(this, this.intern("eojx3")), new WebMrbc.lvar_node(this, this.intern("eprpinib_table"))], WebMrbc.node);
+                    var $super = new WebMrbc.super_node.$ctor1(this, args1);
+                    statements_do.getprogs().push($super);
+                }
+
+                def = new WebMrbc.def_node.ctor(this, this.intern("initialize"), fparams, statements_do);
+            }
+            this.local_resume(lv);
+            return def;
+        },
+        eobject_initialize: function (block) {
+            var $t, $t1;
+            var workspace = block.workspace_;
+            var eobject = workspace.eobject;
+            var properties = workspace.allEProperties(workspace.getWorkspace());
+
+            var def;
+            var lv = this.local_switch();
+            {
+                var fparams = System.Array.init([new WebMrbc.arg_node(this, this.local_add_f$1("eojx3")), new WebMrbc.arg_node(this, this.local_add_f$1("enod"))], WebMrbc.arg_node);
+                var statements_do = Bridge.cast(this.statementToCode(block, "DO"), WebMrbc.begin_node);
+
+                {
+                    var eprpinib_table = new WebMrbc.lvar_node(this, this.intern("eprpinib_table"));
+                    var propinis = System.Array.init(0, null, WebMrbc.node);
+                    $t = Bridge.getEnumerator(eobject.properties);
+                    while ($t.moveNext()) {
+                        $t1 = (function () {
+                            var pi = $t.getCurrent();
+                            if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
+                                return {jump:1};
+                            }
+
+                            var pb = System.Linq.Enumerable.from(properties).firstOrDefault(function (i) {
+                                    return i.getPropertyCode() === pi.propertyCode;
+                                }, null);
+
+                            var ecnl_eproperty = new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EProperty"));
+                            var args = System.Array.init([new WebMrbc.int_node.$ctor1(this, pi.propertyCode, 16), this.getAccess(pi, pb), this.getSize(pi, pb), this.getExinf(pi, pb), this.getSetter(pb), this.getGetter(pb)], WebMrbc.node);
+                            var propini = new WebMrbc.call_node.$ctor2(this, ecnl_eproperty, this.intern("new"), args);
+                            propinis.push(propini);
+                        }).call(this) || {};
+                        if($t1.jump == 1) continue;
+                    }
+
+                    var asgn = new WebMrbc.asgn_node(this, eprpinib_table, new WebMrbc.array_node.$ctor1(this, propinis, true));
+                    statements_do.getprogs().push(asgn);
+                }
+
+                {
+                    var args1 = System.Array.init([new WebMrbc.int_node.$ctor1(this, eobject.type.classGroup.classGroupCode, 16), new WebMrbc.int_node.$ctor1(this, eobject.type.classCode, 16), new WebMrbc.lvar_node(this, this.intern("eojx3")), new WebMrbc.lvar_node(this, this.intern("enod")), new WebMrbc.lvar_node(this, this.intern("eprpinib_table"))], WebMrbc.node);
+                    var $super = new WebMrbc.super_node.$ctor1(this, args1);
+                    statements_do.getprogs().push($super);
+                }
+
+                def = new WebMrbc.def_node.ctor(this, this.intern("initialize"), fparams, statements_do);
+            }
+            this.local_resume(lv);
+            return def;
+        },
+        getSize: function (pi, pb) {
+            if (pb != null) {
+                pi = pb.getPropertyInfo();
+            }
+            return new WebMrbc.int_node.$ctor1(this, ((((pi.arrayCount === 0) ? 1 : pi.arrayCount) * pi.size) | 0), 10);
+        },
+        getAccess: function (pi, pb) {
+            if (pb != null) {
+                pi = pb.getPropertyInfo();
+            }
+            var list = System.Array.init(0, null, WebMrbc.node);
+
+            if (System.Array.contains(pi.access, "RULE_ANNO", String)) {
+                list.push(new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_RULE_ANNO")));
+            }
+
+            if (System.Array.contains(pi.access, "RULE_SET", String)) {
+                list.push(new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_RULE_SET")));
+            }
+
+            if (System.Array.contains(pi.access, "RULE_GET", String)) {
+                list.push(new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_RULE_GET")));
+            }
+
+            if (System.Array.contains(pi.access, "ANNOUNCE", String)) {
+                list.push(new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_ANNOUNCE")));
+            }
+
+            if (System.Array.contains(pi.access, "VARIABLE", String)) {
+                list.push(new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_VARIABLE")));
+            }
+
+            switch (list.length) {
+                case 0: 
+                    return new WebMrbc.colon2_node(this, new WebMrbc.const_node(this, this.intern("ECNL")), this.intern("EPC_NONE"));
+                case 1: 
+                    return list[0];
+            }
+
+            var or = this.intern("|");
+            var result = new WebMrbc.call_node.ctor(this, list[0], or, list[1]);
+            for (var i = 2; i < list.length; i = (i + 1) | 0) {
+                result = new WebMrbc.call_node.ctor(this, result, or, list[i]);
+            }
+            return result;
+        },
+        getExinf: function (pi, pb) {
+            switch (pi.propertyCode) {
+                case 151: 
+                case 152: 
+                    // 現在年月日設定
+                    return new WebMrbc.nil_node(this);
+                default: 
+                    if (pb == null) {
+                        return new WebMrbc.sym_node(this, this.get_var_name(WebMrbc.CodeGenerator.getPropertyIdentifier(pi)));
+                    }
+                    return new WebMrbc.sym_node(this, this.get_var_name(pb.getIdentifier()));
+            }
+        },
+        getSetter: function (pb) {
+            if (pb == null) {
+                return new WebMrbc.sym_node(this, this.intern("ecn_data_prop_set"));
+            }
+            return new WebMrbc.sym_node(this, this.intern(System.String.concat(pb.getIdentifier(), "_set")));
+        },
+        getGetter: function (pb) {
+            if (pb == null) {
+                return new WebMrbc.sym_node(this, this.intern("ecn_data_prop_get"));
+            }
+            return new WebMrbc.sym_node(this, this.intern(System.String.concat(pb.getIdentifier(), "_get")));
         },
         eproperty_fixlen: function (block) {
-            var text_identifier = block.identifier_;
-            var value_description = block.description_;
-            var value_property_code = System.Int32.format(block.property_code_, "X2");
-            var value_property_size = block.property_size_.toString();
+            var text_identifier = block.getIdentifier();
+            var value_description = block.getDescription();
+            var value_property_code = System.Int32.format(block.getPropertyCode(), "X2");
+            var value_property_size = block.getPropertySize().toString();
 
             // 設定関数定義
+            var def_set;
             var lv = this.local_switch();
-
-            var prop = this.local_add_f$1("prop");
-            var src = this.local_add_f$1("src");
-            var args = System.Array.init(0, null, WebMrbc.arg_node);
-            args.push(new WebMrbc.arg_node(this, prop));
-            args.push(new WebMrbc.arg_node(this, src));
-
-            var statements_set = new WebMrbc.begin_node.$ctor1(this, System.Array.init(0, null, WebMrbc.node));
             {
-                var src_bytesize = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, src), this.intern("bytesize"));
-                var size = new WebMrbc.int_node.$ctor1(this, parseInt(value_property_size));
-                var size_check_cond = new WebMrbc.call_node.ctor(this, new WebMrbc.lvar_node(this, src), this.intern("!="), size);
-                var size_check = new WebMrbc.if_node(this, size_check_cond, new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, 0)), null, false);
-                statements_set.getprogs().push(size_check);
-            }
+                var prop = this.local_add_f$1("prop");
+                var src = this.local_add_f$1("src");
+                var args = System.Array.init(0, null, WebMrbc.arg_node);
+                args.push(new WebMrbc.arg_node(this, prop));
+                args.push(new WebMrbc.arg_node(this, src));
 
-            {
-                var anno_check_cond = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("anno"));
-                var prop_exinf = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("exinf"));
-                var set_anno_arg = new WebMrbc.call_node.ctor(this, prop_exinf, this.intern("!="), new WebMrbc.lvar_node(this, src));
-                var anno_check_then = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("set_anno"), System.Array.init([set_anno_arg], WebMrbc.node));
-                var anno_check = new WebMrbc.if_node(this, anno_check_cond, anno_check_then, null, false);
-                statements_set.getprogs().push(anno_check);
-            }
-
-            var val = this.local_add_f$1("val");
-            {
-                var code;
-                var lsrc = new WebMrbc.lvar_node(this, src);
-                var pos = new WebMrbc.int_node.$ctor1(this, 0);
-                switch (value_property_size) {
-                    case "1": 
-                        code = new WebMrbc.call_node.$ctor2(this, lsrc, this.intern("getbyte"), System.Array.init([pos], WebMrbc.node));
-                        break;
-                    case "2": 
-                        code = new WebMrbc.fcall_node.$ctor1(this, this.intern("ecnl_getshort"), System.Array.init([lsrc, pos], WebMrbc.node));
-                        break;
-                    case "4": 
-                        code = new WebMrbc.fcall_node.$ctor1(this, this.intern("ecnl_getint"), System.Array.init([lsrc, pos], WebMrbc.node));
-                        break;
-                    default: 
-                        code = new WebMrbc.int_node.$ctor1(this, -1);
-                        break;
+                var statements_set = new WebMrbc.begin_node.$ctor1(this, System.Array.init(0, null, WebMrbc.node));
+                {
+                    var src_bytesize = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, src), this.intern("bytesize"));
+                    var size = new WebMrbc.int_node.$ctor1(this, parseInt(value_property_size));
+                    var size_check_cond = new WebMrbc.call_node.ctor(this, new WebMrbc.lvar_node(this, src), this.intern("!="), size);
+                    var size_check = new WebMrbc.if_node(this, size_check_cond, new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, 0)), null, false);
+                    statements_set.getprogs().push(size_check);
                 }
-                code = new WebMrbc.asgn_node(this, new WebMrbc.lvar_node(this, val), code);
-                statements_set.getprogs().push(code);
-            }
 
-            if (block.cases_.length > 0) {
-                var argument0 = new WebMrbc.lvar_node(this, val);
-                if (argument0 == null) {
-                    argument0 = new WebMrbc.int_node.$ctor1(this, -1);
+                {
+                    var anno_check_cond = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("anno"));
+                    var prop_exinf = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("exinf"));
+                    var set_anno_arg = new WebMrbc.call_node.ctor(this, prop_exinf, this.intern("!="), new WebMrbc.lvar_node(this, src));
+                    var anno_check_then = new WebMrbc.call_node.$ctor2(this, new WebMrbc.lvar_node(this, prop), this.intern("set_anno"), System.Array.init([set_anno_arg], WebMrbc.node));
+                    var anno_check = new WebMrbc.if_node(this, anno_check_cond, anno_check_then, null, false);
+                    statements_set.getprogs().push(anno_check);
                 }
-                var branches = System.Array.init(0, null, WebMrbc.case_node.when_t);
-                for (var i = 0; i < block.cases_.length; i = (i + 1) | 0) {
-                    var branch = this.statementToCode(block, "SET" + i);
-                    if (branch == null) {
-                        branch = new WebMrbc.nil_node(this);
+
+                var val = this.local_add_f$1("val");
+                {
+                    var code;
+                    var lsrc = new WebMrbc.lvar_node(this, src);
+                    var pos = new WebMrbc.int_node.$ctor1(this, 0);
+                    switch (value_property_size) {
+                        case "1": 
+                            code = new WebMrbc.call_node.$ctor2(this, lsrc, this.intern("getbyte"), System.Array.init([pos], WebMrbc.node));
+                            break;
+                        case "2": 
+                            code = new WebMrbc.fcall_node.$ctor1(this, this.intern("ecnl_getshort"), System.Array.init([lsrc, pos], WebMrbc.node));
+                            break;
+                        case "4": 
+                            code = new WebMrbc.fcall_node.$ctor1(this, this.intern("ecnl_getint"), System.Array.init([lsrc, pos], WebMrbc.node));
+                            break;
+                        default: 
+                            code = new WebMrbc.int_node.$ctor1(this, -1);
+                            break;
                     }
-                    var argument1 = block.getFieldValue("CASE_VALUE" + i);
-                    if (argument1 != null) {
-                        var when = Bridge.merge(new WebMrbc.case_node.when_t(), {
-                            body: branch
-                        } );
-                        when.value.push(new WebMrbc.int_node.$ctor1(this, parseInt(argument1, 10)));
-                        branches.push(when);
-                    } else {
-                        var min = block.getFieldValue("CASE_MIN" + i);
-                        var max = block.getFieldValue("CASE_MAX" + i);
-                        if ((min != null) && (max != null)) {
-                            var when1 = Bridge.merge(new WebMrbc.case_node.when_t(), {
+                    code = new WebMrbc.asgn_node(this, new WebMrbc.lvar_node(this, val), code);
+                    statements_set.getprogs().push(code);
+                }
+
+                if (block.cases_.length > 0) {
+                    var argument0 = new WebMrbc.lvar_node(this, val);
+                    if (argument0 == null) {
+                        argument0 = new WebMrbc.int_node.$ctor1(this, -1);
+                    }
+                    var branches = System.Array.init(0, null, WebMrbc.case_node.when_t);
+                    for (var i = 0; i < block.cases_.length; i = (i + 1) | 0) {
+                        var branch = this.statementToCode(block, "SET" + i);
+                        if (branch == null) {
+                            branch = new WebMrbc.nil_node(this);
+                        }
+                        var argument1 = block.getFieldValue("CASE_VALUE" + i);
+                        if (argument1 != null) {
+                            var when = Bridge.merge(new WebMrbc.case_node.when_t(), {
                                 body: branch
                             } );
-                            when1.value.push(new WebMrbc.dot2_node(this, new WebMrbc.int_node.$ctor1(this, parseInt(min, 10)), new WebMrbc.int_node.$ctor1(this, parseInt(max, 10))));
-                            branches.push(when1);
+                            when.value.push(new WebMrbc.int_node.$ctor1(this, argument1 == null ? 0 : parseInt(argument1, 10)));
+                            branches.push(when);
+                        } else {
+                            var min = block.getFieldValue("CASE_MIN" + i);
+                            var max = block.getFieldValue("CASE_MAX" + i);
+                            if ((min != null) && (max != null)) {
+                                var when1 = Bridge.merge(new WebMrbc.case_node.when_t(), {
+                                    body: branch
+                                } );
+                                when1.value.push(new WebMrbc.dot2_node(this, new WebMrbc.int_node.$ctor1(this, min == null ? 0 : parseInt(min, 10)), new WebMrbc.int_node.$ctor1(this, max == null ? 0 : parseInt(max, 10))));
+                                branches.push(when1);
+                            }
                         }
                     }
-                }
-                if (block.defaultCount_ !== 0) {
-                    var branch1 = this.statementToCode(block, "DEFAULT_SET");
-                    if (branch1 != null) {
+                    {
+                        var branch1 = this.statementToCode(block, "DEFAULT_SET");
+                        if (branch1 == null) {
+                            branch1 = new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, 0));
+                        }
                         var when2 = Bridge.merge(new WebMrbc.case_node.when_t(), {
                             body: branch1
                         } );
                         branches.push(when2);
                     }
+
+                    var code1 = new WebMrbc.case_node.ctor(this, new WebMrbc.lvar_node(this, val), branches);
+                    statements_set.getprogs().push(code1);
                 }
 
-                var code1 = new WebMrbc.case_node.ctor(this, new WebMrbc.lvar_node(this, val), branches);
-                statements_set.getprogs().push(code1);
+                var value_set_ret = new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, parseInt(value_property_size)));
+                statements_set.getprogs().push(value_set_ret);
+                def_set = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_set")), args, statements_set);
             }
-
-            var value_set_ret = new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, parseInt(value_property_size)));
-            statements_set.getprogs().push(value_set_ret);
-            var def_set = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_set")), args, statements_set);
-
             this.local_resume(lv);
 
             // 取得関数定義
+            var def_get;
             lv = this.local_switch();
+            {
+                var prop1 = this.local_add_f$1("prop");
+                var src1 = this.local_add_f$1("src");
+                var args1 = System.Array.init(0, null, WebMrbc.arg_node);
+                args1.push(new WebMrbc.arg_node(this, prop1));
+                args1.push(new WebMrbc.arg_node(this, src1));
 
-            args = System.Array.init(0, null, WebMrbc.arg_node);
-            args.push(new WebMrbc.arg_node(this, prop));
-            args.push(new WebMrbc.arg_node(this, src));
-
-            var statements_get = Bridge.cast(this.statementToCode(block, "GET"), WebMrbc.begin_node);
-            var value_get_ret = this.valueToCode(block, "GET_RET");
-            if (value_get_ret == null) {
-                value_get_ret = new WebMrbc.return_node(this, value_get_ret);
+                var statements_get = Bridge.cast(this.statementToCode(block, "GET"), WebMrbc.begin_node);
+                var value_get_ret = this.valueToCode(block, "GET_RET");
+                if (value_get_ret == null) {
+                    value_get_ret = new WebMrbc.return_node(this, new WebMrbc.str_node.$ctor1(this, ""));
+                }
+                statements_get.getprogs().push(value_get_ret);
+                def_get = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_get")), args1, statements_get);
             }
-            statements_get.getprogs().push(value_get_ret);
-            var def_get = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_get")), args, statements_get);
-
             this.local_resume(lv);
 
             // 設定関数定義と取得関数定義のリスト
@@ -21599,52 +21118,56 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var value_property_size = block.getFieldValue("PROPERTY_SIZE");
 
             // 設定関数定義
+            var def_set;
             var lv = this.local_switch();
+            {
+                var prop = this.local_add_f$1("prop");
+                var src = this.local_add_f$1("src");
+                var args = System.Array.init(0, null, WebMrbc.arg_node);
+                args.push(new WebMrbc.arg_node(this, prop));
+                args.push(new WebMrbc.arg_node(this, src));
 
-            var prop = this.local_add_f$1("prop");
-            var src = this.local_add_f$1("src");
-            var args = System.Array.init(0, null, WebMrbc.arg_node);
-            args.push(new WebMrbc.arg_node(this, prop));
-            args.push(new WebMrbc.arg_node(this, src));
-
-            var statements_set = Bridge.cast(this.statementToCode(block, "SET"), WebMrbc.begin_node);
-            var value_set_ret = this.valueToCode(block, "SET_RET");
-            if (value_set_ret == null) {
-                value_set_ret = new WebMrbc.return_node(this, value_set_ret);
+                var statements_set = Bridge.cast(this.statementToCode(block, "SET"), WebMrbc.begin_node);
+                var value_set_ret = this.valueToCode(block, "SET_RET");
+                if (value_set_ret == null) {
+                    value_set_ret = new WebMrbc.return_node(this, new WebMrbc.int_node.$ctor1(this, 0));
+                }
+                statements_set.getprogs().push(value_set_ret);
+                def_set = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_set")), args, statements_set);
             }
-            statements_set.getprogs().push(value_set_ret);
-            var def_set = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_set")), args, statements_set);
-
             this.local_resume(lv);
 
             // 取得関数定義
+            var def_get;
             lv = this.local_switch();
+            {
+                var prop1 = this.local_add_f$1("prop");
+                var src1 = this.local_add_f$1("src");
+                var args1 = System.Array.init(0, null, WebMrbc.arg_node);
+                args1.push(new WebMrbc.arg_node(this, prop1));
+                args1.push(new WebMrbc.arg_node(this, src1));
 
-            args = System.Array.init(0, null, WebMrbc.arg_node);
-            args.push(new WebMrbc.arg_node(this, prop));
-            args.push(new WebMrbc.arg_node(this, src));
-
-            var statements_get = Bridge.cast(this.statementToCode(block, "GET"), WebMrbc.begin_node);
-            var value_get_ret = this.valueToCode(block, "GET_RET");
-            if (value_get_ret == null) {
-                value_get_ret = new WebMrbc.return_node(this, value_get_ret);
+                var statements_get = Bridge.cast(this.statementToCode(block, "GET"), WebMrbc.begin_node);
+                var value_get_ret = this.valueToCode(block, "GET_RET");
+                if (value_get_ret == null) {
+                    value_get_ret = new WebMrbc.return_node(this, new WebMrbc.str_node.$ctor1(this, ""));
+                }
+                statements_get.getprogs().push(value_get_ret);
+                def_get = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_get")), args1, statements_get);
             }
-            statements_get.getprogs().push(value_get_ret);
-            var def_get = new WebMrbc.def_node.ctor(this, this.intern(System.String.concat(text_identifier, "_get")), args, statements_get);
-
             this.local_resume(lv);
 
             // 設定関数定義と取得関数定義のリスト
             return WebMrbc.node.cons(this, def_set, WebMrbc.node.cons(this, def_get, null));
         },
-        defineMainLoop: function (workspace, localNode) {
-            var code = this.workspaceToCode(workspace.workspace);
+        defineMainLoop: function (workspace, identifier) {
+            var code = this.workspaceToCode(workspace.getWorkspace());
             var sb = new System.Text.StringBuilder();
 
             sb.append(code);
             sb.appendLine();
 
-            sb.appendLine("ctrl = Controller.new()");
+            sb.appendLine(System.String.format("ctrl = {0}.new()", identifier));
             sb.appendLine();
             sb.appendLine("# メインループ");
             sb.appendLine("while (true) do");
@@ -21779,6 +21302,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
             return result;
         },
+        new_str_node: function (text) {
+            var result = WebMrbc.MrbParser.parse(System.String.concat("\"", text, "\""));
+            var begin = Bridge.as(result, WebMrbc.begin_node);
+            if ((begin != null) && (begin.getprogs().length === 1)) {
+                return begin.getprogs()[0];
+            }
+            return result;
+        },
         local_switch: function () {
             var prev = this.locals;
             this.locals = new WebMrbc.locals_node(null);
@@ -21870,7 +21401,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 result.push(node.block_id);
             }
-            return System.Linq.Enumerable.from(result).toArray();
+            return result;
         },
         getBlockId$1: function (filename, lineno, column) {
             var $t;
@@ -21905,15 +21436,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 result.push(node.block_id);
             }
-            return System.Linq.Enumerable.from(result).toArray();
+            return result;
         },
         yyError: function (message, expected) {
             if (expected === void 0) { expected = []; }
-            if (WebMrbc.App.term == null) {
-                return;
-            }
-
-            WebMrbc.App.term.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         colour_picker: function (block) {
             // Colour picker.
@@ -21966,7 +21493,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         lists_create_with: function (block) {
             // Create a list with any number of elements of any type.
-            var p = Bridge.cast((System.Array.init(0, null, WebMrbc.node)).concat(block.itemCount_), System.Array.type(WebMrbc.node));
+            var p = System.Array.init(block.itemCount_, null, WebMrbc.node);
             for (var n = 0; n < block.itemCount_; n = (n + 1) | 0) {
                 var i = this.valueToCode(block, "ADD" + n);
                 if (i == null) {
@@ -22329,7 +21856,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         controls_repeat: function (block) {
             // Repeat n times (internal number).
-            var repeats = new WebMrbc.int_node.$ctor1(this, parseInt(block.getFieldValue("TIMES"), 10));
+            var times = block.getFieldValue("TIMES");
+            var repeats = new WebMrbc.int_node.$ctor1(this, times == null ? 0 : parseInt(times, 10));
             var branch = this.statementToCode(block, "DO");
             if (branch == null) {
                 branch = new WebMrbc.nil_node(this);
@@ -22791,7 +22319,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         text: function (block) {
             // Text value.
-            return new WebMrbc.str_node.$ctor1(this, block.getFieldValue("TEXT"));
+            return this.new_str_node(block.getFieldValue("TEXT"));
         },
         text_join: function (block) {
             // Create a string made up of any number of elements of any type.
@@ -23042,7 +22570,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     var when = Bridge.merge(new WebMrbc.case_node.when_t(), {
                         body: branch
                     } );
-                    when.value.push(new WebMrbc.int_node.$ctor1(this, parseInt(argument1, 10)));
+                    when.value.push(new WebMrbc.int_node.$ctor1(this, argument1 == null ? 0 : parseInt(argument1, 10)));
                     code.push(when);
                 } else {
                     var min = block.getFieldValue("RANGE_MIN" + n);
@@ -23051,7 +22579,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                         var when1 = Bridge.merge(new WebMrbc.case_node.when_t(), {
                             body: branch
                         } );
-                        when1.value.push(new WebMrbc.dot2_node(this, new WebMrbc.int_node.$ctor1(this, parseInt(min, 10)), new WebMrbc.int_node.$ctor1(this, parseInt(max, 10))));
+                        when1.value.push(new WebMrbc.dot2_node(this, new WebMrbc.int_node.$ctor1(this, min == null ? 0 : parseInt(min, 10)), new WebMrbc.int_node.$ctor1(this, max == null ? 0 : parseInt(max, 10))));
                         code.push(when1);
                     }
                 }
@@ -23163,7 +22691,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -23204,10 +22732,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             // TODO:？？？
-            var s = document.createElement("scope");
-            var b = this._body.to_xml();
+            var s = cond.createElement("scope");
+            var b = this._body.to_xml(cond);
             if (b != null) {
                 s.appendChild(b);
             }
@@ -23346,7 +22874,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -23650,7 +23178,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SELF);
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -23671,7 +23199,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SendEsvBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 を送信", System.Array.init([new $asm.$AnonymousType$19("field_variable", "ESV", "item")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 を送信", System.Array.init([new $asm.$AnonymousType$8("field_variable", "ESV", "item")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24015,7 +23543,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -24046,18 +23574,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
             }
         },
+        $ctor1: function (p, args) {
+            this.$initialize();
+            WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_SUPER);
+            this._args = Bridge.cast(this._args.concat.apply(this._args, args), System.Array.type(WebMrbc.node));
+        },
         getargs: function () {
             return this._args;
         },
         getblock: function () {
             return this._block;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             var $t;
-            var block = document.createElement("block");
+            var block = cond.createElement("block");
             block.setAttribute("type", "procedures_callreturn");
 
-            var mutation = document.createElement("mutation");
+            var mutation = cond.createElement("mutation");
             mutation.setAttribute("name", "super");
             block.appendChild(mutation);
 
@@ -24065,10 +23598,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             $t = Bridge.getEnumerator(this.getargs());
             while ($t.moveNext()) {
                 var a = $t.getCurrent();
-                var arg = document.createElement("arg");
+                var arg = cond.createElement("arg");
                 // TODO: 引数名を持ってくkる
                 arg.setAttribute("name", i.toString());
-                arg.appendChild(a.to_xml());
+                arg.appendChild(a.to_xml(cond));
                 block.appendChild(arg);
                 i = (i + 1) | 0;
             }
@@ -24117,7 +23650,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 var v = $t.getCurrent();
                 str = System.String.concat(str, (System.String.concat(v.toString(), " ")));
             }
-            return System.String.format("{0})", this.getblock());
+            return System.String.concat(str, this.getblock(), ")");
         },
         add_block: function (b) {
             if (b != null) {
@@ -24139,7 +23672,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskCallTimeoutBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 のタイムアウト処理を行う", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 のタイムアウト処理を行う", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24153,7 +23686,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskIsMatchBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "NODE", "EObject"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "EDTAT", "String")], Object), "Boolean", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 で %2 ノード %3 は %4 通信端点 %5 と %6 電文 %7 に対応している", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "NODE", "EObject"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "EDTAT", "String")], Object), "Boolean", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24167,7 +23700,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskProgressBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 %2 の時間を %3 [ms]経過させる", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ELAPSE", "Number")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 %2 の時間を %3 [ms]経過させる", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "ELAPSE", "Number")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24181,7 +23714,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskRecvMsgBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "DATA", "String")], Object), null, null, 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$12("%1 に %2 通信端点 %3 からの %4 データ %5 を渡す", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "ENDPOINT", "String"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "DATA", "String")], Object), null, null, 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24195,11 +23728,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskSetTimerBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$27("%1 %2 のタイマーを %3 [ms]に設定", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item"), new $asm.$AnonymousType$18("input_dummy"), new $asm.$AnonymousType$13("input_value", "TIMER", "Number")], Object), 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$24("%1 %2 のタイマーを %3 [ms]に設定", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item"), new $asm.$AnonymousType$16("input_dummy"), new $asm.$AnonymousType$11("input_value", "TIMER", "Number")], Object), 230, "", "http://www.example.com/"));
         }
     });
 
-    Bridge.define("$AnonymousType$27", $asm, {
+    Bridge.define("$AnonymousType$24", $asm, {
         $kind: "anonymous",
         ctor: function (message0, args0, colour, tooltip, helpUrl) {
             this.message0 = message0;
@@ -24224,13 +23757,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return this.helpUrl;
         },
         equals: function (o) {
-            if (!Bridge.is(o, $asm.$AnonymousType$27)) {
+            if (!Bridge.is(o, $asm.$AnonymousType$24)) {
                 return false;
             }
             return Bridge.equals(this.message0, o.message0) && Bridge.equals(this.args0, o.args0) && Bridge.equals(this.colour, o.colour) && Bridge.equals(this.tooltip, o.tooltip) && Bridge.equals(this.helpUrl, o.helpUrl);
         },
         getHashCode: function () {
-            var h = Bridge.addHash([7550210267, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
+            var h = Bridge.addHash([7550209499, this.message0, this.args0, this.colour, this.tooltip, this.helpUrl]);
             return h;
         },
         toJSON: function () {
@@ -24254,7 +23787,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.SvctaskTimerBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16("%1 のタイマー値", System.Array.init([new $asm.$AnonymousType$19("field_variable", "SVC", "item")], Object), "Number", 230, "", "http://www.example.com/"));
+            this.jsonInit(new $asm.$AnonymousType$14("%1 のタイマー値", System.Array.init([new $asm.$AnonymousType$8("field_variable", "SVC", "item")], Object), "Number", 230, "", "http://www.example.com/"));
         }
     });
 
@@ -24282,6 +23815,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.setHelpUrl("http://www.example.com/");
             this.setColour(210);
             this.appendValueInput("SWITCH").appendField("右の値が");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
             this.setMutator(new Blockly.Mutator(System.Array.init([WebMrbc.SwitchCaseNumberConstBlock.type_name, WebMrbc.SwitchCaseNumberRangeBlock.type_name, WebMrbc.SwitchCaseNumberDefaultBlock.type_name], String)));
             this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.SwitchCaseNumberBlock.f1));
             this.cases_ = System.Array.init([{ item1: "0", item2: null }], Object);
@@ -24321,9 +23856,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 container.appendChild(caseInfo);
             }
-            if (this.defaultCount_ !== 0) {
-                container.setAttribute("default", "1");
-            }
+            container.setAttribute("default", this.defaultCount_.toString());
             return container;
         },
         /**
@@ -24353,7 +23886,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     }
                 }
             }
-            this.defaultCount_ = parseInt(xmlElement.getAttribute("default"), 10) || 0;
+            var count = xmlElement.getAttribute("default");
+            this.defaultCount_ = count == null ? 0 : parseInt(count, 10);
             this.updateShape_();
         },
         /**
@@ -24445,7 +23979,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
             this.updateShape_();
             // Reconnect any child blocks.
-            for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
+            for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
                 Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
             }
             Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
@@ -24679,6 +24213,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.setHelpUrl("http://www.example.com/");
             this.setColour(210);
             this.appendValueInput("SWITCH").appendField("右の値が");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
             this.setMutator(new Blockly.Mutator(System.Array.init([WebMrbc.SwitchCaseTextConstBlock.type_name, WebMrbc.SwitchCaseTextRangeBlock.type_name, WebMrbc.SwitchCaseTextDefaultBlock.type_name], String)));
             this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.SwitchCaseTextBlock.f1));
             this.cases_ = System.Array.init([{ item1: "0", item2: null }], Object);
@@ -24718,9 +24254,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 container.appendChild(caseInfo);
             }
-            if (this.defaultCount_ !== 0) {
-                container.setAttribute("default", "1");
-            }
+            container.setAttribute("default", this.defaultCount_.toString());
             return container;
         },
         /**
@@ -24750,7 +24284,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     }
                 }
             }
-            this.defaultCount_ = parseInt(xmlElement.getAttribute("default"), 10) || 0;
+            var count = xmlElement.getAttribute("default");
+            this.defaultCount_ = count == null ? 0 : parseInt(count, 10);
             this.updateShape_();
         },
         /**
@@ -25063,13 +24598,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getname: function () {
             return this._name;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "variables_get");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "VAR");
-            field.appendChild(document.createTextNode(System.String.concat(":", this.getp().WebMrbc$IMrbParser$sym2name(this._name))));
+            field.appendChild(cond.createTextNode(System.String.concat(":", this.getp().WebMrbc$IMrbParser$sym2name(this._name))));
             block.appendChild(field);
 
             return block;
@@ -25098,7 +24633,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -25624,7 +25159,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.TextIsEmptyBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.TEXT_ISEMPTY_TITLE, System.Array.init([new $asm.$AnonymousType$21("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Boolean", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_ISEMPTY_TOOLTIP, Blockly.Msg.TEXT_ISEMPTY_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.TEXT_ISEMPTY_TITLE, System.Array.init([new $asm.$AnonymousType$18("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Boolean", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_ISEMPTY_TOOLTIP, Blockly.Msg.TEXT_ISEMPTY_HELPURL));
         }
     });
 
@@ -25653,7 +25188,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return container;
         },
         domToMutation: function (xmlElement) {
-            this.itemCount_ = parseInt(xmlElement.getAttribute("items"), 10);
+            var count = xmlElement.getAttribute("items");
+            this.itemCount_ = count == null ? 0 : parseInt(count, 10);
             this.updateShape_();
         },
         decompose: function (workspace) {
@@ -25669,12 +25205,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return containerBlock;
         },
         compose: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.TextCreateJoinItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             // Count number of inputs.
             var connections = System.Array.init(0, null, Blockly.Connection);
             while (itemBlock != null) {
                 connections.push(itemBlock.valueConnection_);
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.TextCreateJoinItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
             // Disconnect any children that don"t belong.
             for (var i = 0; i < this.itemCount_; i = (i + 1) | 0) {
@@ -25691,13 +25227,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             }
         },
         saveConnections: function (containerBlock) {
-            var itemBlock = Bridge.cast(containerBlock.getInputTargetBlock("STACK"), WebMrbc.TextCreateJoinItemBlock);
+            var itemBlock = containerBlock.getInputTargetBlock("STACK");
             var i = 0;
             while (itemBlock != null) {
                 var input = this.getInput("ADD" + i);
                 itemBlock.valueConnection_ = (input != null) ? input.connection.targetConnection : null;
                 i = (i + 1) | 0;
-                itemBlock = (itemBlock.nextConnection != null) ? Bridge.cast(itemBlock.nextConnection.targetBlock(), WebMrbc.TextCreateJoinItemBlock) : null;
+                itemBlock = (itemBlock.nextConnection != null) ? itemBlock.nextConnection.targetBlock() : null;
             }
         },
         updateShape_: function () {
@@ -25737,7 +25273,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.TextLengthBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$16(Blockly.Msg.TEXT_LENGTH_TITLE, System.Array.init([new $asm.$AnonymousType$21("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Number", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_LENGTH_TOOLTIP, Blockly.Msg.TEXT_LENGTH_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.TEXT_LENGTH_TITLE, System.Array.init([new $asm.$AnonymousType$18("input_value", "VALUE", System.Array.init(["String", "Array"], String))], Object), "Number", WebMrbc.Texts.HUE, Blockly.Msg.TEXT_LENGTH_TOOLTIP, Blockly.Msg.TEXT_LENGTH_HELPURL));
         }
     });
 
@@ -25751,7 +25287,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.TextPrintBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.TEXT_PRINT_TITLE, System.Array.init([new $asm.$AnonymousType$20("input_value", "TEXT")], Object), null, null, WebMrbc.Texts.HUE, Blockly.Msg.TEXT_PRINT_TOOLTIP, Blockly.Msg.TEXT_PRINT_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.TEXT_PRINT_TITLE, System.Array.init([new $asm.$AnonymousType$17("input_value", "TEXT")], Object), null, null, WebMrbc.Texts.HUE, Blockly.Msg.TEXT_PRINT_TOOLTIP, Blockly.Msg.TEXT_PRINT_HELPURL));
         }
     });
 
@@ -25904,13 +25440,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             WebMrbc.node.ctor.call(this, p, WebMrbc.node_type.NODE_TRUE);
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "logic_boolean");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "BOOL");
-            field.appendChild(document.createTextNode("TRUE"));
+            field.appendChild(cond.createTextNode("TRUE"));
             block.appendChild(field);
 
             return block;
@@ -25952,7 +25488,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         append: function (b) {
             this._syms.push(System.Nullable.getValue(Bridge.cast(b.getcar(), System.Int32)));
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -26005,29 +25541,29 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getelse: function () {
             return this._else;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_if");
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "IF0");
-            value.appendChild(this._cond.to_xml());
+            value.appendChild(this._cond.to_xml(cond));
             block.appendChild(value);
 
             if (this._then != null) {
-                var statement = document.createElement("statement");
+                var statement = cond.createElement("statement");
                 statement.setAttribute("name", "DO0");
                 block.appendChild(statement);
 
-                statement.appendChild(this._then.to_xml());
+                statement.appendChild(this._then.to_xml(cond));
             }
 
             if (this._else != null) {
-                var statement1 = document.createElement("statement");
+                var statement1 = cond.createElement("statement");
                 statement1.setAttribute("name", "ELSE");
                 block.appendChild(statement1);
 
-                statement1.appendChild(this._else.to_xml());
+                statement1.appendChild(this._else.to_xml(cond));
             }
 
             return block;
@@ -26070,23 +25606,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_whileUntil");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "MODE");
-            field.appendChild(document.createTextNode("UNTIL"));
+            field.appendChild(cond.createTextNode("UNTIL"));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "BOOL");
-            value.appendChild(this._cond.to_xml());
+            value.appendChild(this._cond.to_xml(cond));
             block.appendChild(value);
 
-            var statement = document.createElement("statement");
+            var statement = cond.createElement("statement");
             statement.setAttribute("name", "DO");
-            statement.appendChild(this._body.to_xml());
+            statement.appendChild(this._body.to_xml(cond));
             block.appendChild(statement);
 
             return block;
@@ -26150,7 +25686,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.Block.ctor.call(this, WebMrbc.VariablesSetBlock.type_name);
         },
         init: function () {
-            this.jsonInit(new $asm.$AnonymousType$14(Blockly.Msg.VARIABLES_SET, System.Array.init([new $asm.$AnonymousType$19("field_variable", "VAR", Blockly.Msg.VARIABLES_DEFAULT_NAME), new $asm.$AnonymousType$20("input_value", "VALUE")], Object), null, null, Blockly.Variables.HUE, Blockly.Msg.VARIABLES_SET_TOOLTIP, Blockly.Msg.VARIABLES_SET_HELPURL));
+            this.jsonInit(new $asm.$AnonymousType$12(Blockly.Msg.VARIABLES_SET, System.Array.init([new $asm.$AnonymousType$8("field_variable", "VAR", Blockly.Msg.VARIABLES_DEFAULT_NAME), new $asm.$AnonymousType$17("input_value", "VALUE")], Object), null, null, Blockly.Variables.HUE, Blockly.Msg.VARIABLES_SET_TOOLTIP, Blockly.Msg.VARIABLES_SET_HELPURL));
             this.contextMenuMsg_ = Blockly.Msg.VARIABLES_SET_CREATE_GET;
         },
         customContextMenu: function (options) {
@@ -26184,23 +25720,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getbody: function () {
             return this._body;
         },
-        to_xml: function () {
-            var block = document.createElement("block");
+        to_xml: function (cond) {
+            var block = cond.createElement("block");
             block.setAttribute("type", "controls_whileUntil");
 
-            var field = document.createElement("field");
+            var field = cond.createElement("field");
             field.setAttribute("name", "MODE");
-            field.appendChild(document.createTextNode("WHILE"));
+            field.appendChild(cond.createTextNode("WHILE"));
             block.appendChild(field);
 
-            var value = document.createElement("value");
+            var value = cond.createElement("value");
             value.setAttribute("name", "BOOL");
-            value.appendChild(this._cond.to_xml());
+            value.appendChild(this._cond.to_xml(cond));
             block.appendChild(value);
 
-            var statement = document.createElement("statement");
+            var statement = cond.createElement("statement");
             statement.setAttribute("name", "DO");
-            statement.appendChild(this._body.to_xml());
+            statement.appendChild(this._body.to_xml(cond));
             block.appendChild(statement);
 
             return block;
@@ -26236,7 +25772,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         geta: function () {
             return this._a;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -26270,7 +25806,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getlen: function () {
             return this._len;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -26306,7 +25842,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getargs: function () {
             return this._args;
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -26359,7 +25895,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 this._block = b;
             }
         },
-        to_xml: function () {
+        to_xml: function (cond) {
             throw new System.NotImplementedException();
         },
         to_rb: function (cond) {
@@ -26628,32 +26164,41 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
     Bridge.define("WebMrbc.EcnlTaskWorkspace", {
         inherits: [WebMrbc.IClassWorkspace],
-        identifier: null,
+        view: null,
         workspace: null,
+        _RubyCode: null,
         config: {
             alias: [
             "getIdentifier", "WebMrbc$IModel$getIdentifier",
             "getWorkspace", "WebMrbc$IClassWorkspace$getWorkspace",
+            "getView", "WebMrbc$IClassWorkspace$getView",
+            "getRubyCode", "WebMrbc$IClassWorkspace$getRubyCode",
             "getImageUrl", "WebMrbc$IClassWorkspace$getImageUrl",
             "isPreset", "WebMrbc$IClassWorkspace$isPreset",
             "toCode", "WebMrbc$IClassWorkspace$toCode",
-            "toDom", "WebMrbc$IClassWorkspace$toDom",
-            "loadDom", "WebMrbc$IClassWorkspace$loadDom",
+            "activate", "WebMrbc$IClassWorkspace$activate",
+            "inactivate", "WebMrbc$IClassWorkspace$inactivate",
             "reloadToolbox", "WebMrbc$IClassWorkspace$reloadToolbox",
             "openModifyView", "WebMrbc$IClassWorkspace$openModifyView",
             "template", "WebMrbc$IClassWorkspace$template"
             ]
         },
-        ctor: function (identifier) {
+        ctor: function (view) {
             this.$initialize();
-            this.identifier = identifier;
-            this.workspace = new Blockly.Workspace();
+            this.view = view;
+            this.workspace = view.init();
         },
         getIdentifier: function () {
-            return this.identifier;
+            return this.view.getIdentifier();
         },
         getWorkspace: function () {
             return this.workspace;
+        },
+        getView: function () {
+            return this.view;
+        },
+        getRubyCode: function () {
+            return this._RubyCode;
         },
         getImageUrl: function () {
             return "img/no_image.png";
@@ -26661,55 +26206,89 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         isPreset: function () {
             return true;
         },
-        toCode: function (generator) {
-            return generator.defineSvcTask(this, WebMrbc.Collections.LocalNode.getenode());
-        },
-        toDom: function () {
-            return Blockly.Xml.workspaceToDom(this.workspace);
-        },
-        loadDom: function (xml) {
-            this.workspace.clear();
-            Blockly.Xml.domToWorkspace(xml, this.workspace);
-        },
-        reloadToolbox: function (toolbox) {
-            var $t, $t1;
-            var funcs = System.Array.init(["setup", "recv_esv", "break_wait", "timeout", "snd_msg"], String);
-            var procs = System.Array.init(["is_local_addr", "is_multicast_addr", "is_valid_addrid", "get_local_addr", "get_multicast_addr", "get_remote_addr", "get_remote_id", "set_remote_addr", "add_remote_addr"], String);
-            var echonet_category = $("#echonet_category", toolbox);
-
-            echonet_category.html("");
-            $t = Bridge.getEnumerator(funcs);
-            while ($t.moveNext()) {
-                var name = $t.getCurrent();
-                var block = $("<block>");
-                block.attr("type", WebMrbc.ProceduresDefnoreturnBlock.type_name);
-
-                var field = $("<field>");
-                field.attr("name", "NAME");
-                field.text(name);
-                block.append(field);
-
-                echonet_category.append(block);
+        toCode: function (filename) {
+            if (WebMrbc.Collections.LocalNode == null) {
+                return "";
             }
 
-            $t1 = Bridge.getEnumerator(procs);
+            this._RubyCode = new WebMrbc.Ruby(filename);
+            var result = this._RubyCode.defineSvcTask(this, WebMrbc.Collections.LocalNode.getenode());
+            this.view.changed = false;
+            return result;
+        },
+        activate: function () {
+            //ele = Blockly.Xml.workspaceToDom(workspace);
+        },
+        inactivate: function () {
+            //workspace.clear();
+            //Blockly.Xml.domToWorkspace(ele, workspace);
+        },
+        reloadToolbox: function (toolbox) {
+            var $t, $t1, $t2, $t3;
+            toolbox.appendChild(document.createElement("sep"));
+            var xml = $.parseXML(WebMrbc.App.arduinoToolbox);
+            var categories = xml.childNodes[0];
+            $t = Bridge.getEnumerator(categories.childNodes);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                if (!Bridge.referenceEquals(item.nodeName, "category")) {
+                    continue;
+                }
+                toolbox.appendChild(item);
+            }
+
+            toolbox.appendChild(document.createElement("sep"));
+            xml = $.parseXML(WebMrbc.App.ecnlToolbox);
+            categories = xml.childNodes[0];
+            $t1 = Bridge.getEnumerator(categories.childNodes);
             while ($t1.moveNext()) {
-                var name1 = $t1.getCurrent();
-                var block1 = $("<block>");
-                block1.attr("type", WebMrbc.ProceduresDefreturnBlock.type_name);
+                var item1 = $t1.getCurrent();
+                if (!Bridge.referenceEquals(item1.nodeName, "category")) {
+                    continue;
+                }
+                toolbox.appendChild(item1);
+            }
 
-                var field1 = $("<field>");
-                field1.attr("name", "NAME");
-                field1.text(name1);
-                block1.append(field1);
+            var category = document.createElement("category");
+            category.setAttribute("name", "ECNL SvcTask");
+            category.setAttribute("colour", "230");
+            toolbox.appendChild(category);
 
-                echonet_category.append(block1);
+            var funcs = System.Array.init(["setup", "recv_esv", "break_wait", "timeout", "snd_msg"], String);
+            var procs = System.Array.init(["is_local_addr", "is_multicast_addr", "is_valid_addrid", "get_local_addr", "get_multicast_addr", "get_remote_addr", "get_remote_id", "set_remote_addr", "add_remote_addr"], String);
+            $t2 = Bridge.getEnumerator(funcs);
+            while ($t2.moveNext()) {
+                var name = $t2.getCurrent();
+                var block = document.createElement("block");
+                block.setAttribute("type", WebMrbc.ProceduresDefnoreturnBlock.type_name);
+
+                var field = document.createElement("field");
+                field.setAttribute("name", "NAME");
+                field.appendChild(document.createTextNode(name));
+                block.appendChild(field);
+
+                category.appendChild(block);
+            }
+
+            $t3 = Bridge.getEnumerator(procs);
+            while ($t3.moveNext()) {
+                var name1 = $t3.getCurrent();
+                var block1 = document.createElement("block");
+                block1.setAttribute("type", WebMrbc.ProceduresDefreturnBlock.type_name);
+
+                var field1 = document.createElement("field");
+                field1.setAttribute("name", "NAME");
+                field1.appendChild(document.createTextNode(name1));
+                block1.appendChild(field1);
+
+                category.appendChild(block1);
             }
         },
         openModifyView: function (callback) {
+            this.view.reloadToolbox(this);
         },
         template: function (template) {
-            template = System.String.replaceAll(template, "%identifier%", this.identifier);
+            template = System.String.replaceAll(template, "%identifier%", this.getIdentifier());
             template = System.String.replaceAll(template, "%attribute%", "SvcTask");
             template = System.String.replaceAll(template, "%img%", this.getImageUrl());
             return template;
@@ -26720,25 +26299,34 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         inherits: [WebMrbc.IClassWorkspace],
         eobject: null,
         workspace: null,
+        view: null,
         callback: null,
+        _RubyCode: null,
         config: {
             alias: [
             "getIdentifier", "WebMrbc$IModel$getIdentifier",
             "getWorkspace", "WebMrbc$IClassWorkspace$getWorkspace",
+            "getView", "WebMrbc$IClassWorkspace$getView",
+            "getRubyCode", "WebMrbc$IClassWorkspace$getRubyCode",
             "getImageUrl", "WebMrbc$IClassWorkspace$getImageUrl",
             "isPreset", "WebMrbc$IClassWorkspace$isPreset",
             "toCode", "WebMrbc$IClassWorkspace$toCode",
-            "toDom", "WebMrbc$IClassWorkspace$toDom",
-            "loadDom", "WebMrbc$IClassWorkspace$loadDom",
+            "activate", "WebMrbc$IClassWorkspace$activate",
+            "inactivate", "WebMrbc$IClassWorkspace$inactivate",
             "reloadToolbox", "WebMrbc$IClassWorkspace$reloadToolbox",
             "openModifyView", "WebMrbc$IClassWorkspace$openModifyView",
             "template", "WebMrbc$IClassWorkspace$template"
             ]
         },
-        ctor: function (eobject) {
+        ctor: function (view, eobject) {
             this.$initialize();
+            this.view = view;
             this.eobject = eobject;
-            this.workspace = new Blockly.Workspace();
+            this.workspace = view.init();
+
+            view.flyoutCategoryHandlers.add("ECHONET_LITE_PROPERTY", Bridge.fn.cacheBind(this, this.flyoutCategory));
+
+            this.updateInitialBlock();
         },
         getIdentifier: function () {
             return this.eobject.identifier;
@@ -26746,262 +26334,471 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         getWorkspace: function () {
             return this.workspace;
         },
+        getView: function () {
+            return this.view;
+        },
+        getRubyCode: function () {
+            return this._RubyCode;
+        },
+        updateInitialBlock: function () {
+            var $t, $t1;
+            var blocks = this.getWorkspace().getTopBlocks(false);
+            $t = Bridge.getEnumerator(blocks);
+            while ($t.moveNext()) {
+                var b = $t.getCurrent();
+                if ((Bridge.referenceEquals(b.type, WebMrbc.ENodeInitializeBlock.type_name)) || (Bridge.referenceEquals(b.type, WebMrbc.EObjectInitializeBlock.type_name))) {
+                    b.dispose(false);
+                    continue;
+                }
+
+                if ((Bridge.referenceEquals(b.type, WebMrbc.EPropertyFixLenBlock.type_name)) || (Bridge.referenceEquals(b.type, WebMrbc.EPropertyVarLenBlock.type_name))) {
+                    b.InitPropertyInfo(this);
+                    continue;
+                }
+            }
+
+            var xml = document.createElement("xml");
+            var block = document.createElement("block");
+            xml.appendChild(block);
+
+            if ((this.eobject.type.classGroup.classGroupCode === 14) && (this.eobject.type.classCode === 240)) {
+                block.setAttribute("type", WebMrbc.ENodeInitializeBlock.type_name);
+            } else {
+                block.setAttribute("type", WebMrbc.EObjectInitializeBlock.type_name);
+            }
+
+            var statement = document.createElement("statement");
+            statement.setAttribute("name", "DO");
+            block.appendChild(statement);
+
+            var prev = null;
+            $t1 = Bridge.getEnumerator(this.eobject.properties);
+            while ($t1.moveNext()) {
+                var pi = $t1.getCurrent();
+                if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
+                    continue;
+                }
+
+                var vset = document.createElement("block");
+                vset.setAttribute("type", "variables_set");
+
+                var field = document.createElement("field");
+                field.setAttribute("name", "VAR");
+                field.appendChild(document.createTextNode(WebMrbc.CodeGenerator.getPropertyIdentifier(pi)));
+                vset.appendChild(field);
+
+                var value = document.createElement("value");
+                value.setAttribute("name", "VALUE");
+                vset.appendChild(value);
+
+                var text = document.createElement("shadow");
+                text.setAttribute("type", "text");
+                value.appendChild(text);
+
+                field = document.createElement("field");
+                field.setAttribute("name", "TEXT");
+                var body = new System.Text.StringBuilder();
+                this.getInitialValue(body, pi, pi.valueDescription, false);
+                field.appendChild(document.createTextNode(body.toString()));
+                text.appendChild(field);
+
+                if (prev != null) {
+                    var next = document.createElement("next");
+                    next.appendChild(vset);
+                    prev.appendChild(next);
+                } else {
+                    statement.appendChild(vset);
+                }
+                prev = vset;
+            }
+
+            Blockly.Xml.domToWorkspace(xml, this.getWorkspace());
+        },
+        getInitialValue: function (body, emi, valRng, recursive) {
+            var $t;
+            if (Bridge.referenceEquals(emi.type, "manufacturer_code_t")) {
+                body.append("#{$MAKER_CODE}");
+                return;
+            }
+
+            if (Bridge.referenceEquals(emi.type, "version_information_t")) {
+                body.append("\\x01\\x0A\\x01\\x00");
+                return;
+            }
+
+            if (Bridge.referenceEquals(emi.type, "standard_version_information_t")) {
+                body.append("\\x00\\x00C\\x00");
+                return;
+            }
+
+            if (emi.primitive) {
+                var count = emi.arrayCount;
+                if (count === 0) {
+                    body.append(WebMrbc.CodeGenerator.getInitialValue(valRng, emi));
+                } else {
+                    body.append("");
+                    for (var i = 0; i < count; i = (i + 1) | 0) {
+                        body.append(WebMrbc.CodeGenerator.getInitialValue(valRng, emi));
+                    }
+                    body.append("");
+                }
+            } else if (emi.fields != null && emi.fields.length > 0) {
+                $t = Bridge.getEnumerator(emi.fields);
+                while ($t.moveNext()) {
+                    var efi = $t.getCurrent();
+                    this.getInitialValue(body, efi, efi.valueDescription, true);
+                }
+            }
+        },
         getImageUrl: function () {
             return "img/no_image.png";
         },
         isPreset: function () {
             return false;
         },
-        toCode: function (generator) {
-            return generator.defineEObject(this.eobject, this.workspace);
+        toCode: function (filename) {
+            if (this.eobject == null) {
+                return "";
+            }
+
+            this._RubyCode = new WebMrbc.Ruby(filename);
+            this._RubyCode.init(this.getWorkspace());
+            var result = this._RubyCode.defineEObject(this.eobject, this.workspace);
+            this.view.changed = false;
+            return result;
         },
-        toDom: function () {
-            return Blockly.Xml.workspaceToDom(this.workspace);
+        activate: function () {
+            //ele = Blockly.Xml.workspaceToDom(workspace);
         },
-        loadDom: function (xml) {
-            this.workspace.clear();
-            Blockly.Xml.domToWorkspace(xml, this.workspace);
+        inactivate: function () {
+            //workspace.clear();
+            //Blockly.Xml.domToWorkspace(ele, workspace);
         },
         reloadToolbox: function (toolbox) {
-            var $t, $t1, $t2;
-            var echonet_category = document.getElementById("echonet_category");
+            var $t, $t1;
+            toolbox.appendChild(document.createElement("sep"));
+            var xml = $.parseXML(WebMrbc.App.arduinoToolbox);
+            var categories = xml.childNodes[0];
+            $t = Bridge.getEnumerator(categories.childNodes);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                if (!Bridge.referenceEquals(item.nodeName, "category")) {
+                    continue;
+                }
+                toolbox.appendChild(item);
+            }
 
-            echonet_category.innerHTML = "";
+            toolbox.appendChild(document.createElement("sep"));
+            xml = $.parseXML(WebMrbc.App.ecnlToolbox);
+            categories = xml.childNodes[0];
+            $t1 = Bridge.getEnumerator(categories.childNodes);
+            while ($t1.moveNext()) {
+                var item1 = $t1.getCurrent();
+                if (!Bridge.referenceEquals(item1.nodeName, "category")) {
+                    continue;
+                }
+                toolbox.appendChild(item1);
+            }
+
+            var category = document.createElement("category");
+            category.setAttribute("name", "ECHONET Lite Property");
+            category.setAttribute("custom", "ECHONET_LITE_PROPERTY");
+            category.setAttribute("colour", "230");
+            toolbox.appendChild(category);
+        },
+        allEProperties: function (root) {
+            var blocks = root.getAllBlocks();
+            var eproperties = System.Array.init(0, null, WebMrbc.EPropertyBlock);
+            for (var i = 0; i < blocks.length; i = (i + 1) | 0) {
+                var b = blocks[i];
+                if ((Bridge.referenceEquals(b.type, WebMrbc.EPropertyFixLenBlock.type_name)) || (Bridge.referenceEquals(b.type, WebMrbc.EPropertyVarLenBlock.type_name))) {
+                    eproperties.push(b);
+                }
+            }
+            return eproperties;
+        },
+        procTupleComparator_: function (ta, tb) {
+            return ((ta.item2 - tb.item2) | 0);
+        },
+        flyoutCategory: function (workspace) {
+            var $t, $t1, $t2, $t3, $t4;
+            var xmlList = System.Array.init(0, null, Element);
+            var properties = this.allEProperties(workspace);
 
             $t = Bridge.getEnumerator(this.eobject.properties);
             while ($t.moveNext()) {
-                var pi = $t.getCurrent();
-                if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
-                    continue;
-                }
-                var varlen = System.Array.contains(pi.access, "VARIABLE", String);
-                var identifier = WebMrbc.CodeGenerator.getPropertyIdentifier(pi);
-                var valueRange = { };
-                if (!WebMrbc.CodeGenerator.hasPropSetter(pi, valueRange)) {
-                    valueRange.v = null;
-                }
-
-                var block = document.createElement("block");
-                if (varlen) {
-                    block.setAttribute("type", WebMrbc.EPropertyVarLenBlock.type_name);
-                } else {
-                    block.setAttribute("type", WebMrbc.EPropertyFixLenBlock.type_name);
-                }
-
-                var field = document.createElement("field");
-                field.setAttribute("name", "IDENTIFIER");
-                field.appendChild(document.createTextNode(identifier));
-                block.appendChild(field);
-
-                field = document.createElement("field");
-                field.setAttribute("name", "DESCRIPTION");
-                field.appendChild(document.createTextNode(pi.description));
-                block.appendChild(field);
-
-                field = document.createElement("field");
-                field.setAttribute("name", "PROPERTY_CODE");
-                field.appendChild(document.createTextNode(System.Byte.format(pi.propertyCode, "X2")));
-                block.appendChild(field);
-
-                field = document.createElement("field");
-                field.setAttribute("name", "PROPERTY_SIZE");
-                field.appendChild(document.createTextNode(pi.size.toString()));
-                block.appendChild(field);
-
-                echonet_category.appendChild(block);
-
-                // プロパティが可変長の場合
-                if (varlen) {
-                    {
-                        var statement = document.createElement("statement");
-                        statement.setAttribute("name", "SET");
-                        block.appendChild(statement);
-
-                        var ifBlock = this.createSizeCheckBlocks();
-                        statement.appendChild(ifBlock);
-
-                        var next = document.createElement("next");
-                        ifBlock.appendChild(next);
-
-                        if (System.Array.contains(pi.access, "ANNOUNCE", String)) {
-                            var annoBlock = this.createAnnoCheck();
-                            next.appendChild(annoBlock);
-
-                            next = document.createElement("next");
-                            annoBlock.appendChild(next);
-                        }
-
-                        var setBlock = null;
-                        if (valueRange.v != null) {
-                            setBlock = this.createSetStatement(valueRange.v);
-                        } else {
-                            setBlock = document.createElement("block");
-                            setBlock.setAttribute("type", WebMrbc.EcnlSaveReceivedPropertyBlock.type_name);
-                        }
-
-                        if (setBlock != null) {
-                            next.appendChild(setBlock);
-                        }
+                $t1 = (function () {
+                    var pi = $t.getCurrent();
+                    if (WebMrbc.CodeGenerator.isExtractProperty(pi)) {
+                        return {jump:1};
                     }
 
-                    {
-                        var value = document.createElement("value");
-                        value.setAttribute("name", "SET_RET");
-                        block.appendChild(value);
-
-                        var subblock = document.createElement("block");
-                        subblock.setAttribute("type", WebMrbc.EcnlGetPropertyInfoBlock.type_name);
-                        value.appendChild(subblock);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "MEMBER");
-                        field.appendChild(document.createTextNode("sz"));
-                        subblock.appendChild(field);
-                    }
-                } else if ((valueRange.v == null) || ((valueRange.v.getValues().length === 0) && (valueRange.v.getRanges().length === 0))) {
-                    var mutation = document.createElement("mutation");
-                    mutation.setAttribute("property_code", System.Byte.format(pi.propertyCode, "X2"));
-                    mutation.setAttribute("identifier", identifier);
-                    mutation.setAttribute("description", pi.description);
-                    mutation.setAttribute("property_size", pi.size.toString());
-                    mutation.setAttribute("default", "1");
-                    mutation.setAttribute("user_getter", "1");
-                    block.appendChild(mutation);
-
-                    var setBlock1 = null;
-                    switch (pi.propertyCode) {
-                        case 151: 
-                            setBlock1 = this.createSetTime();
-                            break;
-                        case 152: 
-                            setBlock1 = this.createSetDate();
-                            break;
-                    }
-
-                    if (setBlock1 != null) {
-                        var statement1 = document.createElement("statement");
-                        statement1.setAttribute("name", "DEFAULT_SET");
-                        block.appendChild(statement1);
-
-                        statement1.appendChild(setBlock1);
-                    }
-                } else {
-                    var mutation1 = document.createElement("mutation");
-                    mutation1.setAttribute("property_code", System.Byte.format(pi.propertyCode, "X2"));
-                    mutation1.setAttribute("identifier", identifier);
-                    mutation1.setAttribute("description", pi.description);
-                    mutation1.setAttribute("property_size", pi.size.toString());
-                    mutation1.setAttribute("default", "0");
-                    mutation1.setAttribute("user_getter", "1");
-                    block.appendChild(mutation1);
-
-                    var i = 0;
-                    $t1 = Bridge.getEnumerator(valueRange.v.getValues());
-                    while ($t1.moveNext()) {
-                        var v = $t1.getCurrent();
-                        var branch = document.createElement("case");
-                        branch.setAttribute("value", v.getVal().toString());
-                        branch.appendChild(document.createTextNode(v.getDisp().toString()));
-                        mutation1.appendChild(branch);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "CASE_DESCRIPTION" + i);
-                        field.appendChild(document.createTextNode(v.getDisp().toString()));
-                        block.appendChild(field);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "CASE_VALUE" + i);
-                        field.appendChild(document.createTextNode(v.getVal().toString()));
-                        block.appendChild(field);
-                        i = (i + 1) | 0;
-                    }
-
-                    $t2 = Bridge.getEnumerator(valueRange.v.getRanges());
+                    var exist = false;
+                    $t2 = Bridge.getEnumerator(System.Linq.Enumerable.from(properties).where(function (p) {
+                            return p.getPropertyCode() === pi.propertyCode;
+                        }));
                     while ($t2.moveNext()) {
-                        var v1 = $t2.getCurrent();
-                        var branch1 = document.createElement("case");
-                        branch1.setAttribute("minimum", v1.getMin().toString());
-                        branch1.setAttribute("maximum", v1.getMax().toString());
-                        branch1.appendChild(document.createTextNode(v1.getDisp().toString()));
-                        mutation1.appendChild(branch1);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "CASE_DESCRIPTION" + i);
-                        field.appendChild(document.createTextNode(v1.getDisp().toString()));
-                        block.appendChild(field);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "CASE_MIN" + i);
-                        field.appendChild(document.createTextNode(v1.getMin().toString()));
-                        block.appendChild(field);
-
-                        field = document.createElement("field");
-                        field.setAttribute("name", "CASE_MAX" + i);
-                        field.appendChild(document.createTextNode(v1.getMax().toString()));
-                        block.appendChild(field);
-                        i = (i + 1) | 0;
+                        var p = $t2.getCurrent();
+                        exist = true;
+                        break;
                     }
-                }
+                    if (exist) {
+                        return {jump:1};
+                    }
 
-                {
-                    var statement2 = document.createElement("statement");
-                    statement2.setAttribute("name", "GET");
-                    block.appendChild(statement2);
+                    var varlen = System.Array.contains(pi.access, "VARIABLE", String);
+                    var identifier = WebMrbc.CodeGenerator.getPropertyIdentifier(pi);
+                    var valueRange = { };
+                    if (!WebMrbc.CodeGenerator.hasPropSetter(pi, valueRange)) {
+                        valueRange.v = null;
+                    }
 
-                    var ifBlock1 = null;
+                    var block = document.createElement("block");
                     if (varlen) {
-                        ifBlock1 = this.createSizeCheckBlocks();
-                        statement2.appendChild(ifBlock1);
+                        block.setAttribute("type", WebMrbc.EPropertyVarLenBlock.type_name);
+                    } else {
+                        block.setAttribute("type", WebMrbc.EPropertyFixLenBlock.type_name);
                     }
 
-                    var getBlock = null;
-                    switch (pi.propertyCode) {
-                        case 151: 
-                            getBlock = this.createGetTime(identifier);
-                            break;
-                        case 152: 
-                            getBlock = this.createGetDate(identifier);
-                            break;
-                        default: 
-                            break;
-                    }
+                    var field = document.createElement("field");
+                    field.setAttribute("name", "IDENTIFIER");
+                    field.appendChild(document.createTextNode(identifier));
+                    block.appendChild(field);
 
-                    if (getBlock != null) {
-                        if (ifBlock1 != null) {
-                            var next1 = document.createElement("next");
-                            next1.appendChild(getBlock);
+                    field = document.createElement("field");
+                    field.setAttribute("name", "DESCRIPTION");
+                    field.appendChild(document.createTextNode(pi.description));
+                    block.appendChild(field);
 
-                            ifBlock1.appendChild(next1);
-                        } else {
-                            statement2.appendChild(getBlock);
+                    field = document.createElement("field");
+                    field.setAttribute("name", "PROPERTY_CODE");
+                    field.appendChild(document.createTextNode(System.Byte.format(pi.propertyCode, "X2")));
+                    block.appendChild(field);
+
+                    field = document.createElement("field");
+                    field.setAttribute("name", "PROPERTY_SIZE");
+                    field.appendChild(document.createTextNode(pi.size.toString()));
+                    block.appendChild(field);
+                    xmlList.push(block);
+
+                    // プロパティが可変長の場合
+                    if (varlen) {
+                        {
+                            var statement = document.createElement("statement");
+                            statement.setAttribute("name", "SET");
+                            block.appendChild(statement);
+
+                            var ifBlock = this.createSizeCheckBlocks();
+                            statement.appendChild(ifBlock);
+
+                            var next = document.createElement("next");
+                            ifBlock.appendChild(next);
+
+                            if (System.Array.contains(pi.access, "ANNOUNCE", String)) {
+                                var annoBlock = this.createAnnoCheck();
+                                next.appendChild(annoBlock);
+
+                                next = document.createElement("next");
+                                annoBlock.appendChild(next);
+                            }
+
+                            var setBlock = null;
+                            if (valueRange.v != null) {
+                                setBlock = this.createSetStatement(valueRange.v);
+                            } else {
+                                setBlock = document.createElement("block");
+                                setBlock.setAttribute("type", WebMrbc.EcnlSaveReceivedPropertyBlock.type_name);
+                            }
+
+                            if (setBlock != null) {
+                                next.appendChild(setBlock);
+                            }
+                        }
+
+                        {
+                            var value = document.createElement("value");
+                            value.setAttribute("name", "SET_RET");
+                            block.appendChild(value);
+
+                            var subblock = document.createElement("block");
+                            subblock.setAttribute("type", WebMrbc.EcnlGetPropertyInfoBlock.type_name);
+                            value.appendChild(subblock);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "MEMBER");
+                            field.appendChild(document.createTextNode("sz"));
+                            subblock.appendChild(field);
+                        }
+                    } else if ((valueRange.v == null) || ((valueRange.v.getValues().length === 0) && (valueRange.v.getRanges().length === 0))) {
+                        var mutation = document.createElement("mutation");
+                        mutation.setAttribute("property_code", System.Byte.format(pi.propertyCode, "X2"));
+                        mutation.setAttribute("identifier", identifier);
+                        mutation.setAttribute("description", pi.description);
+                        mutation.setAttribute("property_size", pi.size.toString());
+                        mutation.setAttribute("default", "1");
+                        mutation.setAttribute("user_getter", "1");
+                        block.appendChild(mutation);
+
+                        var setBlock1 = null;
+                        switch (pi.propertyCode) {
+                            case 151: 
+                                setBlock1 = this.createSetTime();
+                                break;
+                            case 152: 
+                                setBlock1 = this.createSetDate();
+                                break;
+                            default: 
+                                setBlock1 = document.createElement("block");
+                                setBlock1.setAttribute("type", WebMrbc.EcnlSaveReceivedPropertyBlock.type_name);
+                                break;
+                        }
+
+                        if (setBlock1 != null) {
+                            var statement1 = document.createElement("statement");
+                            statement1.setAttribute("name", "DEFAULT_SET");
+                            block.appendChild(statement1);
+
+                            statement1.appendChild(setBlock1);
+                        }
+                    } else {
+                        var mutation1 = document.createElement("mutation");
+                        mutation1.setAttribute("property_code", System.Byte.format(pi.propertyCode, "X2"));
+                        mutation1.setAttribute("identifier", identifier);
+                        mutation1.setAttribute("description", pi.description);
+                        mutation1.setAttribute("property_size", pi.size.toString());
+                        mutation1.setAttribute("default", "0");
+                        mutation1.setAttribute("user_getter", "1");
+                        block.appendChild(mutation1);
+
+                        var i = 0;
+                        $t3 = Bridge.getEnumerator(valueRange.v.getValues());
+                        while ($t3.moveNext()) {
+                            var v = $t3.getCurrent();
+                            var branch = document.createElement("case");
+                            branch.setAttribute("value", v.getVal().toString());
+                            branch.appendChild(document.createTextNode(v.getDisp().toString()));
+                            mutation1.appendChild(branch);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "CASE_DESCRIPTION" + i);
+                            field.appendChild(document.createTextNode(v.getDisp().toString()));
+                            block.appendChild(field);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "CASE_VALUE" + i);
+                            field.appendChild(document.createTextNode(v.getVal().toString()));
+                            block.appendChild(field);
+
+                            var statement2 = document.createElement("statement");
+                            statement2.setAttribute("name", "SET" + i);
+                            block.appendChild(statement2);
+
+                            var setBlock2 = document.createElement("shadow");
+                            setBlock2.setAttribute("type", WebMrbc.EcnlSaveReceivedPropertyBlock.type_name);
+                            statement2.appendChild(setBlock2);
+
+                            i = (i + 1) | 0;
+                        }
+
+                        $t4 = Bridge.getEnumerator(valueRange.v.getRanges());
+                        while ($t4.moveNext()) {
+                            var v1 = $t4.getCurrent();
+                            var branch1 = document.createElement("case");
+                            branch1.setAttribute("minimum", v1.getMin().toString());
+                            branch1.setAttribute("maximum", v1.getMax().toString());
+                            branch1.appendChild(document.createTextNode(v1.getDisp().toString()));
+                            mutation1.appendChild(branch1);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "CASE_DESCRIPTION" + i);
+                            field.appendChild(document.createTextNode(v1.getDisp().toString()));
+                            block.appendChild(field);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "CASE_MIN" + i);
+                            field.appendChild(document.createTextNode(v1.getMin().toString()));
+                            block.appendChild(field);
+
+                            field = document.createElement("field");
+                            field.setAttribute("name", "CASE_MAX" + i);
+                            field.appendChild(document.createTextNode(v1.getMax().toString()));
+                            block.appendChild(field);
+
+                            var statement3 = document.createElement("statement");
+                            statement3.setAttribute("name", "SET" + i);
+                            block.appendChild(statement3);
+
+                            var setBlock3 = document.createElement("shadow");
+                            setBlock3.setAttribute("type", WebMrbc.EcnlSaveReceivedPropertyBlock.type_name);
+                            statement3.appendChild(setBlock3);
+
+                            i = (i + 1) | 0;
                         }
                     }
-                }
 
-                {
-                    var value1 = document.createElement("value");
-                    value1.setAttribute("name", "GET_RET");
-                    block.appendChild(value1);
+                    {
+                        var statement4 = document.createElement("statement");
+                        statement4.setAttribute("name", "GET");
+                        block.appendChild(statement4);
 
-                    var subblock1 = null;
-                    switch (pi.propertyCode) {
-                        case 151: 
-                            subblock1 = this.createGetRetTime(identifier);
-                            break;
-                        case 152: 
-                            subblock1 = this.createGetRetDate(identifier);
-                            break;
-                        default: 
-                            subblock1 = document.createElement("block");
-                            subblock1.setAttribute("type", WebMrbc.EcnlGetSavedPropertyBlock.type_name);
-                            break;
+                        var ifBlock1 = null;
+                        if (varlen) {
+                            ifBlock1 = this.createSizeCheckBlocks();
+                            statement4.appendChild(ifBlock1);
+                        }
+
+                        var getBlock = null;
+                        switch (pi.propertyCode) {
+                            case 151: 
+                                getBlock = this.createGetTime(identifier);
+                                break;
+                            case 152: 
+                                getBlock = this.createGetDate(identifier);
+                                break;
+                            default: 
+                                break;
+                        }
+
+                        if (getBlock != null) {
+                            if (ifBlock1 != null) {
+                                var next1 = document.createElement("next");
+                                next1.appendChild(getBlock);
+
+                                ifBlock1.appendChild(next1);
+                            } else {
+                                statement4.appendChild(getBlock);
+                            }
+                        }
                     }
 
-                    if (subblock1 != null) {
-                        value1.appendChild(subblock1);
+                    {
+                        var value1 = document.createElement("value");
+                        value1.setAttribute("name", "GET_RET");
+                        block.appendChild(value1);
+
+                        var subblock1 = null;
+                        switch (pi.propertyCode) {
+                            case 151: 
+                                subblock1 = this.createGetRetTime(identifier);
+                                break;
+                            case 152: 
+                                subblock1 = this.createGetRetDate(identifier);
+                                break;
+                            default: 
+                                subblock1 = document.createElement("block");
+                                subblock1.setAttribute("type", WebMrbc.EcnlGetSavedPropertyBlock.type_name);
+                                break;
+                        }
+
+                        if (subblock1 != null) {
+                            value1.appendChild(subblock1);
+                        }
                     }
-                }
+                }).call(this) || {};
+                if($t1.jump == 1) continue;
             }
+
+            return xmlList;
         },
         createSetDate: function () {
             var localvar = "date";
@@ -27410,6 +27207,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 return;
             }
             this.callback = callback;
+
             WebMrbc.Views.EObjectModalView.setEObject(this.eobject, this.getImageUrl());
             WebMrbc.Views.EObjectModalView.addClosed(Bridge.fn.cacheBind(this, this.eObjectModalView_Closed));
             WebMrbc.Views.EObjectModalView.render();
@@ -27417,11 +27215,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         eObjectModalView_Closed: function (view, ok) {
             view.removeClosed(Bridge.fn.cacheBind(this, this.eObjectModalView_Closed));
 
-            WebMrbc.App.reloadToolbox();
-
-            if (!Bridge.staticEquals(this.callback, null)) {
-                this.callback(ok);
+            if (ok) {
+                this.view.reloadToolbox(this);
+                this.updateInitialBlock();
             }
+            !Bridge.staticEquals(this.callback, null) ? this.callback(ok) : null;
             this.callback = null;
         },
         template: function (template) {
@@ -27429,6 +27227,473 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             template = System.String.replaceAll(template, "%attribute%", System.String.concat("EOBJ: ", System.Byte.format(this.eobject.type.classGroup.classGroupCode, "X2"), System.Byte.format(this.eobject.type.classCode, "X2"), System.Byte.format(this.eobject.instanceCode, "X2"), "<br>区分: ", this.eobject.attribute));
             template = System.String.replaceAll(template, "%img%", this.getImageUrl());
             return template;
+        },
+        onBlockCreated: function (sender, cre) {
+            var block = this.workspace.getBlockById(cre.blockId);
+
+            if (Bridge.referenceEquals(block.type, WebMrbc.ENodeInitializeBlock.type_name)) {
+                var nodeBlock = block;
+                nodeBlock.onCreate(this, cre);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EObjectInitializeBlock.type_name)) {
+                var objectBlock = block;
+                objectBlock.onCreate(this, cre);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
+                var propertyBlock = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
+                propertyBlock.onCreate(this, cre);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
+                var propertyBlock1 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
+                propertyBlock1.onCreate(this, cre);
+            }
+        },
+        onBlockDeleted: function (sender, del) {
+            var block = this.workspace.getBlockById(del.blockId);
+
+            if (block != null) {
+                if (Bridge.referenceEquals(block.type, WebMrbc.ENodeInitializeBlock.type_name)) {
+                    var nodeBlock = block;
+                    nodeBlock.onDelete(this, del);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EObjectInitializeBlock.type_name)) {
+                    var objectBlock = block;
+                    objectBlock.onDelete(this, del);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
+                    var propertyBlock = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
+                    propertyBlock.onDelete(this, del);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
+                    var propertyBlock1 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
+                    propertyBlock1.onDelete(this, del);
+                }
+            }
+        },
+        onBlockChanged: function (sender, chg) {
+            var block = this.workspace.getBlockById(chg.blockId);
+
+            if (Bridge.referenceEquals(block.type, WebMrbc.ENodeInitializeBlock.type_name)) {
+                var nodeBlock = block;
+                nodeBlock.onChange(this, chg);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EObjectInitializeBlock.type_name)) {
+                var objectBlock = block;
+                objectBlock.onChange(this, chg);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
+                var propertyBlock = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
+                propertyBlock.onChange(this, chg);
+            } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
+                var propertyBlock1 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
+                propertyBlock1.onChange(this, chg);
+            }
+        },
+        onBlockMoveed: function (sender, mov) {
+            var block = this.workspace.getBlockById(mov.blockId);
+
+            if (block != null) {
+                if (Bridge.referenceEquals(block.type, WebMrbc.ENodeInitializeBlock.type_name)) {
+                    var nodeBlock = block;
+                    nodeBlock.onMove(this, mov);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EObjectInitializeBlock.type_name)) {
+                    var objectBlock = block;
+                    objectBlock.onMove(this, mov);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyVarLenBlock.type_name)) {
+                    var propertyBlock = Bridge.cast(block, WebMrbc.EPropertyVarLenBlock);
+                    propertyBlock.onMove(this, mov);
+                } else if (Bridge.referenceEquals(block.type, WebMrbc.EPropertyFixLenBlock.type_name)) {
+                    var propertyBlock1 = Bridge.cast(block, WebMrbc.EPropertyFixLenBlock);
+                    propertyBlock1.onMove(this, mov);
+                }
+            }
+        }
+    });
+
+    Bridge.define("WebMrbc.EPropertyFixLenBlock", {
+        inherits: [WebMrbc.EPropertyBlock],
+        statics: {
+            type_name: "eproperty_fixlen"
+        },
+        cases_: null,
+        defaultCount_: 0,
+        userGetter_: false,
+        statementConnection_: null,
+        retvalConnection_: null,
+        ctor: function () {
+            this.$initialize();
+            WebMrbc.EPropertyBlock.ctor.call(this, WebMrbc.EPropertyFixLenBlock.type_name);
+        },
+        init: function () {
+            this.setHelpUrl("http://www.example.com/");
+            this.setColour(230);
+            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
+            this.setMutator(new Blockly.Mutator(System.Array.init([WebMrbc.EPropertyFixLenConstBlock.type_name, WebMrbc.EPropertyFixLenRangeBlock.type_name, WebMrbc.EPropertyFixLenDefaultBlock.type_name], String)));
+            this.setTooltip(Bridge.fn.bind(this, $asm.$.WebMrbc.EPropertyFixLenBlock.f1));
+            this.cases_ = System.Array.init(0, null, Object);
+            this.defaultCount_ = 0;
+            this.userGetter_ = true;
+            this.updateSetter_();
+            this.updateGetter_(this.userGetter_);
+        },
+        /**
+         * Create XML to represent the number of else-if and else inputs.
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @param   {boolean}    opt_caseIds
+         * @return  {Element}                   XML storage element.
+         */
+        mutationToDom: function (opt_caseIds) {
+            if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
+                return null;
+            }
+            var container = document.createElement("mutation");
+            for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
+                var caseInfo = document.createElement("case");
+                caseInfo.appendChild(document.createTextNode(this.cases_[i].item1));
+                if (this.cases_[i].item3 == null) {
+                    caseInfo.setAttribute("value", this.cases_[i].item2);
+                } else {
+                    caseInfo.setAttribute("minimum", this.cases_[i].item2);
+                    caseInfo.setAttribute("maximum", this.cases_[i].item3);
+                }
+                container.appendChild(caseInfo);
+            }
+            container.setAttribute("default", this.defaultCount_.toString());
+            container.setAttribute("user_getter", this.userGetter_ ? "1" : "0");
+            container.setAttribute("property_code", System.Int32.format(this.getPropertyCode(), "X2"));
+            container.setAttribute("identifier", this.getIdentifier());
+            container.setAttribute("description", this.getDescription());
+            container.setAttribute("property_size", this.getPropertySize().toString());
+            return container;
+        },
+        /**
+         * Parse XML to restore the else-if and else inputs.
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @param   {Element}    xmlElement    XML storage element.
+         * @return  {void}
+         */
+        domToMutation: function (xmlElement) {
+            this.cases_ = System.Array.init(0, null, Object);
+            var childNode;
+            for (var i = 0; ((childNode = xmlElement.childNodes[i])) != null; i = (i + 1) | 0) {
+                if (Bridge.referenceEquals(childNode.nodeName.toLowerCase(), "case")) {
+                    var description = (childNode.childNodes.length !== 0) ? childNode.childNodes[0].nodeValue : "";
+                    var value = childNode.getAttribute("value");
+                    if (value != null) {
+                        this.cases_.push({ item1: description, item2: value, item3: null });
+                    } else {
+                        var min = childNode.getAttribute("minimum");
+                        var max = childNode.getAttribute("maximum");
+                        if ((min != null) && (max != null)) {
+                            this.cases_.push({ item1: description, item2: min, item3: max });
+                        }
+                    }
+                }
+            }
+            var count = xmlElement.getAttribute("default");
+            this.defaultCount_ = count == null ? 0 : parseInt(count, 10);
+            count = xmlElement.getAttribute("user_getter");
+            this.userGetter_ = count == null ? false : (parseInt(count, 10) !== 0);
+            count = xmlElement.getAttribute("property_code");
+            this.setPropertyCode(parseInt(count, 16));
+            if (this.getWorkspace() != null) {
+                this.initPropertyInfo(this.getWorkspace(), true);
+            }
+            this.setIdentifier(xmlElement.getAttribute("identifier"));
+            this.setDescription(xmlElement.getAttribute("description"));
+            count = xmlElement.getAttribute("property_size");
+            this.setPropertySize(count == null ? 0 : parseInt(count, 10));
+            this.updateSetter_();
+            this.updateGetter_(this.userGetter_);
+        },
+        /**
+         * Populate the mutator's dialog with this block's components.
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @param   {Blockly.Workspace}    workspace    Mutator's workspace.
+         * @return  {WebMrbc.Block}                     Root block in mutator.
+         */
+        decompose: function (workspace) {
+            var containerBlock = workspace.newBlock(WebMrbc.EPropertyFixLenContainerBlock.type_name);
+            containerBlock.initSvg();
+            var connection = containerBlock.getInput("STACK").connection;
+            for (var i = 0; i < this.cases_.length; i = (i + 1) | 0) {
+                var caseBlock;
+                var description = this.getFieldValue("CASE_DESCRIPTION" + i);
+                var value = this.getFieldValue("CASE_VALUE" + i);
+                if (value != null) {
+                    caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenConstBlock.type_name);
+                    caseBlock.setFieldValue(description, "DESCRIPTION");
+                    caseBlock.setFieldValue(value, "CONST");
+                } else {
+                    var min = this.getFieldValue("CASE_MIN" + i);
+                    var max = this.getFieldValue("CASE_MAX" + i);
+                    if ((min != null) && (max != null)) {
+                        caseBlock = workspace.newBlock(WebMrbc.EPropertyFixLenRangeBlock.type_name);
+                        caseBlock.setFieldValue(description, "DESCRIPTION");
+                        caseBlock.setFieldValue(min, "RANGE_MIN");
+                        caseBlock.setFieldValue(max, "RANGE_MAX");
+                    } else {
+                        continue;
+                    }
+                }
+                caseBlock.initSvg();
+                connection.connect(caseBlock.previousConnection);
+                connection = caseBlock.nextConnection;
+            }
+            if (this.defaultCount_ !== 0) {
+                var defaultBlock = workspace.newBlock(WebMrbc.EPropertyFixLenDefaultBlock.type_name);
+                defaultBlock.initSvg();
+                connection.connect(defaultBlock.previousConnection);
+            }
+            containerBlock.setFieldValue(this.userGetter_ ? "TRUE" : "FALSE", "USER_GETTER");
+            return containerBlock;
+        },
+        /**
+         * Reconfigure this block based on the mutator dialog's components.
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @param   {WebMrbc.Block}    containerBlock    Root block in mutator.
+         * @return  {void}
+         */
+        compose: function (containerBlock) {
+            var clauseBlock = containerBlock.getInputTargetBlock("STACK");
+            // Count number of inputs.
+            this.cases_ = System.Array.init(0, null, Object);
+            this.defaultCount_ = 0;
+            var statementConnections = System.Array.init(0, null, Blockly.Connection);
+            var defaultStatementConnection = null;
+            while (clauseBlock != null) {
+                switch (clauseBlock.type) {
+                    case WebMrbc.EPropertyFixLenConstBlock.type_name: 
+                        {
+                            var description = clauseBlock.getFieldValue("DESCRIPTION");
+                            var value = clauseBlock.getFieldValue("CONST");
+                            this.cases_.push({ item1: description, item2: value, item3: null });
+                            statementConnections.push(clauseBlock.statementConnection_);
+                        }
+                        break;
+                    case WebMrbc.EPropertyFixLenRangeBlock.type_name: 
+                        {
+                            var description1 = clauseBlock.getFieldValue("DESCRIPTION");
+                            var range_min = clauseBlock.getFieldValue("RANGE_MIN");
+                            var range_max = clauseBlock.getFieldValue("RANGE_MAX");
+                            this.cases_.push({ item1: description1, item2: range_min, item3: range_max });
+                            statementConnections.push(Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenRangeBlock).statementConnection_);
+                        }
+                        break;
+                    case WebMrbc.EPropertyFixLenDefaultBlock.type_name: 
+                        {
+                            this.defaultCount_ = (this.defaultCount_ + 1) | 0;
+                            defaultStatementConnection = Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenDefaultBlock).statementConnection_;
+                        }
+                        break;
+                    default: 
+                        throw new System.Exception("Unknown block type.");
+                }
+                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
+            }
+            this.updateSetter_();
+            // Reconnect any child blocks.
+            for (var i = 0; i <= this.cases_.length; i = (i + 1) | 0) {
+                Blockly.Mutator.reconnect(statementConnections[i], this, "SET" + i);
+            }
+            Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_SET");
+            var userGetter_ = containerBlock.getFieldValue("USER_GETTER");
+            if (userGetter_ != null) {
+                var userGetter = Bridge.referenceEquals(userGetter_, "TRUE");
+                if (this.userGetter_ !== userGetter) {
+                    if (userGetter) {
+                        this.updateGetter_(true);
+                        // Restore the stack, if one was saved.
+                        Blockly.Mutator.reconnect(this.statementConnection_, this, "GET");
+                        this.statementConnection_ = null;
+                        Blockly.Mutator.reconnect(this.retvalConnection_, this, "GET_RET");
+                        this.retvalConnection_ = null;
+                    } else {
+                        // Save the stack, then disconnect it.
+                        var getterConnection = this.getInput("GET").connection;
+                        this.statementConnection_ = getterConnection.targetConnection;
+                        var getretConnection = this.getInput("GET_RET").connection;
+                        this.retvalConnection_ = getretConnection.targetConnection;
+                        if (this.statementConnection_ != null) {
+                            var doBlock = getterConnection.targetBlock();
+                            doBlock.unplug();
+                            doBlock.bumpNeighbours_();
+                        }
+                        if (this.retvalConnection_ != null) {
+                            var doBlock1 = getretConnection.targetBlock();
+                            doBlock1.unplug();
+                            doBlock1.bumpNeighbours_();
+                        }
+                        this.updateGetter_(false);
+                    }
+                }
+            }
+        },
+        /**
+         * Store pointers to any connected child blocks.
+         *
+         * @instance
+         * @public
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @param   {WebMrbc.Block}    containerBlock    Root block in mutator.
+         * @return  {void}
+         */
+        saveConnections: function (containerBlock) {
+            var clauseBlock = containerBlock.getInputTargetBlock("STACK");
+            var i = 0;
+            while (clauseBlock != null) {
+                switch (clauseBlock.type) {
+                    case WebMrbc.EPropertyFixLenConstBlock.type_name: 
+                        {
+                            var inputSet = this.getInput("SET" + i);
+                            clauseBlock.statementConnection_ = (inputSet != null) ? inputSet.connection.targetConnection : null;
+                            i = (i + 1) | 0;
+                        }
+                        break;
+                    case WebMrbc.EPropertyFixLenRangeBlock.type_name: 
+                        {
+                            var inputSet1 = this.getInput("SET" + i);
+                            Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenRangeBlock).statementConnection_ = (inputSet1 != null) ? inputSet1.connection.targetConnection : null;
+                            i = (i + 1) | 0;
+                        }
+                        break;
+                    case WebMrbc.EPropertyFixLenDefaultBlock.type_name: 
+                        {
+                            var inputDo = this.getInput("DEFAULT_SET");
+                            Bridge.cast(clauseBlock, WebMrbc.EPropertyFixLenDefaultBlock).statementConnection_ = (inputDo != null) ? inputDo.connection.targetConnection : null;
+                        }
+                        break;
+                    default: 
+                        throw new System.Exception("Unknown block type.");
+                }
+
+                clauseBlock = (clauseBlock.nextConnection != null) ? clauseBlock.nextConnection.targetBlock() : null;
+            }
+            var inputGet = this.getInput("GET");
+            this.statementConnection_ = (inputGet != null) ? inputGet.connection.targetConnection : null;
+            var inputGetRet = this.getInput("GET_RET");
+            this.retvalConnection_ = (inputGetRet != null) ? inputGetRet.connection.targetConnection : null;
+        },
+        /**
+         * Modify this block to have the correct number of inputs.
+         *
+         * @instance
+         * @private
+         * @this WebMrbc.EPropertyFixLenBlock
+         * @memberof WebMrbc.EPropertyFixLenBlock
+         * @return  {void}
+         */
+        updateSetter_: function () {
+            var $t;
+            // Delete everything.
+            if (this.getInput("DEFAULT") != null) {
+                this.removeInput("DEFAULT");
+                this.removeInput("DEFAULT_SET");
+            }
+            var i = 0;
+            while (this.getInput("CASE" + i) != null) {
+                this.removeInput("CASE" + i);
+                this.removeInput("SET" + i);
+                i = (i + 1) | 0;
+            }
+            // Rebuild block.
+            var getLabel = this.getInput("GET_LABEL");
+            i = 0;
+            $t = Bridge.getEnumerator(this.cases_);
+            while ($t.moveNext()) {
+                var c = $t.getCurrent();
+                if (c.item3 == null) {
+                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_VALUE" + i).appendField("の");
+                } else {
+                    this.appendDummyInput("CASE" + i).appendField("設定値が").appendField(c.item1, "CASE_DESCRIPTION" + i).appendField(c.item2, "CASE_MIN" + i).appendField("から").appendField(c.item3, "CASE_MAX" + i).appendField("の");
+                }
+                if (getLabel != null) {
+                    this.moveInputBefore("CASE" + i, "GET_LABEL");
+                }
+                this.appendStatementInput("SET" + i).appendField("とき");
+                if (getLabel != null) {
+                    this.moveInputBefore("SET" + i, "GET_LABEL");
+                }
+                i = (i + 1) | 0;
+            }
+            if (this.defaultCount_ !== 0) {
+                if (this.cases_.length === 0) {
+                    this.appendDummyInput("DEFAULT").appendField("値が設定される");
+                } else {
+                    this.appendDummyInput("DEFAULT").appendField("設定値が不明の");
+                }
+                if (getLabel != null) {
+                    this.moveInputBefore("DEFAULT", "GET_LABEL");
+                }
+                this.appendStatementInput("DEFAULT_SET").appendField("とき");
+                if (getLabel != null) {
+                    this.moveInputBefore("DEFAULT_SET", "GET_LABEL");
+                }
+            }
+        },
+        updateGetter_: function (userGetter) {
+            this.userGetter_ = userGetter;
+
+            if (this.getInput("GET") != null) {
+                this.removeInput("GET_LABEL");
+                this.removeInput("GET");
+                this.removeInput("GET_RET");
+            }
+            // Rebuild block.
+            if (this.userGetter_) {
+                this.appendDummyInput("GET_LABEL").appendField("値が取得される");
+                this.appendStatementInput("GET").appendField("とき");
+                this.appendValueInput("GET_RET").setCheck("String").setAlign(Blockly.ALIGN_RIGHT).appendField("返す値は");
+            }
+        }
+    });
+
+    Bridge.ns("WebMrbc.EPropertyFixLenBlock", $asm.$);
+
+    Bridge.apply($asm.$.WebMrbc.EPropertyFixLenBlock, {
+        f1: function () {
+            if ((this.cases_.length === 0) && (this.defaultCount_ === 0)) {
+                return "条件に合うブロックを実行";
+            } else if ((this.cases_.length === 0) && (this.defaultCount_ !== 0)) {
+                return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
+            } else if ((this.cases_.length !== 0) && (this.defaultCount_ === 0)) {
+                return "条件に合うブロックを実行";
+            } else if ((this.cases_.length !== 0) && (this.defaultCount_ !== 0)) {
+                return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
+            }
+            return "";
+        }
+    });
+
+    Bridge.define("WebMrbc.EPropertyVarLenBlock", {
+        inherits: [WebMrbc.EPropertyBlock],
+        statics: {
+            type_name: "eproperty_varlen"
+        },
+        ctor: function () {
+            this.$initialize();
+            WebMrbc.EPropertyBlock.ctor.call(this, WebMrbc.EPropertyVarLenBlock.type_name);
+        },
+        init: function () {
+            this.appendDummyInput("PROPERTY").appendField("EPC:").appendField("__", "PROPERTY_CODE").appendField("__", "DESCRIPTION").appendField("__", "IDENTIFIER").appendField("Size:").appendField("__", "PROPERTY_SIZE").appendField("byte");
+            this.appendStatementInput("SET").setCheck("EPropertySetHandler").appendField("設定");
+            this.appendValueInput("SET_RET").setCheck("Number").setAlign(Blockly.ALIGN_RIGHT).appendField("設定に使用したバイト数");
+            this.appendStatementInput("GET").setCheck("EPropertyGetHandler").appendField("取得");
+            this.appendValueInput("GET_RET").setCheck("String").setAlign(Blockly.ALIGN_RIGHT).appendField("返すデータ");
+            this.setColour(230);
+            this.setTooltip("");
+            this.setHelpUrl("http://www.example.com/");
+
+            this.getField("PROPERTY_CODE").EDITABLE = true;
         }
     });
 
@@ -27456,32 +27721,69 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
     Bridge.define("WebMrbc.MainLoopWorkspace", {
         inherits: [WebMrbc.IClassWorkspace],
-        identifier: null,
         workspace: null,
+        view: null,
+        _RubyCode: null,
         config: {
             alias: [
             "getIdentifier", "WebMrbc$IModel$getIdentifier",
             "getWorkspace", "WebMrbc$IClassWorkspace$getWorkspace",
+            "getView", "WebMrbc$IClassWorkspace$getView",
+            "getRubyCode", "WebMrbc$IClassWorkspace$getRubyCode",
             "getImageUrl", "WebMrbc$IClassWorkspace$getImageUrl",
             "isPreset", "WebMrbc$IClassWorkspace$isPreset",
             "toCode", "WebMrbc$IClassWorkspace$toCode",
-            "toDom", "WebMrbc$IClassWorkspace$toDom",
-            "loadDom", "WebMrbc$IClassWorkspace$loadDom",
+            "activate", "WebMrbc$IClassWorkspace$activate",
+            "inactivate", "WebMrbc$IClassWorkspace$inactivate",
             "reloadToolbox", "WebMrbc$IClassWorkspace$reloadToolbox",
             "openModifyView", "WebMrbc$IClassWorkspace$openModifyView",
             "template", "WebMrbc$IClassWorkspace$template"
             ]
         },
-        ctor: function (identifier) {
+        ctor: function (view) {
             this.$initialize();
-            this.identifier = identifier;
-            this.workspace = new Blockly.Workspace();
+            this.view = view;
+            this.workspace = view.init();
+
+            this.updateInitialBlock();
         },
         getIdentifier: function () {
-            return this.identifier;
+            return this.view.getIdentifier();
         },
         getWorkspace: function () {
             return this.workspace;
+        },
+        getView: function () {
+            return this.view;
+        },
+        getRubyCode: function () {
+            return this._RubyCode;
+        },
+        updateInitialBlock: function () {
+            var xml = document.createElement("xml");
+            var vset = document.createElement("block");
+            vset.setAttribute("type", "variables_set");
+            xml.appendChild(vset);
+
+            var field = document.createElement("field");
+            field.setAttribute("name", "VAR");
+            field.appendChild(document.createTextNode("MAKER_CODE"));
+            vset.appendChild(field);
+
+            var value = document.createElement("value");
+            value.setAttribute("name", "VALUE");
+            vset.appendChild(value);
+
+            var text = document.createElement("shadow");
+            text.setAttribute("type", "text");
+            value.appendChild(text);
+
+            field = document.createElement("field");
+            field.setAttribute("name", "TEXT");
+            field.appendChild(document.createTextNode("\\x00\\x00\\xB3")); /*  TOPPERSプロジェクト */
+            text.appendChild(field);
+
+            Blockly.Xml.domToWorkspace(xml, this.getWorkspace());
         },
         getImageUrl: function () {
             return "img/no_image.png";
@@ -27489,25 +27791,38 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         isPreset: function () {
             return true;
         },
-        toCode: function (generator) {
-            return generator.defineMainLoop(this, WebMrbc.Collections.LocalNode.getenode());
+        toCode: function (filename) {
+            this._RubyCode = new WebMrbc.Ruby(filename);
+            var result = this._RubyCode.defineMainLoop(this, this.getIdentifier());
+            this.view.changed = false;
+            return result;
         },
-        toDom: function () {
-            return Blockly.Xml.workspaceToDom(this.workspace);
+        activate: function () {
+            //ele = Blockly.Xml.workspaceToDom(workspace);
         },
-        loadDom: function (xml) {
-            this.workspace.clear();
-            Blockly.Xml.domToWorkspace(xml, this.workspace);
+        inactivate: function () {
+            //workspace.clear();
+            //Blockly.Xml.domToWorkspace(ele, workspace);
         },
         reloadToolbox: function (toolbox) {
-            var echonet_category = $("#echonet_category", toolbox);
-
-            echonet_category.html("");
+            var $t;
+            toolbox.appendChild(document.createElement("sep"));
+            var xml = $.parseXML(WebMrbc.App.arduinoToolbox);
+            var categories = xml.childNodes[0];
+            $t = Bridge.getEnumerator(categories.childNodes);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                if (!Bridge.referenceEquals(item.nodeName, "category")) {
+                    continue;
+                }
+                toolbox.appendChild(item);
+            }
         },
         openModifyView: function (callback) {
+            this.view.reloadToolbox(this);
         },
         template: function (template) {
-            template = System.String.replaceAll(template, "%identifier%", this.identifier);
+            template = System.String.replaceAll(template, "%identifier%", this.getIdentifier());
             template = System.String.replaceAll(template, "%attribute%", "MainLoop");
             template = System.String.replaceAll(template, "%img%", this.getImageUrl());
             return template;
@@ -27650,9 +27965,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             "toCode", "WebMrbc$IClassWorkspace$toCode"
             ]
         },
-        ctor: function (enode) {
+        ctor: function (view, enode) {
             this.$initialize();
-            WebMrbc.EObjectWorkspace.ctor.call(this, enode);
+            WebMrbc.EObjectWorkspace.ctor.call(this, view, enode);
         },
         getenode: function () {
             return Bridge.cast(this.eobject, WebMrbc.JsonNodeInfo);
@@ -27663,8 +27978,16 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         isPreset: function () {
             return true;
         },
-        toCode: function (generator) {
-            return generator.defineENode(Bridge.cast(this.eobject, WebMrbc.JsonNodeInfo), this.getWorkspace());
+        toCode: function (filename) {
+            if (this.eobject == null) {
+                return "";
+            }
+
+            this._RubyCode = new WebMrbc.Ruby(filename);
+            this._RubyCode.init(this.getWorkspace());
+            var result = this._RubyCode.defineENode(Bridge.cast(this.eobject, WebMrbc.JsonNodeInfo), this.getWorkspace());
+            this.getView().changed = false;
+            return result;
         }
     });
 });

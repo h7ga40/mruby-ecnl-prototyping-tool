@@ -1,0 +1,41 @@
+<xml id="toolbox" style="display: none">
+	<category name="ECHONET Lite API" colour="230">
+		<block type="property_attribute"></block>
+		<block type="service_code"></block>
+		<block type="node_id"></block>
+		<block type="save_received_property"></block>
+		<block type="get_saved_property"></block>
+		<block type="get_property_info"></block>
+		<block type="set_announce_request"></block>
+		<block type="data_to_number">
+			<value name="POSITION">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="number_to_data">
+			<value name="POSITION">
+				<shadow type="math_number"></shadow>
+			</value>
+		</block>
+		<block type="no_op"></block>
+		<block type="received_data"></block>
+		<block type="received_data_size"></block>
+		<block type="data_join"></block>
+		<block type="create_esv_get"></block>
+		<block type="create_esv_set"></block>
+		<block type="esv_add_edt"></block>
+		<block type="esv_add_epc"></block>
+		<block type="send_esv"></block>
+		<block type="release_esv"></block>
+		<block type="notify_initial_esv"></block>
+		<block type="esv_get_esv"></block>
+		<block type="esv_iterate"></block>
+		<block type="esv_iterator"></block>
+		<block type="svctask_set_timer"></block>
+		<block type="svctask_timer"></block>
+		<block type="svctask_progress"></block>
+		<block type="svctask_recv_msg"></block>
+		<block type="svctask_call_timeout"></block>
+		<block type="svctask_is_match"></block>
+	</category>
+</xml>

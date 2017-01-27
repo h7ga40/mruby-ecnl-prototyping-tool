@@ -128,10 +128,10 @@
 							</a>
 						</li>
 						<li>
-							<a id="mrbc-compile-to-bin-button" onclick="WebMrbc.Views.MainMenuView.onCompileToBin()">
+							<a id="mrbc-compile-to-bin-button" onclick="WebMrbc.Views.MainMenuView.onCompileToMrb()">
 								<h4>
 									<i class="glyphicon glyphicon-download"></i>
-									ビルド（.bin）
+									ビルド（.mrb）
 								</h4>
 							</a>
 						</li>
@@ -145,7 +145,6 @@
 	<div class="tab-content" id="modes-container">
 		<div class="tab-pane active modes-tab-pane" id="block-tab">
 			<div class="right-pane" id="block-tab-right-pane">
-				<div dir="LTR" id="blockly-div"></div>
 			</div>
 			<div class="left-pane" id="block-tab-left-pane">
 				<div id="selectors-container">
@@ -156,9 +155,9 @@
 					</ul>
 					<div class="tab-content" id="selectors-tab-content">
 						<div class="tab-pane active selector-tab" id="class-selector-tab">
-							<div id="class-selector-eobject-set"></div>
-							<div class="item" id="add-eobject-item">
-								<a class="eobject" id="add-eobject-button">
+							<div id="class-selector-celltype-set"></div>
+							<div class="item" id="add-celltype-item">
+								<a class="celltype" id="add-celltype-button">
 									<i class="glyphicon glyphicon-plus"></i>
 									<br>
 									新しい機器オブジェクト
@@ -175,18 +174,18 @@
 		</div>
 
 		<div class="tab-pane modes-tab-pane" id="output-tab">
-			<a href="http://emscripten.org" id="emscripten_logo">
-				<img src="img/banner.svg" />
-			</a>
-			<div class="spinner" id='spinner'></div>
-			<div class="emscripten" id="status">Downloading...</div>
-			<div class="emscripten">
-				<progress value="0" max="100" id="progress" hidden></progress>
+			<div id="term-box">
+				<div id="term"></div>
 			</div>
-			<div id="term"></div>
-			<textarea id="output"></textarea>
-			<div class="emscripten_border">
-				<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+			<div id="emscripten-box">
+				<a href="http://emscripten.org" id="emscripten_logo">
+					<img src="img/banner.svg" />
+				</a>
+				<div class="spinner" id='spinner'></div>
+				<div class="emscripten" id="status">Downloading...</div>
+				<div class="emscripten">
+					<progress value="0" max="100" id="progress" hidden></progress>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -209,19 +208,19 @@
 					</div>
 					<div class="left-pane" id="eobject-modal-left-pane">
 						<div class="ui-droppable" id="eobject-modal-preview">
-							<div style="left: 0px; top: 0px; transform: rotate(0deg) scaleX(1);" class="ui-draggable" id="eobject-modal-eobject">
+							<div style="left: 0px; top: 0px; transform: rotate(0deg) scaleX(1);" class="ui-draggable" id="eobject-modal-celltype">
 								<img alt="car1.png" src="smalruby_files/car1.png">
 							</div>
 						</div>
 						<div id="eobject-modal-attributes">
 							<form class="form-horizontal" id="eobject-modal-form">
-								<div class="control-group" for="eobject[identifier]">
+								<div class="control-group" for="celltype[identifier]">
 									<label class="control-label" for="eobject_identifier">名前</label>
 									<div class="controls">
-										<input class="form-control" id="eobject_identifier" name="eobject[identifier]" placeholder="car1やball1など" type="text">
+										<input class="form-control" id="eobject_identifier" name="celltype[identifier]" placeholder="car1やball1など" type="text">
 									</div>
 								</div>
-								<div class="control-group" for="eobject[attribute]">
+								<div class="control-group" for="celltype[attribute]">
 									<label class="control-label" for="eobject_attribute">区分</label>
 									<div class="dropdown">
 										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_attribute" data-toggle="dropdown" aria-expanded="false">
@@ -236,7 +235,7 @@
 										</ul>
 									</div>
 								</div>
-								<div class="control-group" for="eobject[classGroupCode]">
+								<div class="control-group" for="celltype[classGroupCode]">
 									<label class="control-label" for="eobject_classGroupCode">クラスグループ</label>
 									<div class="dropdown">
 										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_classGroupCode" data-toggle="dropdown" aria-expanded="false">
@@ -249,7 +248,7 @@
 										</ul>
 									</div>
 								</div>
-								<div class="control-group" for="eobject[classCode]">
+								<div class="control-group" for="celltype[classCode]">
 									<label class="control-label" for="eobject_classCode">クラス</label>
 									<div class="dropdown">
 										<button class="btn btn-default dropdown-toggle" type="button" id="eobject_classCode" data-toggle="dropdown" aria-expanded="false">
@@ -263,10 +262,10 @@
 										</ul>
 									</div>
 								</div>
-								<div class="control-group" for="eobject[instanceCode]">
+								<div class="control-group" for="celltype[instanceCode]">
 									<label class="control-label" for="eobject_instanceCode">インスタンス</label>
 									<div class="controls">
-										<input class="form-control" id="eobject_instanceCode" name="eobject[instanceCode]" placeholder="1～127" type="text" onchange="WebMrbc.Views.EObjectModalView.onChangeInstanceCode(this)">
+										<input class="form-control" id="eobject_instanceCode" name="celltype[instanceCode]" placeholder="1～127" type="text" onchange="WebMrbc.Views.EObjectModalView.onChangeInstanceCode(this)">
 									</div>
 								</div>
 							</form>
@@ -301,50 +300,11 @@
 						</a>
 					</span>
 				</div>
-				<a class='eobject'>
+				<a class='celltype'>
 					<img src='%img%'>
 				</a>
 			</div>
 		</script>
-	</div>
-
-	<div id="reset-modal" class="modal fade">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3>
-						本当にリセットしますか？
-					</h3>
-				</div>
-				<div class="modal-body">
-					<p>
-						作成中のプログラムが消えてしまうよ！
-					</p>
-				</div>
-				<div class="modal-footer">
-					<button aria-hidden="true" class="btn" data-dismiss="modal" id="reset-modal-cancel-button"><i class="glyphicon glyphicon-remove"></i>やめる</button>
-					<button class="btn btn-primary" id="reset-modal-ok-button"><i class="glyphicon glyphicon-off"></i>リセット</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div id="preference-modal" class="modal fade">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3>
-						<i class="glyphicon glyphicon-cog"></i>
-						設定
-					</h3>
-				</div>
-				<div class="modal-body" id="preference-modal-content"></div>
-				<div class="modal-footer">
-					<button aria-hidden="true" class="btn" data-dismiss="modal"><i class="glyphicon glyphicon-remove"></i>やめる</button>
-					<button class="btn btn-primary" id="preference-modal-ok-button"><i class="glyphicon glyphicon-circle-blank"></i>決めた！</button>
-				</div>
-			</div>
-		</div>
 	</div>
 
 	<xml id="toolbox" style="display: none">
@@ -644,442 +604,6 @@
 		<sep></sep>
 		<category name="Variables" custom="VARIABLE" colour="330"></category>
 		<category name="Functions" custom="PROCEDURE" colour="290"></category>
-		<sep></sep>
-		<category name="Arduino" colour="160">
-			<category name="Kernel">
-				<block type="call"></block>
-				<block type="pin_mode"></block>
-				<block type="digital_write"></block>
-				<block type="digital_read"></block>
-				<block type="analog_read"></block>
-				<block type="pwm">
-					<value name="PWM_OUT">
-						<shadow type="pwm_value"></shadow>
-					</value>
-				</block>
-				<block type="pwm_value"></block>
-				<block type="analog_reference"></block>
-				<block type="init_dac"></block>
-				<block type="analog_dac">
-					<value name="VALUE">
-						<shadow type="dac_value"></shadow>
-					</value>
-				</block>
-				<block type="dac_value"></block>
-				<block type="delay">
-					<value name="VALUE">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="millis"></block>
-				<block type="micros"></block>
-				<block type="led">
-					<value name="SW">
-						<shadow type="bit"></shadow>
-					</value>
-				</block>
-				<block type="bit"></block>
-				<block type="hexadecimal"></block>
-				<block type="tone">
-					<value name="FREQUENCY">
-						<shadow type="tone_value"></shadow>
-					</value>
-					<value name="DURATION">
-						<shadow type="math_number">
-							<field name="NUM">0</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="tone_value"></block>
-				<block type="no_tone"></block>
-				<block type="random_seed">
-					<value name="VALUE">
-						<shadow type="math_number">
-							<field name="NUM">0</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="random">
-					<value name="MIN">
-						<shadow type="math_number">
-							<field name="NUM">0</field>
-						</shadow>
-					</value>
-					<value name="MAX">
-						<shadow type="math_number">
-							<field name="NUM">100</field>
-						</shadow>
-					</value>
-				</block>
-			</category>
-			<category name="System">
-				<block type="system_exit"></block>
-				<block type="system_setrun">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="system_version"></block>
-				<block type="system_push">
-					<value name="ADDRESS">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-					<value name="DATA">
-						<shadow type="text"></shadow>
-					</value>
-					<value name="LENGTH">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="system_pop">
-					<value name="ADDRESS">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-					<value name="LENGTH">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="system_fileload"></block>
-				<block type="system_reset"></block>
-				<block type="system_use_sd"></block>
-				<block type="system_use_wifi"></block>
-				<block type="system_get_mrb_path"></block>
-			</category>
-			<category name="MemFile">
-				<block type="memfile_open">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="memfile_close"></block>
-				<block type="memfile_read"></block>
-				<block type="memfile_write">
-					<value name="DATA">
-						<shadow type="text"></shadow>
-					</value>
-					<value name="LENGTH">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="memfile_seek">
-					<value name="POSITION">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="memfile_cp">
-					<value name="SRC_FILENAME">
-						<shadow type="text">
-							<field name="TEXT">src.ext</field>
-						</shadow>
-					</value>
-					<value name="DST_FILENAME">
-						<shadow type="text">
-							<field name="TEXT">dst.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="memfile_rm">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-			</category>
-			<category name="Serial">
-				<block type="serial_new">
-					<value name="BPS">
-						<shadow type="bps_value">
-							<field name="VALUE">9.6kbps</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="serial_bps">
-					<value name="BPS">
-						<shadow type="bps_value">
-							<field name="VALUE">9.6kbps</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="serial_print">
-					<value name="STR">
-						<shadow type="text"></shadow>
-					</value>
-				</block>
-				<block type="serial_println">
-					<value name="STR">
-						<shadow type="text"></shadow>
-					</value>
-				</block>
-				<block type="serial_available"></block>
-				<block type="serial_read"></block>
-				<block type="serial_write">
-					<value name="DATA">
-						<shadow type="text"></shadow>
-					</value>
-					<value name="LENGTH">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="serial_flash"></block>
-				<block type="bps_value">
-					<field name="VALUE">9.6kbps</field>
-				</block>
-			</category>
-			<category name="I2C">
-				<block type="i2c_new"></block>
-				<block type="i2c_write">
-					<value name="ADDRESS">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-					<value name="DATA">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="i2c_read">
-					<value name="ADDRESS_L">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-					<value name="ADDRESS_H">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-				</block>
-				<block type="i2c_begin"></block>
-				<block type="i2c_lwrite">
-					<value name="DATA">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="i2c_end"></block>
-				<block type="i2c_request">
-					<value name="ADDRESS">
-						<shadow type="hexadecimal"></shadow>
-					</value>
-					<value name="COUNT">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="i2c_lread"></block>
-				<block type="i2c_available"></block>
-				<block type="i2c_frequency">
-					<value name="FREQUENCY">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-			</category>
-			<category name="Servo">
-				<block type="servo_attach"></block>
-				<block type="servo_write">
-					<value name="ANGLE">
-						<shadow type="servo_angle"></shadow>
-					</value>
-				</block>
-				<block type="servo_us">
-					<value name="US">
-						<shadow type="servo_us_value"></shadow>
-					</value>
-				</block>
-				<block type="servo_read"></block>
-				<block type="servo_attached"></block>
-				<block type="servo_detach"></block>
-				<block type="servo_angle"></block>
-				<block type="servo_us_value"></block>
-			</category>
-			<category name="RTC">
-				<block type="rtc_gettime"></block>
-				<block type="rtc_settime">
-					<value name="DATE">
-						<block type="rtc_datetime">
-							<value name="YEAR">
-								<shadow type="rtc_year"></shadow>
-							</value>
-							<value name="MONTH">
-								<shadow type="rtc_month"></shadow>
-							</value>
-							<value name="DAY">
-								<shadow type="rtc_day"></shadow>
-							</value>
-							<value name="HOUR">
-								<shadow type="rtc_hour"></shadow>
-							</value>
-							<value name="MINUTE">
-								<shadow type="rtc_minute"></shadow>
-							</value>
-							<value name="SECOND">
-								<shadow type="rtc_second"></shadow>
-							</value>
-						</block>
-					</value>
-				</block>
-				<block type="rtc_deinit"></block>
-				<block type="rtc_init"></block>
-				<block type="rtc_datetime">
-					<value name="YEAR">
-						<shadow type="rtc_year"></shadow>
-					</value>
-					<value name="MONTH">
-						<shadow type="rtc_month"></shadow>
-					</value>
-					<value name="DAY">
-						<shadow type="rtc_day"></shadow>
-					</value>
-					<value name="HOUR">
-						<shadow type="rtc_hour"></shadow>
-					</value>
-					<value name="MINUTE">
-						<shadow type="rtc_minute"></shadow>
-					</value>
-					<value name="SECOND">
-						<shadow type="rtc_second"></shadow>
-					</value>
-				</block>
-				<block type="rtc_get_datetime_item"></block>
-				<block type="rtc_set_datetime_item"></block>
-				<block type="rtc_year"></block>
-				<block type="rtc_month"></block>
-				<block type="rtc_day"></block>
-				<block type="rtc_hour"></block>
-				<block type="rtc_minute"></block>
-				<block type="rtc_second"></block>
-				<block type="rtc_weekday"></block>
-			</category>
-			<category name="SD">
-				<block type="sd_exists">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_mkdir">
-					<value name="DIRNAME">
-						<shadow type="text">
-							<field name="TEXT">dirname</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_remove">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_copy">
-					<value name="SRC_FILENAME">
-						<shadow type="text">
-							<field name="TEXT">src.ext</field>
-						</shadow>
-					</value>
-					<value name="DST_FILENAME">
-						<shadow type="text">
-							<field name="TEXT">dst.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_rmdir">
-					<value name="DIRNAME">
-						<shadow type="text">
-							<field name="TEXT">dirname</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_open">
-					<value name="FILENAME">
-						<shadow type="text">
-							<field name="TEXT">filename.ext</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_close"></block>
-				<block type="sd_read"></block>
-				<block type="sd_seek">
-					<value name="POSITION">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="sd_write">
-					<value name="DATA">
-						<shadow type="text"></shadow>
-					</value>
-					<value name="LENGTH">
-						<shadow type="math_number">
-							<field name="NUM">1</field>
-						</shadow>
-					</value>
-				</block>
-				<block type="sd_flush"></block>
-				<block type="sd_size"></block>
-				<block type="sd_position"></block>
-			</category>
-		</category>
-		<category name="ECHONET Lite" colour="230">
-			<category name="API">
-				<block type="property_attribute"></block>
-				<block type="service_code"></block>
-				<block type="node_id"></block>
-				<block type="save_received_property"></block>
-				<block type="get_saved_property"></block>
-				<block type="get_property_info"></block>
-				<block type="set_announce_request"></block>
-				<block type="data_to_number">
-					<value name="POSITION">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="number_to_data">
-					<value name="POSITION">
-						<shadow type="math_number"></shadow>
-					</value>
-				</block>
-				<block type="no_op"></block>
-				<block type="received_data"></block>
-				<block type="received_data_size"></block>
-				<block type="data_join"></block>
-				<block type="create_esv_get"></block>
-				<block type="create_esv_set"></block>
-				<block type="esv_add_edt"></block>
-				<block type="esv_add_epc"></block>
-				<block type="send_esv"></block>
-				<block type="release_esv"></block>
-				<block type="notify_initial_esv"></block>
-				<block type="esv_get_esv"></block>
-				<block type="esv_iterate"></block>
-				<block type="esv_iterator"></block>
-				<block type="svctask_set_timer"></block>
-				<block type="svctask_timer"></block>
-				<block type="svctask_progress"></block>
-				<block type="svctask_recv_msg"></block>
-				<block type="svctask_call_timeout"></block>
-				<block type="svctask_is_match"></block>
-			</category>
-			<category name="Property" id="echonet_category">
-				<block type="eproperty_varlen">
-					<field name="PROPERTY_CODE">80</field>
-				</block>
-				<block type="eproperty_varlen">
-					<field name="PROPERTY_CODE">82</field>
-				</block>
-			</category>
-		</category>
 	</xml>
 </body>
 </html>
