@@ -534,24 +534,6 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     Bridge.ready(this.main);
                 }
             },
-            initMruby: function () {
-                var mruby = new WebMrbc.Mruby();
-
-                window.onerror = function (message, url, lineNumber, columnNumber, error) {
-                    var spinnerElement = document.getElementById("spinner");
-                    // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-                    mruby.setStatus("Exception thrown, see JavaScript console");
-                    spinnerElement.style.display = "none";
-                    mruby.setStatus = function (text) {
-                        if (!System.String.isNullOrEmpty(text)) {
-                            mruby.printErr(System.Array.init([System.String.concat("[post-exception status] ", text)], String));
-                        }
-                    };
-                    return false;
-                };
-
-                return mruby;
-            },
             main: function () {
                 Number.isFinite = Number.isFinite || function(any) { return typeof any === 'number' && isFinite(any); };
                 Number.isNaN = Number.isNaN || function(any) { return typeof any === 'number' && isNaN(any); };
@@ -973,8 +955,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             },
             no: 1
         },
+        identifier: null,
         flyoutCategoryHandlers: null,
-        changed: false,
+        changed: true,
         _Workspace: null,
         _WorkspaceElementId: null,
         _IdNo: 0,
@@ -984,10 +967,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 BlockDeleted: null,
                 BlockChanged: null,
                 BlockMoveed: null,
-                UiEvent: null
-            },
-            properties: {
-                Identifier: null
+                UiEvent: null,
+                IdentifierChanged: null
             },
             init: function () {
                 this.flyoutCategoryHandlers = new (System.Collections.Generic.Dictionary$2(String,Function))();
@@ -999,6 +980,15 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
             this.flyoutCategoryHandlers.add(Blockly.Procedures.NAME_TYPE, Bridge.fn.cacheBind(Blockly.Procedures, Blockly.Procedures.flyoutCategory));
             this.flyoutCategoryHandlers.add(Blockly.Variables.NAME_TYPE, Bridge.fn.cacheBind(Blockly.Variables, Blockly.Variables.flyoutCategory));
+        },
+        getIdentifier: function () {
+            return this.identifier;
+        },
+        setIdentifier: function (value) {
+            if (!Bridge.referenceEquals(this.identifier, value)) {
+                this.identifier = value;
+                !Bridge.staticEquals(this.IdentifierChanged, null) ? this.IdentifierChanged(this, Object.empty) : null;
+            }
         },
         init: function () {
             var $t;
@@ -1403,6 +1393,30 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
     Bridge.define("WebMrbc.CodeGenerator", {
         statics: {
+            getClassIdentifier: function (cls) {
+                var $t;
+                var result = "";
+                var up = true;
+                $t = Bridge.getEnumerator(cls.name.toLowerCase());
+                while ($t.moveNext()) {
+                    var c = $t.getCurrent();
+                    if (c === 95) {
+                        up = true;
+                        continue;
+                    }
+                    result = System.String.concat(result, (up ? String.fromCharCode(c).toUpperCase() : String.fromCharCode(c)));
+                    up = false;
+                }
+                if (System.String.endsWith(result, "Eobj")) {
+                    result = result.substr(0, ((result.length - 4) | 0));
+                }
+
+                if (!new RegExp("^[A-Z][A-Za-z0-9_]+$").test(result)) {
+                    result = System.String.format("Cls{0:X2}{1:X2}", cls.classGroup.classGroupCode, cls.classCode);
+                }
+
+                return result;
+            },
             getPropertyIdentifier: function (pi) {
                 var cls = pi.classInfo;
                 var fi = pi;
@@ -1411,53 +1425,21 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 if (!new RegExp("^[A-Za-z_][A-Za-z0-9_]+$").test(result)) {
                     result = System.String.format("property{0:X2}", pi.propertyCode);
                 } else {
-                    var ms = new RegExp("[A-Z][a-z]+", "g");
+                    var reg = new RegExp("[A-Z][a-z]+", "g");
                     var m;
-                    if (((m = ms.exec(result))) != null) {
+                    if (((m = reg.exec(result))) != null) {
                         var blocks = System.Array.init(0, null, String);
                         var pos = 0;
                         do {
-                            var len = (m.index - pos) | 0;
+                            var len = (((m.index + m[0].length) | 0) - pos) | 0;
                             blocks.push(result.substr(pos, len).toLowerCase());
                             pos = (pos + len) | 0;
-                        } while (((m = ms.exec(result))) != null);
+                        } while (((m = reg.exec(result))) != null);
                         result = blocks.join("_");
                     }
-                }
-
-                if (fi.isArray) {
-                    result = System.String.concat(result, (System.String.format("[{0}]", pi.arrayCount)));
                 }
 
                 return result;
-            },
-            getFieldIdentifier: function (efi) {
-                var fi = efi;
-                var result = fi.identifier;
-
-                if (!new RegExp("^[A-Za-z_][A-Za-z0-9_]+$").test(result)) {
-                    result = System.String.format("field{0:X8}", efi.type);
-                } else {
-                    var ms = new RegExp("[A-Z][a-z]+", "g");
-                    var m;
-                    if (((m = ms.exec(result))) != null) {
-                        var blocks = System.Array.init(0, null, String);
-                        var pos = 0;
-                        do {
-                            var len = (m.index - pos) | 0;
-                            blocks.push(result.substr(pos, len).toLowerCase());
-                            pos = (pos + len) | 0;
-                        } while (((m = ms.exec(result))) != null);
-
-                        result = blocks.join("_");
-                    }
-                }
-
-                if (fi.isArray) {
-                    result = System.String.concat(result, (System.String.format("[{0}]", efi.arrayCount)));
-                }
-
-                return System.String.concat("@", result);
             },
             hasPropSetter: function (epi, valueRange) {
                 valueRange.v = null;
@@ -1607,9 +1589,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var button = $("#eobject_attribute");
             button.text(text);
 
-            var caret = document.createElement("span");
-            caret.setAttribute("class", "caret");
-            button.get(0).appendChild(caret);
+            var caret = $("span.caret", button);
+            if (caret.length === 0) {
+                caret = $("<span>");
+                caret.attr("class", "caret");
+                button.append(caret);
+            }
         },
         setClassGroup: function (cg, success) {
             if (success === void 0) { success = null; }
@@ -1624,9 +1609,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 button.attr("disabled", "disabled");
             }
 
-            var caret = document.createElement("span");
-            caret.setAttribute("class", "caret");
-            button.get(0).appendChild(caret);
+            var caret = $("span.caret", button);
+            if (caret.length === 0) {
+                caret = $("<span>");
+                caret.attr("class", "caret");
+                button.append(caret);
+            }
 
             this.initClasss(cg);
             if (!Bridge.staticEquals(success, null)) {
@@ -1646,9 +1634,18 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 button.attr("disabled", "disabled");
             }
 
-            var caret = document.createElement("span");
-            caret.setAttribute("class", "caret");
-            button.get(0).appendChild(caret);
+            var caret = $("span.caret", button);
+            if (caret.length === 0) {
+                caret = $("<span>");
+                caret.attr("class", "caret");
+                button.append(caret);
+            }
+
+            var identifier = $("#eobject_identifier").val();
+            if (Bridge.referenceEquals(this.model.identifier, identifier)) {
+                this.model.identifier = WebMrbc.CodeGenerator.getClassIdentifier(c);
+                $("#eobject_identifier").val(this.model.identifier);
+            }
 
             this.initProperties(c);
             if (!Bridge.staticEquals(success, null)) {
@@ -1767,6 +1764,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     label.button('toggle');
                 }
             }
+        },
+        onChangeIdentifier: function (ele) {
+            var identifier = $("#eobject_identifier").val();
+            this.model.identifier = identifier;
         },
         onSelectAttribute: function (sender, attribute) {
             var text = sender.textContent;
@@ -2023,7 +2024,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         ctor: function (name) {
             this.$initialize();
             this.name_ = name;
-            this.FUNCTION_NAME_PLACEHOLDER_REGEXP_ = new System.Text.RegularExpressions.Regex.$ctor1(this.FUNCTION_NAME_PLACEHOLDER_, 0);
+            this.FUNCTION_NAME_PLACEHOLDER_REGEXP_ = new RegExp(this.FUNCTION_NAME_PLACEHOLDER_, "g");
         },
         /**
          * Generate code for all blocks in the workspace to the specified language.
@@ -2076,7 +2077,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
          * @return  {string}              The prefixed lines of code.
          */
         prefixLines: function (text, prefix) {
-            return System.String.concat(prefix, System.Text.RegularExpressions.Regex.replace(text, "(?!\n$)\n", System.String.concat("\n", prefix)));
+            return System.String.concat(prefix, text.replace(new RegExp("(?!\n$)\n"), System.String.concat("\n", prefix)));
         },
         /**
          * Recursively spider a tree of blocks, returning all their comments.
@@ -2145,8 +2146,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 code.block_id = block.id;
                 result.push(code);
             }
-            this.scrub_(block, result);
-            return result;
+            return this.scrub_(block, result);
         },
         /**
          * Generate code representing the specified value input.
@@ -2166,7 +2166,9 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 return null;
             }
             var code = this.blockToCode(targetBlock);
-            if (code.length === 1) {
+            if (code == null) {
+                return null;
+            } else if (code.length === 1) {
                 return code[0];
             } else {
                 throw new System.Exception();
@@ -2888,14 +2890,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             rubyfiles[i] = outfile.v;
         },
         onHelp: function () {
-            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module = new WebMrbc.Mruby();
 
             var args = System.Array.init(["mrbc", "--help"], String);
             WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
         onVersion: function () {
-            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module = new WebMrbc.Mruby();
 
             var args = System.Array.init(["mrbc", "--version"], String);
             WebMrbc.App.module.run(args);
@@ -2907,7 +2909,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.getCompileArgs(args, "/src/", "c", mrbfile);
             args[4] = "/build/main_rb.c";
 
-            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module = new WebMrbc.Mruby();
             WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
                 var $t;
                 var FS = WebMrbc.App.module.getFileSystem();
@@ -2932,7 +2934,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.getCompileArgs(args, "/src/", "mrb", mrbfile);
             args[3] = "/build/main_rb.mrb";
 
-            WebMrbc.App.module = WebMrbc.App.initMruby();
+            WebMrbc.App.module = new WebMrbc.Mruby();
             WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
                 var $t;
                 var FS = WebMrbc.App.module.getFileSystem();
@@ -3481,7 +3483,23 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
             var exe = Bridge.cast(args.shift(), String);
             this.arguments = args;
-            eval(System.String.concat(exe, "(this)"));
+
+            var onerror = window.onerror;
+            window.onerror = Bridge.fn.bind(this, function (message, url, lineNumber, columnNumber, error) {
+                var spinnerElement = document.getElementById("spinner");
+                // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+                this.setStatus("Exception thrown, see JavaScript console");
+                spinnerElement.style.display = "none";
+                this.setStatus = Bridge.fn.bind(this, $asm.$.WebMrbc.Mruby.f1);
+                onerror(message, url, lineNumber, columnNumber, error);
+                return false;
+            });
+            try {
+                eval(System.String.concat(exe, "(this)"));
+            }
+            finally {
+                window.onerror = onerror;
+            }
         },
         _setStatus: function (text) {
             if (this._last == null) {
@@ -3557,6 +3575,16 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 time : this.time,
                 text : this.text
             };
+        }
+    });
+
+    Bridge.ns("WebMrbc.Mruby", $asm.$);
+
+    Bridge.apply($asm.$.WebMrbc.Mruby, {
+        f1: function (text) {
+            if (!System.String.isNullOrEmpty(text)) {
+                this.printErr(System.Array.init([System.String.concat("[post-exception status] ", text)], String));
+            }
         }
     });
 
@@ -3674,7 +3702,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             } else {
                 // Unfortunately names in non-latin characters will look like
                 // _E9_9F_B3_E4_B9_90 which is pretty meaningless.
-                name = encodeURI(System.Text.RegularExpressions.Regex.replace(System.Text.RegularExpressions.Regex.replace(name, " ", "_"), "[^\\w]", "_"));
+                name = encodeURI(name.replace(new RegExp(" "), "_").replace(new RegExp("[^\\w]"), "_"));
                 // Most languages don't allow names with leading numbers.
                 if (System.String.indexOf(("0123456789"), String.fromCharCode(name.charCodeAt(0))) !== -1) {
                     name = System.String.concat("my_", name);
@@ -3900,11 +3928,11 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 }
                 while (!WebMrbc.Procedures.isLegalName_(name, block.workspace, block)) {
                     // Collision with another procedure.
-                    var r = System.Text.RegularExpressions.Regex.match(name, "^(.*?)(\\d+)$");
+                    var r = new RegExp("^(.*?)(\\d+)$").exec(name);
                     if (r == null) {
                         name = System.String.concat(name, "2");
                     } else {
-                        name = System.String.concat(r.getGroups().get(1).getValue(), (((parseInt(r.getGroups().get(2).getValue(), 10) + 1) | 0)));
+                        name = System.String.concat(r[1], (((parseInt(r[2], 10) + 1) | 0)));
                     }
                 }
                 return name;
@@ -4010,7 +4038,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
          */
         rename: function (field, name) {
             // Strip leading and trailing whitespace.  Beyond this, all names are legal.
-            name = System.Text.RegularExpressions.Regex.replace(name, "^[\\s\\xa0] +|[\\s\\xa0] +$", "");
+            name = name.replace(new RegExp("^[\\s\\xa0] +|[\\s\\xa0] +$"), "");
 
             // Ensure two identically-named procedures don't exist.
             var legalName = WebMrbc.Procedures.findLegalName(name, field.sourceBlock_);
@@ -5185,7 +5213,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 // Merge runs of whitespace.  Strip leading and trailing whitespace.
                 // Beyond this, all names are legal.
                 if (newVar != null) {
-                    newVar = System.Text.RegularExpressions.Regex.replace(System.Text.RegularExpressions.Regex.replace(newVar, "[\\s\\xa0] +", " "), "^ | $", "");
+                    newVar = newVar.replace(new RegExp("[\\s\\xa0] +"), " ").replace(new RegExp("^ | $"), "");
                     if (Bridge.referenceEquals(newVar, Blockly.Msg.RENAME_VARIABLE) || Bridge.referenceEquals(newVar, Blockly.Msg.NEW_VARIABLE)) {
                         // Ok, not ALL names are legal...
                         newVar = null;
@@ -12879,7 +12907,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.yyConsole.WebMrbc$MrbParser$yyConsoleOut$yyWarning(message, expected);
         },
         WebMrbc$MrbParser$yyConsoleOut$yyWarning: function (message, expected) {
-            WebMrbc.App.write(System.String.format("{0}({1},{2}): warning {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.writeLine(System.String.format("{0}({1},{2}): warning {3}", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * (syntax) error message.
@@ -12901,7 +12929,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.yyConsole.WebMrbc$MrbParser$yyConsoleOut$yyError(message, expected);
         },
         WebMrbc$MrbParser$yyConsoleOut$yyError: function (message, expected) {
-            WebMrbc.App.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.writeLine(System.String.format("{0}({1},{2}): error {3}", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         /**
          * computes list of expected tokens on error by tracing the tables.
@@ -20538,7 +20566,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             var value_endpoint = this.valueToCode(block, "ENDPOINT");
             return new WebMrbc.fcall_node.$ctor1(this, this.intern("is_match"), System.Array.init([value_node, value_edtat, value_endpoint], WebMrbc.node));
         },
-        defineSvcTask: function (workspace, localNode) {
+        defineEcnlTask: function (workspace, localNode) {
             var $t, $t1;
             this.global = false;
             var code = this.workspaceToCode(workspace.getWorkspace());
@@ -20604,7 +20632,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     $t = Bridge.getEnumerator(localNode.objects);
                     while ($t.moveNext()) {
                         var o1 = $t.getCurrent();
-                        sb.appendLine(System.String.concat("\t\t\t", o1.identifier, ".new(", o1.instanceCode, ", @profile) ]"));
+                        sb.appendLine(System.String.concat("\t\t\t", o1.identifier, ".new(", o1.instanceCode, ", @profile)"));
                     }
                     sb.appendLine("\t\t]");
                     break;
@@ -21243,9 +21271,10 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                 nextBlock = block.nextConnection.targetBlock();
             }
             var nextCode = this.blockToCode(nextBlock);
-            if (nextCode != null) {
-                code = Bridge.cast(code.concat.apply(code, nextCode), System.Array.type(WebMrbc.node));
+            if (nextCode == null) {
+                return code;
             }
+            return Bridge.cast(code.concat.apply(code, nextCode), System.Array.type(WebMrbc.node));
         },
         get_sym: function (str) {
             var i = this.syms.indexOf(str);
@@ -21440,7 +21469,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         yyError: function (message, expected) {
             if (expected === void 0) { expected = []; }
-            WebMrbc.App.write(System.String.format("{0}({1},{2}): error {3}\r\n", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
+            WebMrbc.App.writeLine(System.String.format("{0}({1},{2}): error {3}", this.getfilename(), this.getlineno(), this.getcolumn(), System.String.format.apply(System.String, [message].concat(expected))));
         },
         colour_picker: function (block) {
             // Colour picker.
@@ -26207,12 +26236,25 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return true;
         },
         toCode: function (filename) {
+            var $t;
             if (WebMrbc.Collections.LocalNode == null) {
                 return "";
             }
 
             this._RubyCode = new WebMrbc.Ruby(filename);
-            var result = this._RubyCode.defineSvcTask(this, WebMrbc.Collections.LocalNode.getenode());
+            var enode = WebMrbc.Collections.LocalNode.getenode();
+            var objects = System.Array.init(0, null, WebMrbc.JsonObjectInfo);
+            $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                var obj = Bridge.as(item, WebMrbc.EObjectWorkspace);
+                if ((obj == null) || (Bridge.referenceEquals(obj, WebMrbc.Collections.LocalNode))) {
+                    continue;
+                }
+                objects.push(obj.eobject);
+            }
+            enode.objects = objects;
+            var result = this._RubyCode.defineEcnlTask(this, enode);
             this.view.changed = false;
             return result;
         },
@@ -26286,6 +26328,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         openModifyView: function (callback) {
             this.view.reloadToolbox(this);
+            callback(true);
         },
         template: function (template) {
             template = System.String.replaceAll(template, "%identifier%", this.getIdentifier());
@@ -26329,7 +26372,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.updateInitialBlock();
         },
         getIdentifier: function () {
-            return this.eobject.identifier;
+            return this.view.getIdentifier();
         },
         getWorkspace: function () {
             return this.workspace;
@@ -27216,7 +27259,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             view.removeClosed(Bridge.fn.cacheBind(this, this.eObjectModalView_Closed));
 
             if (ok) {
-                this.view.reloadToolbox(this);
+                this.getView().setIdentifier(this.eobject.identifier);
+                this.getView().reloadToolbox(this);
                 this.updateInitialBlock();
             }
             !Bridge.staticEquals(this.callback, null) ? this.callback(ok) : null;
@@ -27792,8 +27836,12 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             return true;
         },
         toCode: function (filename) {
+            if (WebMrbc.Collections.EcnlTaskWorkspace == null) {
+                return "";
+            }
+
             this._RubyCode = new WebMrbc.Ruby(filename);
-            var result = this._RubyCode.defineMainLoop(this, this.getIdentifier());
+            var result = this._RubyCode.defineMainLoop(this, WebMrbc.Collections.EcnlTaskWorkspace.getIdentifier());
             this.view.changed = false;
             return result;
         },
@@ -27820,6 +27868,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         openModifyView: function (callback) {
             this.view.reloadToolbox(this);
+            callback(true);
         },
         template: function (template) {
             template = System.String.replaceAll(template, "%identifier%", this.getIdentifier());
