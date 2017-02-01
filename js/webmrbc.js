@@ -2825,6 +2825,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         _BlockIds: null,
         _Files: null,
+        _CFile: null,
+        _MrbFile: null,
         filename: null,
         el: null,
         current: null,
@@ -2837,7 +2839,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             this.$initialize();
             this.el = $("#main-menu");
 
-            $("#filename").keypress($asm.$.WebMrbc.MainMenuView.f1);
+            var filedialog = Bridge.cast(document.getElementById("load-file"), HTMLInputElement);
+            filedialog.onchange = Bridge.fn.combine(filedialog.onchange, Bridge.fn.bind(this, function (ele) {
+                if (filedialog.value == null) {
+                    return;
+                }
+
+                this.onUpload(filedialog);
+            }));
 
             // HACK: if don't do below, can't open submenu on Chromium on Raspberry Pi
             $(".dropdown-toggle").dropdown();
@@ -2848,6 +2857,21 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
             this.current = WebMrbc.Views.ClassSelectorView.getCurrent();
         },
+        toRubyAll: function () {
+            var $t;
+            $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
+            while ($t.moveNext()) {
+                var item = $t.getCurrent();
+                var view = item.WebMrbc$IClassWorkspace$getView();
+                if (view.changed || item.WebMrbc$IClassWorkspace$getRubyCode() == null) {
+                    var rubyfile = System.String.concat(item.WebMrbc$IModel$getIdentifier(), ".rb");
+                    var workspace = item.WebMrbc$IClassWorkspace$getWorkspace();
+                    var code = item.WebMrbc$IClassWorkspace$toCode(rubyfile);
+
+                    this._Files.set(rubyfile, code);
+                }
+            }
+        },
         getCompileArgs: function (rubyfiles, path, ext, outfile) {
             var $t, $t1;
             var i = rubyfiles.length;
@@ -2856,6 +2880,8 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             if (!System.String.endsWith(path, "/")) {
                 path = System.String.concat(path, "/");
             }
+
+            this.toRubyAll();
 
             var list = System.Array.init(0, null, WebMrbc.IClassWorkspace);
             list.push(WebMrbc.Collections.LocalNode);
@@ -2872,21 +2898,13 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
 
             $t1 = Bridge.getEnumerator(list);
             while ($t1.moveNext()) {
-                var item1 = $t1.getCurrent();
-                var rubyfile;
-                var view = item1.WebMrbc$IClassWorkspace$getView();
-                if (view.changed || item1.WebMrbc$IClassWorkspace$getRubyCode() == null) {
-                    rubyfile = System.String.concat(path, item1.WebMrbc$IModel$getIdentifier(), ".rb");
-                    var workspace = item1.WebMrbc$IClassWorkspace$getWorkspace();
-                    var code = item1.WebMrbc$IClassWorkspace$toCode(rubyfile);
-
-                    this._Files.set(rubyfile, code);
-                } else {
-                    rubyfile = item1.WebMrbc$IClassWorkspace$getRubyCode().getfilename();
-                }
-                rubyfiles.push(rubyfile);
+                var file = $t1.getCurrent();
+                rubyfiles.push(System.String.concat(path, file.WebMrbc$IModel$getIdentifier(), ".rb"));
             }
-            outfile.v = rubyfiles[((i + 1) | 0)].replace(new RegExp(".rb$", "g"), System.String.startsWith(ext, ".") ? ext : (System.String.concat(".", ext)));
+
+            if (System.String.isNullOrEmpty(outfile.v) && (((i + 1) | 0) < rubyfiles.length)) {
+                outfile.v = rubyfiles[((i + 1) | 0)].replace(new RegExp(".rb$", "g"), System.String.startsWith(ext, ".") ? ext : (System.String.concat(".", ext)));
+            }
             rubyfiles[i] = outfile.v;
         },
         onHelp: function () {
@@ -2903,53 +2921,64 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
+        mruby_PreRun: function () {
+            var $t;
+            var FS = WebMrbc.App.module.getFileSystem();
+
+            FS.createFolder("/", "src", true, false);
+            FS.createFolder("/", "build", true, true);
+
+            $t = Bridge.getEnumerator(this._Files);
+            while ($t.moveNext()) {
+                var f = $t.getCurrent();
+                FS.writeFile(System.String.concat("/src/", f.key), f.value);
+            }
+        },
+        mruby_ToCPostRun: function () {
+            var FS = WebMrbc.App.module.getFileSystem();
+
+            var filename = "/build/main_rb.c";
+            var stt = FS.stat(filename);
+            var stream = FS.open(filename, "r");
+            var buf = new Uint8Array(stt.size);
+            FS.read(stream, buf, 0, stt.size, 0);
+            FS.close(stream);
+
+            this._CFile = buf;
+        },
+        mruby_ToMrbPostRun: function () {
+            var FS = WebMrbc.App.module.getFileSystem();
+
+            var filename = "/build/main_rb.mrb";
+            var stt = FS.stat(filename);
+            var stream = FS.open(filename, "r");
+            var buf = new Uint8Array(stt.size);
+            FS.read(stream, buf, 0, stt.size, 0);
+            FS.close(stream);
+
+            this._MrbFile = buf;
+        },
         onCompileToC: function () {
             var args = System.Array.init(["mrbc", "-Bmain_rb_code", "-e", "-o"], String);
-            var mrbfile = { };
+            var mrbfile = { v : "/build/main_rb.c" };
             this.getCompileArgs(args, "/src/", "c", mrbfile);
-            args[4] = "/build/main_rb.c";
 
+            this._CFile = null;
             WebMrbc.App.module = new WebMrbc.Mruby();
-            WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
-                var $t;
-                var FS = WebMrbc.App.module.getFileSystem();
-
-                FS.createFolder("/", "src", true, false);
-                FS.createFolder("/", "build", true, true);
-
-                $t = Bridge.getEnumerator(this._Files);
-                while ($t.moveNext()) {
-                    var f = $t.getCurrent();
-                    FS.writeFile(f.key, f.value);
-                }
-            }));
-            WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f2);
-
+            WebMrbc.App.module.preRun.push(Bridge.fn.cacheBind(this, this.mruby_PreRun));
+            WebMrbc.App.module.postRun.push(Bridge.fn.bind(this, $asm.$.WebMrbc.MainMenuView.f1));
             WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
         onCompileToMrb: function () {
             var args = System.Array.init(["mrbc", "-e", "-o"], String);
-            var mrbfile = { };
+            var mrbfile = { v : "/build/main_rb.mrb" };
             this.getCompileArgs(args, "/src/", "mrb", mrbfile);
-            args[3] = "/build/main_rb.mrb";
 
+            this._MrbFile = null;
             WebMrbc.App.module = new WebMrbc.Mruby();
-            WebMrbc.App.module.preRun.push(Bridge.fn.bind(this, function () {
-                var $t;
-                var FS = WebMrbc.App.module.getFileSystem();
-
-                FS.createFolder("/", "src", true, false);
-                FS.createFolder("/", "build", true, true);
-
-                $t = Bridge.getEnumerator(this._Files);
-                while ($t.moveNext()) {
-                    var f = $t.getCurrent();
-                    FS.writeFile(f.key, f.value);
-                }
-            }));
-            WebMrbc.App.module.postRun.push($asm.$.WebMrbc.MainMenuView.f3);
-
+            WebMrbc.App.module.preRun.push(Bridge.fn.cacheBind(this, this.mruby_PreRun));
+            WebMrbc.App.module.postRun.push(Bridge.fn.bind(this, $asm.$.WebMrbc.MainMenuView.f2));
             WebMrbc.App.module.run(args);
             this.onOutputMode();
         },
@@ -2965,28 +2994,68 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
             WebMrbc.MainMenuView.selectOutputTab();
             WebMrbc.App.term.fit();
         },
-        onRun: function () {
+        onLoad: function () {
+            var filedialog = Bridge.cast(document.getElementById("load-file"), HTMLInputElement);
+            filedialog.value = null;
+            filedialog.click();
         },
-        onLoadLocal: function () {
-        },
-        onSave: function () {
-            var $t;
-            var item = WebMrbc.Views.ClassSelectorView.getCurrent();
-            if (item == null) {
+        onUpload: function (filedialog) {
+            var view = WebMrbc.Views.ClassSelectorView.getCurrent();
+            if (view == null) {
                 return;
             }
 
+            var file = filedialog.files[0];
+            try {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var xml = Blockly.Xml.textToDom(reader.result);
+                    Blockly.Xml.domToWorkspace(xml, view.WebMrbc$IClassWorkspace$getWorkspace());
+                };
+                reader.readAsText(file);
+            }
+            catch (e) {
+                e = System.Exception.create(e);
+                WebMrbc.App.writeLine(e.toString());
+            }
+        },
+        onSaveWorkspace: function () {
+            var $t;
             var zip = new JSZip();
-            var i = 1;
             $t = Bridge.getEnumerator(WebMrbc.Collections.ClassWorkspaces);
             while ($t.moveNext()) {
                 var e = $t.getCurrent();
                 var xml = Blockly.Xml.workspaceToDom(e.WebMrbc$IClassWorkspace$getWorkspace());
-                zip.file("ClassWorkspace" + i + ".xml", xml.outerHTML);
-                i = (i + 1) | 0;
+                zip.file(System.String.concat(e.WebMrbc$IModel$getIdentifier(), ".xml"), xml.outerHTML);
             }
             var blob = zip.generate({ type: "blob" });
             saveAs(blob, "Workspace.zip");
+        },
+        onSaveRuby: function () {
+            var $t;
+            this.toRubyAll();
+
+            var zip = new JSZip();
+            $t = Bridge.getEnumerator(this._Files);
+            while ($t.moveNext()) {
+                var f = $t.getCurrent();
+                zip.file(f.key, f.value);
+            }
+            var blob = zip.generate({ type: "blob" });
+            saveAs(blob, "Workspace.zip");
+        },
+        onReset: function () {
+        },
+        onRun: function () {
+            var args = System.Array.init(["mrbc", "-e", "-o"], String);
+            var mrbfile = { v : "/build/main_rb.mrb" };
+            this.getCompileArgs(args, "/src/", "mrb", mrbfile);
+
+            this._MrbFile = null;
+            WebMrbc.App.module = new WebMrbc.Mruby();
+            WebMrbc.App.module.preRun.push(Bridge.fn.cacheBind(this, this.mruby_PreRun));
+            WebMrbc.App.module.postRun.push(Bridge.fn.bind(this, $asm.$.WebMrbc.MainMenuView.f5));
+            WebMrbc.App.module.run(args);
         },
         classSelectorView1_Selected: function (sender, e) {
             var $t;
@@ -3053,38 +3122,44 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
     Bridge.ns("WebMrbc.MainMenuView", $asm.$);
 
     Bridge.apply($asm.$.WebMrbc.MainMenuView, {
-        f1: function (e) {
-            if (e == null) {
-                e = window["event"];
-            }
-            if (e.keyCode === 13) {
-                $("#save-button").click();
-                return false;
-            } else {
-                return true;
+        f1: function () {
+            this.mruby_ToCPostRun();
+
+            if (this._CFile != null) {
+                WebMrbc.App.writeLine(WebMrbc.App.module.UTF8ArrayToString(this._CFile, 0));
+
+                var blob = new Blob(System.Array.init([this._CFile.buffer], Object), { type: "text/plain;charset=utf-8" });
+                saveAs(blob, "main_rb.c");
             }
         },
         f2: function () {
-            var FS = WebMrbc.App.module.getFileSystem();
+            this.mruby_ToMrbPostRun();
 
-            var stt = FS.stat("/build/main_rb.c");
-            var stream = FS.open("/build/main_rb.c", "r");
-            var buf = new Uint8Array(stt.size);
-            FS.read(stream, buf, 0, stt.size, 0);
-            FS.close(stream);
+            if (this._MrbFile != null) {
+                WebMrbc.App.writeLine((new WebMrbc.HexDump(this._MrbFile, 16)).toString());
 
-            WebMrbc.App.writeLine(WebMrbc.App.module.UTF8ArrayToString(buf, 0));
+                var blob = new Blob(System.Array.init([this._MrbFile.buffer], Object), { type: "application/octet-stream" });
+                saveAs(blob, "main_rb.mrb");
+            }
         },
-        f3: function () {
-            var FS = WebMrbc.App.module.getFileSystem();
+        f3: function (data, textStatus, request) {
+            WebMrbc.App.writeLine(textStatus);
+        },
+        f4: function (request, textStatus, error) {
+            WebMrbc.App.writeLine(textStatus);
+        },
+        f5: function () {
+            this.mruby_ToMrbPostRun();
 
-            var stt = FS.stat("/build/main_rb.mrb");
-            var stream = FS.open("/build/main_rb.mrb", "r");
-            var buf = new Uint8Array(stt.size);
-            FS.read(stream, buf, 0, stt.size, 0);
-            FS.close(stream);
+            if (this._MrbFile != null) {
+                WebMrbc.App.writeLine((new WebMrbc.HexDump(this._MrbFile, 16)).toString());
 
-            WebMrbc.App.writeLine((new WebMrbc.HexDump(buf, 16)).toString());
+                var blob = new Blob(System.Array.init([this._MrbFile.buffer], Object), { type: "application/octet-stream" });
+                var fd = new FormData();
+                fd.append("filename", "main_rb.mrb");
+                fd.append("data", blob);
+                $.ajax({ url: "/upload", type: "POST", data: fd, processData: false, contentType: false, success: $asm.$.WebMrbc.MainMenuView.f3, error: $asm.$.WebMrbc.MainMenuView.f4 });
+            }
         }
     });
 
@@ -14578,7 +14653,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                             break;
                         case 352: 
                             {
-                                yyVal = this.new_args(Bridge.cast(yyVals[((-1 + yyTop) | 0)], WebMrbc.node), null, 1, null, 0);
+                                yyVal = this.new_args(Bridge.cast(yyVals[((-1 + yyTop) | 0)], WebMrbc.node), null, 0, null, 0);
                             }
                             break;
                         case 353: 

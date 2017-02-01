@@ -31,7 +31,7 @@
 			<ul class="nav navbar-nav" id="tabs">
 				<li class="active">
 					<a href="#block-tab" id="block-mode-button" onclick="WebMrbc.Views.MainMenuView.onBlockMode()">
-						<i class="glyphicon glyphicon-folder-close"></i>
+						<i class="glyphicon glyphicon-equalizer"></i>
 						ブロック
 					</a>
 				</li>
@@ -43,12 +43,12 @@
 				</li>
 				<li>
 					<a href="#output-tab" id="output-mode-button" onclick="WebMrbc.Views.MainMenuView.onOutputMode()">
-						<i class="glyphicon glyphicon-list-alt"></i>
+						<i class="glyphicon glyphicon-console"></i>
 						出力
 					</a>
 				</li>
 			</ul>
-			<form accept-charset="UTF-8" action="/source_codes/load?locale=ja" class="navbar-form pull-right" enctype="multipart/form-data" id="file-form" method="post">
+			<form accept-charset="UTF-8" action="/upload" class="navbar-form pull-right" enctype="multipart/form-data" id="file-form" method="post">
 				<div class="btn-group">
 					<a class="dropdown-toggle btn btn-primary" data-toggle="dropdown" href="#menu" id="submenu-button">
 						<i class="glyphicon glyphicon-th-list"></i>
@@ -56,26 +56,29 @@
 					</a>
 					<ul class="dropdown-menu pull-right" id="submenu">
 						<li>
-							<a id="load-local-button" onclick="WebMrbc.Views.MainMenuView.onLoadLocal()">
+							<a id="load-local-button">
 								<h4>
-									<i class="glyphicon glyphicon-folder-open"></i>
-									ロード
+									<label for="load-file">
+										<i class="glyphicon glyphicon-folder-open"></i>
+										ロード
+									</label>
+									<input type="file" name="workspace_xml" id="load-file" accept=".xml,application/xml" style="position:absolute; visibility: hidden" onclick="WebMrbc.Views.MainMenuView.onLoad()" />
 								</h4>
 							</a>
 						</li>
 						<li>
-							<a id="save-button" onclick="WebMrbc.Views.MainMenuView.onSave()">
+							<a id="save-button" onclick="WebMrbc.Views.MainMenuView.onSaveWorkspace()">
 								<h4>
 									<i class="glyphicon glyphicon-hdd"></i>
-									セーブ
+									ブロックを保存
 								</h4>
 							</a>
 						</li>
 						<li>
-							<a id="check-button" onclick="WebMrbc.Views.MainMenuView.onCheck()">
+							<a id="save-button" onclick="WebMrbc.Views.MainMenuView.onSaveRuby()">
 								<h4>
-									<i class="glyphicon glyphicon-check"></i>
-									チェック
+									<i class="glyphicon glyphicon-hdd"></i>
+									Rubyコードを保存
 								</h4>
 							</a>
 						</li>
@@ -84,14 +87,6 @@
 								<h4>
 									<i class="glyphicon glyphicon-off"></i>
 									リセット
-								</h4>
-							</a>
-						</li>
-						<li>
-							<a class="signed-in-menu" id="preference-button" style="display: none" onclick="WebMrbc.Views.MainMenuView.onPreference()">
-								<h4>
-									<i class="glyphicon glyphicon-cog"></i>
-									設定
 								</h4>
 							</a>
 						</li>
@@ -137,6 +132,10 @@
 						</li>
 					</ul>
 				</div>
+				<a class="btn btn-default" id="run-button" onclick="WebMrbc.Views.MainMenuView.onRun()">
+					<i class="glyphicon glyphicon-send"></i>
+					実行
+				</a>
 			</form>
 		</div>
 	</div>
