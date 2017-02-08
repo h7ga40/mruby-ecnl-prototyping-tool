@@ -140,7 +140,6 @@
 		</div>
 	</div>
 
-	<div id="messages"></div>
 	<div class="tab-content" id="modes-container">
 		<div class="tab-pane active modes-tab-pane" id="block-tab">
 			<div class="right-pane" id="block-tab-right-pane">
@@ -208,7 +207,7 @@
 					<div class="left-pane" id="eobject-modal-left-pane">
 						<div class="ui-droppable" id="eobject-modal-preview">
 							<div style="left: 0px; top: 0px; transform: rotate(0deg) scaleX(1);" class="ui-draggable" id="eobject-modal-celltype">
-								<img alt="car1.png" src="smalruby_files/car1.png">
+								<img alt="no_image.png" src="img/no_image.png">
 							</div>
 						</div>
 						<div id="eobject-modal-attributes">
@@ -304,6 +303,19 @@
 				</a>
 			</div>
 		</script>
+	</div>
+
+	<div id="message-modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div id="message-text">実行ファイルを転送しています。</div>
+					<div style="text-align: right;">
+						<button id="message-button" class="btn btn-default" hidden onclick="WebMrbc.Views.MainMenuView.onMessageClose()">OK</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<xml id="toolbox" style="display: none">
