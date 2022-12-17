@@ -551,11 +551,14 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
                     useStyle: true,
                     screenKeys: true,
                     cursorBlink: false
-                } ));
-                WebMrbc.App.term.on("data", $asm.$.WebMrbc.App.f1);
-                WebMrbc.App.term.on("title", $asm.$.WebMrbc.App.f2);
+                }));
+                WebMrbc.App.fitAddon = new FitAddon.FitAddon();
+                WebMrbc.App.term.loadAddon(WebMrbc.App.fitAddon);
+                WebMrbc.App.term.onData($asm.$.WebMrbc.App.f1);
+                WebMrbc.App.term.onTitleChange($asm.$.WebMrbc.App.f2);
 
                 WebMrbc.App.term.open(termElement);
+                WebMrbc.App.fitAddon.fit();
 
                 WebMrbc.App.codeEditor = ace.edit("text-editor");
                 window["textEditor"] = WebMrbc.App.codeEditor;
