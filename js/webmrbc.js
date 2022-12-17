@@ -3297,7 +3297,7 @@ Bridge.assembly("WebMrbc", function ($asm, globals) {
         },
         onOutputMode: function () {
             WebMrbc.MainMenuView.selectOutputTab();
-            WebMrbc.App.term.fit();
+            WebMrbc.App.fitAddon.fit();
         },
         onLoad: function () {
             var filedialog = Bridge.cast(document.getElementById("load-file"), HTMLInputElement);
