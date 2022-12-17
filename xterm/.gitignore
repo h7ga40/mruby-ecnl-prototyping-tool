@@ -1,8 +1,10 @@
 node_modules/
 *.swp
-build/*
 .lock-wscript
+lib/
 out/
+out-test/
+.nyc_output/
 Makefile.gyp
 *.Makefile
 *.target.gyp.mk
@@ -10,3 +12,16 @@ Makefile.gyp
 example/*.log
 docs/
 npm-debug.log
+/.idea/
+.env
+build/
+.DS_Store
+package-lock.json
+
+# Keep bundled code out of Git
+dist/
+demo/dist/
+
+# dont commit benchmark folders
+.benchmark/
+timeline/
